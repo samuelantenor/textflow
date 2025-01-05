@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import CreateCampaignButton from "@/components/CreateCampaignButton";
 import StatsDisplay from "@/components/StatsDisplay";
 import CampaignTable from "@/components/CampaignTable";
@@ -14,6 +15,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User, LogOut } from "lucide-react";
+
+const UserMenu = ({ onLogout }: { onLogout: () => Promise<void> }) => {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <User className="h-5 w-5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={onLogout} className="text-red-600">
+          <LogOut className="mr-2 h-4 w-4" />
+          Log out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 const Index = () => {
   const navigate = useNavigate();
@@ -65,9 +84,11 @@ const Index = () => {
 
   if (isLoadingSubscription) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
+      <TooltipProvider>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      </TooltipProvider>
     );
   }
 
@@ -78,38 +99,22 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="absolute top-4 right-4">
-        <UserMenu onLogout={handleLogout} />
-      </div>
-      <div className="max-w-2xl mx-auto text-center space-y-8">
-        <h1 className="text-3xl font-bold">Subscribe to Access SMS Campaigns</h1>
-        <p className="text-muted-foreground">
-          To access the SMS campaign features, you need an active subscription.
-        </p>
-        <div className="flex justify-center">
-          <SubscribeButton />
+    <TooltipProvider>
+      <div className="min-h-screen p-8">
+        <div className="absolute top-4 right-4">
+          <UserMenu onLogout={handleLogout} />
+        </div>
+        <div className="max-w-2xl mx-auto text-center space-y-8">
+          <h1 className="text-3xl font-bold">Subscribe to Access SMS Campaigns</h1>
+          <p className="text-muted-foreground">
+            To access the SMS campaign features, you need an active subscription.
+          </p>
+          <div className="flex justify-center">
+            <SubscribeButton />
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
-
-const UserMenu = ({ onLogout }: { onLogout: () => Promise<void> }) => {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <User className="h-5 w-5" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={onLogout} className="text-red-600">
-          <LogOut className="mr-2 h-4 w-4" />
-          Log out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    </TooltipProvider>
   );
 };
 
