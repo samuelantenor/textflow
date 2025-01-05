@@ -22,9 +22,10 @@ export const CampaignAnalytics = () => {
       // Calculate totals
       const totals = data.reduce((acc, curr) => {
         acc.total_messages++;
-        acc.delivered += curr.delivery_rate;
-        acc.failed += (100 - curr.delivery_rate);
-        acc.response_rate += curr.open_rate;
+        // Ensure numeric values for calculations
+        acc.delivered += Number(curr.delivery_rate) || 0;
+        acc.failed += Number(100 - curr.delivery_rate) || 0;
+        acc.response_rate += Number(curr.open_rate) || 0;
         return acc;
       }, {
         total_messages: 0,
@@ -106,7 +107,7 @@ export const CampaignAnalytics = () => {
               <XCircle className="w-4 h-4 text-red-500" />
               <span>Failed</span>
             </div>
-            <span>{analytics?.delivery_status?.failed || 0} ({100 - (analytics?.delivery_rate || 0)}%)</span>
+            <span>{analytics?.delivery_status?.failed || 0} ({(100 - Number(analytics?.delivery_rate || 0))}%)</span>
           </div>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
