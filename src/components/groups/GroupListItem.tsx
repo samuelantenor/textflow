@@ -7,12 +7,15 @@ import { useQueryClient } from "@tanstack/react-query";
 import { EditGroupDialog } from "./EditGroupDialog";
 import { ImportContactsDialog } from "./ImportContactsDialog";
 import { ViewContactsDialog } from "./ViewContactsDialog";
+import { Card } from "@/components/ui/card";
+import { format } from "date-fns";
 
 interface GroupListItemProps {
   group: {
     id: string;
     name: string;
     contacts: { count: number }[];
+    created_at: string;
   };
 }
 
@@ -46,42 +49,51 @@ export function GroupListItem({ group }: GroupListItemProps) {
   };
 
   return (
-    <div className="flex items-center justify-between p-4 bg-white rounded-lg border">
-      <div>
-        <h3 className="font-medium">{group.name}</h3>
-        <p className="text-sm text-gray-500">
-          {group.contacts[0]?.count || 0} contacts
-        </p>
+    <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow">
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="font-semibold text-lg">{group.name}</h3>
+          <p className="text-sm text-muted-foreground">
+            {group.contacts[0]?.count || 0} contacts
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Created {format(new Date(group.created_at), "MMM d, yyyy")}
+          </p>
+        </div>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 justify-end pt-2">
         <Button
-          variant="ghost"
-          size="icon"
+          variant="outline"
+          size="sm"
           onClick={() => setIsViewContactsOpen(true)}
         >
-          <Users className="h-4 w-4" />
+          <Users className="h-4 w-4 mr-2" />
+          View
         </Button>
         <Button
-          variant="ghost"
-          size="icon"
+          variant="outline"
+          size="sm"
           onClick={() => setIsImportOpen(true)}
         >
-          <Upload className="h-4 w-4" />
+          <Upload className="h-4 w-4 mr-2" />
+          Import
         </Button>
         <Button
-          variant="ghost"
-          size="icon"
+          variant="outline"
+          size="sm"
           onClick={() => setIsEditOpen(true)}
         >
-          <Edit className="h-4 w-4" />
+          <Edit className="h-4 w-4 mr-2" />
+          Edit
         </Button>
         <Button
-          variant="ghost"
-          size="icon"
+          variant="outline"
+          size="sm"
           onClick={handleDelete}
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-4 w-4 mr-2" />
+          Delete
         </Button>
       </div>
 
@@ -100,6 +112,6 @@ export function GroupListItem({ group }: GroupListItemProps) {
         open={isViewContactsOpen}
         onOpenChange={setIsViewContactsOpen}
       />
-    </div>
+    </Card>
   );
 }

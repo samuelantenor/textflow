@@ -5,6 +5,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import { UseFormReturn } from "react-hook-form";
 import { CampaignFormData } from "./types";
+import { format } from "date-fns";
 
 interface CampaignFormFieldsProps {
   form: UseFormReturn<CampaignFormData>;
@@ -77,25 +78,44 @@ export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
         )}
       />
 
-      <FormField
-        control={form.control}
-        name="scheduled_for"
-        render={({ field }) => (
-          <FormItem className="flex flex-col">
-            <FormLabel>Schedule (Optional)</FormLabel>
-            <Calendar
-              mode="single"
-              selected={field.value}
-              onSelect={field.onChange}
-              disabled={(date) =>
-                date < new Date() || date < new Date("1900-01-01")
-              }
-              initialFocus
-            />
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="space-y-2">
+        <FormField
+          control={form.control}
+          name="scheduled_for"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Schedule (Optional)</FormLabel>
+              <Calendar
+                mode="single"
+                selected={field.value}
+                onSelect={field.onChange}
+                disabled={(date) =>
+                  date < new Date() || date < new Date("1900-01-01")
+                }
+                initialFocus
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="scheduled_time"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Time</FormLabel>
+              <FormControl>
+                <Input
+                  type="time"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
     </>
   );
 }

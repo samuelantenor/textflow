@@ -3,4 +3,5 @@ export type CampaignFormData = {
   message: string;
   media?: File;
   scheduled_for?: Date;
+  scheduled_time?: string;
 };
