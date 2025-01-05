@@ -44,32 +44,47 @@ const StatsDisplay = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card className="campaign-card p-6">
+      <Card className="campaign-card p-6 hover:scale-[1.02] transition-transform duration-200">
         <div className="flex items-center gap-4">
-          <MessageSquare className="w-8 h-8 text-primary" />
+          <div className="p-3 rounded-full bg-primary/10">
+            <MessageSquare className="w-6 h-6 text-primary" />
+          </div>
           <div>
-            <p className="text-sm text-muted-foreground">Avg. Delivery Rate</p>
-            <h3 className="text-2xl font-bold">{analytics?.avg_delivery_rate || 0}%</h3>
+            <p className="text-sm text-muted-foreground font-medium">Delivery Rate</p>
+            <div className="flex items-baseline">
+              <h3 className="text-2xl font-bold">{analytics?.avg_delivery_rate || 0}</h3>
+              <span className="text-sm text-muted-foreground ml-1">%</span>
+            </div>
           </div>
         </div>
       </Card>
       
-      <Card className="campaign-card p-6">
+      <Card className="campaign-card p-6 hover:scale-[1.02] transition-transform duration-200">
         <div className="flex items-center gap-4">
-          <Users className="w-8 h-8 text-primary" />
+          <div className="p-3 rounded-full bg-primary/10">
+            <Users className="w-6 h-6 text-primary" />
+          </div>
           <div>
-            <p className="text-sm text-muted-foreground">Avg. Open Rate</p>
-            <h3 className="text-2xl font-bold">{analytics?.avg_open_rate || 0}%</h3>
+            <p className="text-sm text-muted-foreground font-medium">Open Rate</p>
+            <div className="flex items-baseline">
+              <h3 className="text-2xl font-bold">{analytics?.avg_open_rate || 0}</h3>
+              <span className="text-sm text-muted-foreground ml-1">%</span>
+            </div>
           </div>
         </div>
       </Card>
       
-      <Card className="campaign-card p-6">
+      <Card className="campaign-card p-6 hover:scale-[1.02] transition-transform duration-200">
         <div className="flex items-center gap-4">
-          <BarChart3 className="w-8 h-8 text-primary" />
+          <div className="p-3 rounded-full bg-primary/10">
+            <BarChart3 className="w-6 h-6 text-primary" />
+          </div>
           <div>
-            <p className="text-sm text-muted-foreground">ROI</p>
-            <h3 className="text-2xl font-bold">{analytics?.roi || 0}%</h3>
+            <p className="text-sm text-muted-foreground font-medium">ROI</p>
+            <div className="flex items-baseline">
+              <h3 className="text-2xl font-bold">{analytics?.roi || 0}</h3>
+              <span className="text-sm text-muted-foreground ml-1">%</span>
+            </div>
           </div>
         </div>
       </Card>

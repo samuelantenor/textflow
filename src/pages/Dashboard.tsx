@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, LayoutDashboard } from "lucide-react";
 import { CreateCampaignDialog } from "@/components/campaigns/CreateCampaignDialog";
 import { CampaignList } from "@/components/campaigns/CampaignList";
 import { GroupList } from "@/components/groups/GroupList";
@@ -72,8 +72,8 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -84,32 +84,60 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">SMS Campaigns</h1>
-          <div className="flex items-center gap-4">
-            <CreateCampaignDialog />
-            <Button variant="ghost" size="icon" onClick={() => supabase.auth.signOut()}>
-              <LogOut className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-        
-        <div className="grid gap-8">
-          <StatsDisplay />
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="md:col-span-2">
-              <CampaignChart />
+    <div className="min-h-screen bg-background">
+      <div className="border-b border-border/40 backdrop-blur-sm bg-background/95 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-2">
+              <LayoutDashboard className="h-6 w-6 text-primary" />
+              <h1 className="text-xl font-semibold">SMS Campaigns</h1>
             </div>
-            <div>
-              <CampaignROI />
+            <div className="flex items-center gap-4">
+              <CreateCampaignDialog />
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="hover:bg-muted"
+                onClick={() => supabase.auth.signOut()}
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
             </div>
           </div>
-          <GroupList />
-          <CampaignList />
         </div>
       </div>
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-8">
+          <StatsDisplay />
+          
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-8">
+              <div className="rounded-lg border border-border/40 bg-card p-6">
+                <h2 className="text-lg font-semibold mb-4">Campaign Performance</h2>
+                <CampaignChart />
+              </div>
+              
+              <div className="rounded-lg border border-border/40 bg-card p-6">
+                <h2 className="text-lg font-semibold mb-4">Contact Groups</h2>
+                <GroupList />
+              </div>
+              
+              <div className="rounded-lg border border-border/40 bg-card p-6">
+                <h2 className="text-lg font-semibold mb-4">Recent Campaigns</h2>
+                <CampaignList />
+              </div>
+            </div>
+            
+            <div className="space-y-8">
+              <div className="rounded-lg border border-border/40 bg-card p-6">
+                <h2 className="text-lg font-semibold mb-4">Campaign ROI</h2>
+                <CampaignROI />
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 };
