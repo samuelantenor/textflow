@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { CreateCampaignDialog } from "@/components/campaigns/CreateCampaignDialog";
 import { CampaignList } from "@/components/campaigns/CampaignList";
+import { useQuery } from "@tanstack/react-query";
 
 const Dashboard = () => {
   const navigate = useNavigate();
