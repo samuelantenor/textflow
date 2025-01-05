@@ -54,7 +54,7 @@ export function MessageLogs({ campaignId }: MessageLogsProps) {
           {logs?.map((log) => (
             <TableRow key={log.id}>
               <TableCell>
-                {log.contacts.name || log.contacts.phone_number}
+                {log.contacts?.name || log.contacts?.phone_number}
               </TableCell>
               <TableCell>
                 <Badge
