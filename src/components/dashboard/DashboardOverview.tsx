@@ -7,52 +7,51 @@ interface DashboardOverviewProps {
 }
 
 export const DashboardOverview = ({ setActiveTab }: DashboardOverviewProps) => {
+  const quickActions = [
+    {
+      title: "New Campaign",
+      description: "Create and send SMS campaigns",
+      icon: MessageSquare,
+      tab: "campaigns"
+    },
+    {
+      title: "Contact Groups",
+      description: "Manage your contact lists",
+      icon: Users,
+      tab: "groups"
+    },
+    {
+      title: "Analytics",
+      description: "View campaign performance",
+      icon: BarChart3,
+      tab: "analytics"
+    }
+  ];
+
   return (
-    <div className="grid md:grid-cols-3 gap-4">
-      <Card 
-        className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
-        onClick={() => setActiveTab("campaigns")}
-      >
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-full bg-primary/10">
-            <MessageSquare className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h3 className="font-semibold">Campaigns</h3>
-            <p className="text-sm text-muted-foreground">Create and manage campaigns</p>
-          </div>
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
+        <div className="grid md:grid-cols-3 gap-4">
+          {quickActions.map((action) => (
+            <Card 
+              key={action.title}
+              className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => setActiveTab(action.tab)}
+            >
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-full bg-primary/10">
+                  <action.icon className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">{action.title}</h3>
+                  <p className="text-sm text-muted-foreground">{action.description}</p>
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
-      </Card>
-
-      <Card 
-        className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
-        onClick={() => setActiveTab("groups")}
-      >
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-full bg-primary/10">
-            <Users className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h3 className="font-semibold">Groups</h3>
-            <p className="text-sm text-muted-foreground">Manage contact groups</p>
-          </div>
-        </div>
-      </Card>
-
-      <Card 
-        className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
-        onClick={() => setActiveTab("analytics")}
-      >
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-full bg-primary/10">
-            <BarChart3 className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h3 className="font-semibold">Analytics</h3>
-            <p className="text-sm text-muted-foreground">View campaign performance</p>
-          </div>
-        </div>
-      </Card>
+      </div>
     </div>
   );
 };

@@ -7,9 +7,7 @@ import { CreateCampaignDialog } from "@/components/campaigns/CreateCampaignDialo
 import { CampaignList } from "@/components/campaigns/CampaignList";
 import { GroupList } from "@/components/groups/GroupList";
 import { useQuery } from "@tanstack/react-query";
-import StatsDisplay from "@/components/StatsDisplay";
-import CampaignChart from "@/components/analytics/CampaignChart";
-import CampaignROI from "@/components/analytics/CampaignROI";
+import { CampaignAnalytics } from "@/components/analytics/CampaignAnalytics";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 
@@ -45,7 +43,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (sessionId) {
       toast({
-        title: "Welcome to SMS Campaigns!",
+        title: "Welcome to FlowText!",
         description: "Your subscription has been activated successfully.",
       });
       // Clean up the URL
@@ -91,8 +89,6 @@ const Dashboard = () => {
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
-          <StatsDisplay />
-          
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -117,17 +113,10 @@ const Dashboard = () => {
               <GroupList />
             </TabsContent>
 
-            <TabsContent value="analytics" className="space-y-8">
-              <div className="grid lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2">
-                  <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-                    <h2 className="text-lg font-semibold mb-4">Campaign Performance</h2>
-                    <CampaignChart />
-                  </div>
-                </div>
-                <div>
-                  <CampaignROI />
-                </div>
+            <TabsContent value="analytics">
+              <div className="space-y-8">
+                <h2 className="text-2xl font-bold">Campaign Analytics</h2>
+                <CampaignAnalytics />
               </div>
             </TabsContent>
           </Tabs>
