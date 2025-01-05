@@ -49,23 +49,24 @@ export function GroupListItem({ group }: GroupListItemProps) {
   };
 
   return (
-    <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow">
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="font-semibold text-lg">{group.name}</h3>
-          <p className="text-sm text-muted-foreground">
-            {group.contacts[0]?.count || 0} contacts
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Created {format(new Date(group.created_at), "MMM d, yyyy")}
-          </p>
-        </div>
+    <Card className="p-4 space-y-3 hover:shadow-lg transition-shadow">
+      <div className="space-y-1">
+        <h3 className="font-semibold text-lg truncate" title={group.name}>
+          {group.name}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          {group.contacts[0]?.count || 0} contacts
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Created {format(new Date(group.created_at), "MMM d, yyyy")}
+        </p>
       </div>
 
-      <div className="flex gap-2 justify-end pt-2">
+      <div className="flex flex-wrap gap-2">
         <Button
           variant="outline"
           size="sm"
+          className="flex-1"
           onClick={() => setIsViewContactsOpen(true)}
         >
           <Users className="h-4 w-4 mr-2" />
@@ -74,6 +75,7 @@ export function GroupListItem({ group }: GroupListItemProps) {
         <Button
           variant="outline"
           size="sm"
+          className="flex-1"
           onClick={() => setIsImportOpen(true)}
         >
           <Upload className="h-4 w-4 mr-2" />
@@ -82,6 +84,7 @@ export function GroupListItem({ group }: GroupListItemProps) {
         <Button
           variant="outline"
           size="sm"
+          className="flex-1"
           onClick={() => setIsEditOpen(true)}
         >
           <Edit className="h-4 w-4 mr-2" />
@@ -90,6 +93,7 @@ export function GroupListItem({ group }: GroupListItemProps) {
         <Button
           variant="outline"
           size="sm"
+          className="flex-1"
           onClick={handleDelete}
         >
           <Trash2 className="h-4 w-4 mr-2" />
