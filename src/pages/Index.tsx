@@ -18,6 +18,27 @@ import { User, LogOut } from "lucide-react";
 const Index = () => {
   const navigate = useNavigate();
 
+  // Check authentication first
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/login");
+        return;
+      }
+    };
+    
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session) {
+        navigate("/login");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
   // Check subscription status
   const { data: subscription, isLoading: isLoadingSubscription } = useQuery({
     queryKey: ['subscription'],
@@ -36,16 +57,6 @@ const Index = () => {
       return subscriptions;
     },
   });
-
-  useEffect(() => {
-    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
-        navigate("/login");
-      }
-    });
-
-    return () => authSubscription.unsubscribe();
-  }, [navigate]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
