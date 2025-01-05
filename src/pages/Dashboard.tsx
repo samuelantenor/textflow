@@ -4,13 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
-import { CreateCampaignDialog } from "@/components/campaigns/CreateCampaignDialog";
+import { CreateCampaignDialog } from "@/components/CreateCampaignDialog";
 import { CampaignList } from "@/components/campaigns/CampaignList";
 import { GroupList } from "@/components/groups/GroupList";
 import { useQuery } from "@tanstack/react-query";
 import StatsDisplay from "@/components/StatsDisplay";
 import CampaignChart from "@/components/analytics/CampaignChart";
 import CampaignROI from "@/components/analytics/CampaignROI";
+import { LandingPageBuilder } from "@/components/landing-page/LandingPageBuilder";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -108,6 +109,10 @@ const Dashboard = () => {
           </div>
           <GroupList />
           <CampaignList />
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-4">Landing Page Builder</h2>
+            <LandingPageBuilder />
+          </div>
         </div>
       </div>
     </div>
