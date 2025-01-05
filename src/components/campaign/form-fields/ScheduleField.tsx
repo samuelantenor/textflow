@@ -41,6 +41,7 @@ export function ScheduleField({ form }: ScheduleFieldProps) {
               <Input
                 type="time"
                 {...field}
+                disabled={!form.watch("scheduled_for")}
               />
             </FormControl>
             <FormMessage />

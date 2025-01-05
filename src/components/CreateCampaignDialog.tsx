@@ -48,12 +48,20 @@ export function CreateCampaignDialog() {
         mediaUrl = publicUrl;
       }
 
+      // Combine date and time if both are provided
+      let scheduledFor = data.scheduled_for;
+      if (scheduledFor && data.scheduled_time) {
+        const [hours, minutes] = data.scheduled_time.split(':');
+        scheduledFor = new Date(scheduledFor);
+        scheduledFor.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+      }
+
       const { error } = await supabase.from("campaigns").insert({
         user_id: session.user.id,
         name: data.name,
         message: data.message,
         media_url: mediaUrl,
-        scheduled_for: data.scheduled_for?.toISOString(),
+        scheduled_for: scheduledFor?.toISOString(),
         group_id: data.group_id,
         status: "draft",
       });
