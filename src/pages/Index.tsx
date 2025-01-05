@@ -5,6 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import CreateCampaignButton from "@/components/CreateCampaignButton";
 import StatsDisplay from "@/components/StatsDisplay";
 import CampaignTable from "@/components/CampaignTable";
+import SubscribeButton from "@/components/SubscribeButton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -71,24 +79,40 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">SMS Campaigns</h1>
-          <div className="flex items-center gap-4">
-            <CreateCampaignButton />
-            <UserMenu onLogout={handleLogout} />
+    <>
+      <div className="min-h-screen p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold">SMS Campaigns</h1>
+            <div className="flex items-center gap-4">
+              <CreateCampaignButton />
+              <UserMenu onLogout={handleLogout} />
+            </div>
+          </div>
+          
+          <StatsDisplay />
+          
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">Recent Campaigns</h2>
+            <CampaignTable />
           </div>
         </div>
-        
-        <StatsDisplay />
-        
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Recent Campaigns</h2>
-          <CampaignTable />
-        </div>
       </div>
-    </div>
+
+      <Dialog open={!subscription} modal>
+        <DialogContent className="sm:max-w-md" showClose={false}>
+          <DialogHeader>
+            <DialogTitle className="text-center">Subscribe to Access SMS Campaigns</DialogTitle>
+            <DialogDescription className="text-center">
+              To access the SMS campaign features, you need an active subscription.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center pt-4">
+            <SubscribeButton />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
