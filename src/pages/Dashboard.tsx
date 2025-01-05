@@ -3,7 +3,9 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard } from "lucide-react";
+import { LogOut, LayoutDashboard, MessageSquare, Users, BarChart3 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
 import { CreateCampaignDialog } from "@/components/campaigns/CreateCampaignDialog";
 import { CampaignList } from "@/components/campaigns/CampaignList";
 import { GroupList } from "@/components/groups/GroupList";
@@ -92,17 +94,14 @@ const Dashboard = () => {
               <LayoutDashboard className="h-6 w-6 text-primary" />
               <h1 className="text-xl font-semibold">SMS Campaigns</h1>
             </div>
-            <div className="flex items-center gap-4">
-              <CreateCampaignDialog />
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="hover:bg-muted"
-                onClick={() => supabase.auth.signOut()}
-              >
-                <LogOut className="h-5 w-5" />
-              </Button>
-            </div>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="hover:bg-muted"
+              onClick={() => supabase.auth.signOut()}
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
           </div>
         </div>
       </div>
@@ -111,31 +110,89 @@ const Dashboard = () => {
         <div className="space-y-8">
           <StatsDisplay />
           
-          <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-8">
-              <div className="rounded-lg border border-border/40 bg-card p-6">
-                <h2 className="text-lg font-semibold mb-4">Campaign Performance</h2>
-                <CampaignChart />
+          <Tabs defaultValue="overview" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+              <TabsTrigger value="groups">Groups</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-4">
+              <div className="grid md:grid-cols-3 gap-4">
+                <Card 
+                  className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => document.querySelector('[value="campaigns"]')?.click()}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-full bg-primary/10">
+                      <MessageSquare className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Campaigns</h3>
+                      <p className="text-sm text-muted-foreground">Create and manage campaigns</p>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card 
+                  className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => document.querySelector('[value="groups"]')?.click()}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-full bg-primary/10">
+                      <Users className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Groups</h3>
+                      <p className="text-sm text-muted-foreground">Manage contact groups</p>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card 
+                  className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => document.querySelector('[value="analytics"]')?.click()}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-full bg-primary/10">
+                      <BarChart3 className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Analytics</h3>
+                      <p className="text-sm text-muted-foreground">View campaign performance</p>
+                    </div>
+                  </div>
+                </Card>
               </div>
-              
-              <div className="rounded-lg border border-border/40 bg-card p-6">
-                <h2 className="text-lg font-semibold mb-4">Contact Groups</h2>
-                <GroupList />
+            </TabsContent>
+
+            <TabsContent value="campaigns" className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">Campaigns</h2>
+                <CreateCampaignDialog />
               </div>
-              
-              <div className="rounded-lg border border-border/40 bg-card p-6">
-                <h2 className="text-lg font-semibold mb-4">Recent Campaigns</h2>
-                <CampaignList />
+              <CampaignList />
+            </TabsContent>
+
+            <TabsContent value="groups">
+              <GroupList />
+            </TabsContent>
+
+            <TabsContent value="analytics" className="space-y-8">
+              <div className="grid lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2">
+                  <Card className="p-6">
+                    <h2 className="text-lg font-semibold mb-4">Campaign Performance</h2>
+                    <CampaignChart />
+                  </Card>
+                </div>
+                <div>
+                  <CampaignROI />
+                </div>
               </div>
-            </div>
-            
-            <div className="space-y-8">
-              <div className="rounded-lg border border-border/40 bg-card p-6">
-                <h2 className="text-lg font-semibold mb-4">Campaign ROI</h2>
-                <CampaignROI />
-              </div>
-            </div>
-          </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
     </div>
