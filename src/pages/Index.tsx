@@ -100,7 +100,7 @@ const Index = () => {
       </div>
 
       <Dialog open={!subscription} modal>
-        <DialogContent className="sm:max-w-md" showClose={false}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-center">Subscribe to Access SMS Campaigns</DialogTitle>
             <DialogDescription className="text-center">
