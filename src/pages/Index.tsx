@@ -2,25 +2,10 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import CreateCampaignButton from "@/components/CreateCampaignButton";
 import StatsDisplay from "@/components/StatsDisplay";
 import CampaignTable from "@/components/CampaignTable";
-import SubscribeButton from "@/components/SubscribeButton";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { User, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import DashboardHeader from "@/components/DashboardHeader";
+import SubscriptionDialog from "@/components/SubscriptionDialog";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -82,16 +67,8 @@ const Index = () => {
     <>
       <div className="min-h-screen p-8">
         <div className="max-w-7xl mx-auto space-y-8">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">SMS Campaigns</h1>
-            <div className="flex items-center gap-4">
-              <CreateCampaignButton />
-              <UserMenu onLogout={handleLogout} />
-            </div>
-          </div>
-          
+          <DashboardHeader onLogout={handleLogout} />
           <StatsDisplay />
-          
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">Recent Campaigns</h2>
             <CampaignTable />
@@ -99,38 +76,8 @@ const Index = () => {
         </div>
       </div>
 
-      <Dialog open={!subscription} modal>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-center">Subscribe to Access SMS Campaigns</DialogTitle>
-            <DialogDescription className="text-center">
-              To access the SMS campaign features, you need an active subscription.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-center pt-4">
-            <SubscribeButton />
-          </div>
-        </DialogContent>
-      </Dialog>
+      <SubscriptionDialog isOpen={!subscription} />
     </>
-  );
-};
-
-const UserMenu = ({ onLogout }: { onLogout: () => Promise<void> }) => {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <User className="h-5 w-5" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={onLogout} className="text-red-600">
-          <LogOut className="mr-2 h-4 w-4" />
-          Log out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 };
 
