@@ -48,13 +48,14 @@ serve(async (req) => {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
-        const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-        const customerId = session.customer as string;
-        const customer = await stripe.customers.retrieve(customerId);
+        console.log('Session data:', session);
         
-        if (!customer || customer.deleted) {
-          throw new Error('Customer not found or deleted');
+        if (!session.client_reference_id) {
+          throw new Error('No client_reference_id found in session');
         }
+
+        const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+        console.log('Subscription data:', subscription);
 
         const { error } = await supabaseClient
           .from('subscriptions')
@@ -64,20 +65,31 @@ serve(async (req) => {
             status: subscription.status,
           });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error inserting subscription:', error);
+          throw error;
+        }
+        
+        console.log('Successfully recorded subscription in database');
         break;
       }
       
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted': {
         const subscription = event.data.object;
+        console.log('Updating subscription status:', subscription.id, subscription.status);
         
         const { error } = await supabaseClient
           .from('subscriptions')
           .update({ status: subscription.status })
           .eq('stripe_subscription_id', subscription.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error updating subscription:', error);
+          throw error;
+        }
+        
+        console.log('Successfully updated subscription status in database');
         break;
       }
     }
