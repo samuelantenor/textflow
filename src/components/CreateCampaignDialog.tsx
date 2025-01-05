@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Loader2 } from "lucide-react";
 import { CampaignFormFields } from "./campaign/CampaignFormFields";
-import type { CampaignFormData } from "./campaign/types";
+import type { CampaignFormData } from "@/types/campaign";
 
 export function CreateCampaignDialog() {
   const [open, setOpen] = useState(false);
