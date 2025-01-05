@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CampaignListItem } from "./CampaignListItem";
 import { SendTestMessageDialog } from "../campaign/SendTestMessageDialog";
+import type { Campaign } from "@/types/campaign";
 
 export function CampaignList() {
   const { data: campaigns, isLoading } = useQuery({
@@ -13,7 +14,12 @@ export function CampaignList() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      
+      // Ensure the status is either 'draft' or 'sent'
+      return (data as any[]).map(campaign => ({
+        ...campaign,
+        status: campaign.status as Campaign['status']
+      })) as Campaign[];
     },
   });
 
