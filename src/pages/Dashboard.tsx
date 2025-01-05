@@ -1,12 +1,11 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
-import { CreateCampaignDialog } from "@/components/CreateCampaignDialog";
-import CampaignTable from "@/components/CampaignTable";
+import { CreateCampaignDialog } from "@/components/campaigns/CreateCampaignDialog";
+import { CampaignList } from "@/components/campaigns/CampaignList";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -98,7 +97,7 @@ const Dashboard = () => {
         </div>
         
         <div className="grid gap-6">
-          <CampaignTable />
+          <CampaignList />
         </div>
       </div>
     </div>
