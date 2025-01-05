@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -49,12 +50,21 @@ export function CreateCampaignDialog() {
         mediaUrl = publicUrl;
       }
 
+      // Combine date and time if both are provided
+      let scheduledFor = data.scheduled_for;
+      if (scheduledFor && data.scheduled_time) {
+        const [hours, minutes] = data.scheduled_time.split(':');
+        scheduledFor = new Date(scheduledFor);
+        scheduledFor.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+      }
+
       const { error } = await supabase.from("campaigns").insert({
         user_id: session.user.id,
         name: data.name,
         message: data.message,
         media_url: mediaUrl,
-        scheduled_for: data.scheduled_for?.toISOString(),
+        scheduled_for: scheduledFor?.toISOString(),
+        group_id: data.group_id,
         status: "draft",
       });
 
@@ -88,25 +98,27 @@ export function CreateCampaignDialog() {
           New Campaign
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[400px] p-4">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create New Campaign</DialogTitle>
+          <DialogDescription>
+            Create a new campaign to send to your contacts.
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <CampaignFormFields form={form} />
-            <div className="flex justify-end space-x-2 pt-2">
+            <div className="flex justify-end space-x-4 pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
-                size="sm"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading} size="sm">
+              <Button type="submit" disabled={isLoading}>
                 {isLoading && (
-                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 Save as Draft
               </Button>
