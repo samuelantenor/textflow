@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { EditContactDialog } from "./EditContactDialog";
+import { Pencil, Trash2, Search } from "lucide-react";
 
 interface ViewContactsDialogProps {
   groupId: string;
@@ -14,6 +16,8 @@ interface ViewContactsDialogProps {
 }
 
 export function ViewContactsDialog({ groupId, open, onOpenChange }: ViewContactsDialogProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editingContact, setEditingContact] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -29,69 +33,109 @@ export function ViewContactsDialog({ groupId, open, onOpenChange }: ViewContacts
       if (error) throw error;
       return data;
     },
-    enabled: open,
   });
 
   const handleDelete = async (contactId: string) => {
-    const { error } = await supabase
-      .from('contacts')
-      .delete()
-      .eq('id', contactId);
+    try {
+      const { error } = await supabase
+        .from('contacts')
+        .delete()
+        .eq('id', contactId);
 
-    if (error) {
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Contact deleted successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['contacts', groupId] });
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to delete contact",
         variant: "destructive",
       });
-      return;
     }
-
-    toast({
-      title: "Success",
-      description: "Contact deleted successfully",
-    });
-    queryClient.invalidateQueries({ queryKey: ['contacts', groupId] });
-    queryClient.invalidateQueries({ queryKey: ['campaign-groups'] });
   };
 
+  const filteredContacts = contacts?.filter(contact => 
+    contact.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    contact.phone_number.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Contacts</DialogTitle>
-        </DialogHeader>
-        {isLoading ? (
-          <div className="flex items-center justify-center p-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>View Contacts</DialogTitle>
+          </DialogHeader>
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search contacts..."
+              className="pl-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-        ) : !contacts?.length ? (
-          <div className="text-center p-8 text-gray-500">
-            No contacts in this group yet. Import contacts to get started.
+          <div className="relative max-h-[60vh] overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Phone Number</TableHead>
+                  <TableHead className="w-[100px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center">Loading...</TableCell>
+                  </TableRow>
+                ) : filteredContacts?.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center">No contacts found</TableCell>
+                  </TableRow>
+                ) : (
+                  filteredContacts?.map((contact) => (
+                    <TableRow key={contact.id}>
+                      <TableCell>{contact.name || "N/A"}</TableCell>
+                      <TableCell>{contact.phone_number}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setEditingContact(contact)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(contact.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {contacts.map((contact) => (
-              <div
-                key={contact.id}
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-              >
-                <div>
-                  <p className="font-medium">{contact.name || 'Unnamed Contact'}</p>
-                  <p className="text-sm text-gray-500">{contact.phone_number}</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDelete(contact.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+
+      {editingContact && (
+        <EditContactDialog
+          contact={editingContact}
+          open={!!editingContact}
+          onOpenChange={(open) => !open && setEditingContact(null)}
+        />
+      )}
+    </>
   );
 }
