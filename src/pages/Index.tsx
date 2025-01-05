@@ -20,8 +20,9 @@ const Index = () => {
       const { data: subscriptions, error } = await supabase
         .from('subscriptions')
         .select('*')
+        .eq('user_id', session.user.id)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return subscriptions;
