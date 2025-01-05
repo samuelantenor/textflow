@@ -12,12 +12,12 @@ interface CampaignFormFieldsProps {
 
 export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
   return (
-    <>
+    <div className="space-y-4">
       <CampaignNameField form={form} />
       <GroupSelectField form={form} />
       <MessageField form={form} />
       <MediaField form={form} />
       <ScheduleField form={form} />
-    </>
+    </div>
   );
 }
