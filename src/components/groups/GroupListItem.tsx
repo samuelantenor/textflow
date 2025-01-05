@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Edit, Trash2, Upload, Users, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -9,7 +7,8 @@ import { ImportContactsDialog } from "./ImportContactsDialog";
 import { ViewContactsDialog } from "./ViewContactsDialog";
 import { AddContactDialog } from "./AddContactDialog";
 import { Card } from "@/components/ui/card";
-import { format, isValid, parseISO } from "date-fns";
+import { GroupHeader } from "./GroupHeader";
+import { GroupActions } from "./GroupActions";
 
 interface GroupListItemProps {
   group: {
@@ -50,80 +49,21 @@ export function GroupListItem({ group }: GroupListItemProps) {
     queryClient.invalidateQueries({ queryKey: ['campaign-groups'] });
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      const date = parseISO(dateString);
-      if (!isValid(date)) {
-        return "Invalid date";
-      }
-      return format(date, "MMM d, yyyy");
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return "Invalid date";
-    }
-  };
-
   return (
     <Card className="p-4 space-y-3 hover:shadow-lg transition-shadow">
-      <div className="space-y-1">
-        <h3 className="font-semibold text-lg truncate" title={group.name}>
-          {group.name}
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          {group.contacts[0]?.count || 0} contacts
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Created {formatDate(group.created_at)}
-        </p>
-      </div>
+      <GroupHeader
+        name={group.name}
+        contactCount={group.contacts[0]?.count || 0}
+        createdAt={group.created_at}
+      />
 
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1"
-          onClick={() => setIsViewContactsOpen(true)}
-        >
-          <Users className="h-4 w-4 mr-2" />
-          View
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1"
-          onClick={() => setIsAddContactOpen(true)}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1"
-          onClick={() => setIsImportOpen(true)}
-        >
-          <Upload className="h-4 w-4 mr-2" />
-          Import
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1"
-          onClick={() => setIsEditOpen(true)}
-        >
-          <Edit className="h-4 w-4 mr-2" />
-          Edit
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1"
-          onClick={handleDelete}
-        >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Delete
-        </Button>
-      </div>
+      <GroupActions
+        onView={() => setIsViewContactsOpen(true)}
+        onAdd={() => setIsAddContactOpen(true)}
+        onImport={() => setIsImportOpen(true)}
+        onEdit={() => setIsEditOpen(true)}
+        onDelete={handleDelete}
+      />
 
       <EditGroupDialog
         group={group}
