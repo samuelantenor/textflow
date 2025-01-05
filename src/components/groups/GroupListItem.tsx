@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Edit, Trash2, Upload, Users } from "lucide-react";
+import { Edit, Trash2, Upload, Users, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { EditGroupDialog } from "./EditGroupDialog";
 import { ImportContactsDialog } from "./ImportContactsDialog";
 import { ViewContactsDialog } from "./ViewContactsDialog";
+import { AddContactDialog } from "./AddContactDialog";
 import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
 
@@ -23,6 +24,7 @@ export function GroupListItem({ group }: GroupListItemProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isViewContactsOpen, setIsViewContactsOpen] = useState(false);
+  const [isAddContactOpen, setIsAddContactOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -76,6 +78,15 @@ export function GroupListItem({ group }: GroupListItemProps) {
           variant="outline"
           size="sm"
           className="flex-1"
+          onClick={() => setIsAddContactOpen(true)}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1"
           onClick={() => setIsImportOpen(true)}
         >
           <Upload className="h-4 w-4 mr-2" />
@@ -115,6 +126,11 @@ export function GroupListItem({ group }: GroupListItemProps) {
         groupId={group.id}
         open={isViewContactsOpen}
         onOpenChange={setIsViewContactsOpen}
+      />
+      <AddContactDialog
+        groupId={group.id}
+        open={isAddContactOpen}
+        onOpenChange={setIsAddContactOpen}
       />
     </Card>
   );
