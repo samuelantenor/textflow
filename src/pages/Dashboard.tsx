@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CampaignAnalytics } from "@/components/analytics/CampaignAnalytics";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
+import { Loader2 } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -73,7 +74,7 @@ const Dashboard = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -87,38 +88,44 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <DashboardHeader />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="space-y-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList>
+            <TabsList className="w-full sm:w-auto">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
               <TabsTrigger value="groups">Groups</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="overview">
-              <DashboardOverview setActiveTab={setActiveTab} />
-            </TabsContent>
-
-            <TabsContent value="campaigns" className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Campaigns</h2>
-                <CreateCampaignDialog />
+            <Suspense fallback={
+              <div className="flex items-center justify-center p-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
-              <CampaignList />
-            </TabsContent>
+            }>
+              <TabsContent value="overview">
+                <DashboardOverview setActiveTab={setActiveTab} />
+              </TabsContent>
 
-            <TabsContent value="groups">
-              <GroupList />
-            </TabsContent>
+              <TabsContent value="campaigns" className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold">Campaigns</h2>
+                  <CreateCampaignDialog />
+                </div>
+                <CampaignList />
+              </TabsContent>
 
-            <TabsContent value="analytics">
-              <div className="space-y-8">
-                <h2 className="text-2xl font-bold">Campaign Analytics</h2>
-                <CampaignAnalytics />
-              </div>
-            </TabsContent>
+              <TabsContent value="groups">
+                <GroupList />
+              </TabsContent>
+
+              <TabsContent value="analytics">
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold">Campaign Analytics</h2>
+                  <CampaignAnalytics />
+                </div>
+              </TabsContent>
+            </Suspense>
           </Tabs>
         </div>
       </main>
