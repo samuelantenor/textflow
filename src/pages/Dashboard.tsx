@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { CreateCampaignDialog } from "@/components/campaigns/CreateCampaignDialog";
 import { CampaignList } from "@/components/campaigns/CampaignList";
+import { GroupList } from "@/components/groups/GroupList";
 import { useQuery } from "@tanstack/react-query";
 
 const Dashboard = () => {
@@ -97,7 +98,8 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <div className="grid gap-6">
+        <div className="grid gap-8">
+          <GroupList />
           <CampaignList />
         </div>
       </div>
