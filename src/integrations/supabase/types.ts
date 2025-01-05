@@ -80,6 +80,7 @@ export type Database = {
       campaigns: {
         Row: {
           created_at: string
+          group_id: string | null
           id: string
           media_url: string | null
           message: string
@@ -91,6 +92,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          group_id?: string | null
           id?: string
           media_url?: string | null
           message: string
@@ -102,6 +104,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          group_id?: string | null
           id?: string
           media_url?: string | null
           message?: string
@@ -111,7 +114,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contacts: {
         Row: {
