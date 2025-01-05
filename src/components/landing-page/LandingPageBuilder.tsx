@@ -41,19 +41,33 @@ export function LandingPageBuilder() {
 
   const handleImageUpload = async (file: File) => {
     try {
+      // First, check if user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        throw new Error("You must be logged in to upload images");
+      }
+
       const fileExt = file.name.split(".").pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
       
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data } = await supabase.storage
         .from("landing_page_assets")
-        .upload(fileName, file);
+        .upload(fileName, file, {
+          upsert: false,
+        });
 
       if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("landing_page_assets")
+        .getPublicUrl(fileName);
 
       toast({
         title: "Image uploaded",
         description: "Your image has been uploaded successfully.",
       });
+
+      return publicUrl;
     } catch (error) {
       console.error("Error uploading image:", error);
       toast({
@@ -61,6 +75,7 @@ export function LandingPageBuilder() {
         description: "Failed to upload image. Please try again.",
         variant: "destructive",
       });
+      throw error;
     }
   };
 
