@@ -5,8 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import CreateCampaignButton from "@/components/CreateCampaignButton";
 import StatsDisplay from "@/components/StatsDisplay";
 import CampaignTable from "@/components/CampaignTable";
-import SubscribeButton from "@/components/SubscribeButton";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -71,24 +70,22 @@ const Index = () => {
     );
   }
 
-  // Redirect to dashboard if user is already subscribed
-  if (subscription) {
-    navigate("/dashboard");
-    return null;
-  }
-
   return (
     <div className="min-h-screen p-8">
-      <div className="absolute top-4 right-4">
-        <UserMenu onLogout={handleLogout} />
-      </div>
-      <div className="max-w-2xl mx-auto text-center space-y-8">
-        <h1 className="text-3xl font-bold">Subscribe to Access SMS Campaigns</h1>
-        <p className="text-muted-foreground">
-          To access the SMS campaign features, you need an active subscription.
-        </p>
-        <div className="flex justify-center">
-          <SubscribeButton />
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">SMS Campaigns</h1>
+          <div className="flex items-center gap-4">
+            <CreateCampaignButton />
+            <UserMenu onLogout={handleLogout} />
+          </div>
+        </div>
+        
+        <StatsDisplay />
+        
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Recent Campaigns</h2>
+          <CampaignTable />
         </div>
       </div>
     </div>
