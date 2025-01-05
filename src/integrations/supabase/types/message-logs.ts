@@ -4,12 +4,12 @@ export interface MessageLog {
   contact_id: string;
   twilio_message_sid: string;
   status: string;
-  error_message?: string;
-  response_message?: string;
+  error_message?: string | null;
+  response_message?: string | null;
   created_at: string;
   updated_at: string;
   contacts?: {
-    name?: string;
+    name?: string | null;
     phone_number: string;
   };
 }
@@ -20,8 +20,8 @@ export interface MessageLogInsert {
   contact_id: string;
   twilio_message_sid: string;
   status?: string;
-  error_message?: string;
-  response_message?: string;
+  error_message?: string | null;
+  response_message?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -32,8 +32,8 @@ export interface MessageLogUpdate {
   contact_id?: string;
   twilio_message_sid?: string;
   status?: string;
-  error_message?: string;
-  response_message?: string;
+  error_message?: string | null;
+  response_message?: string | null;
   created_at?: string;
   updated_at?: string;
 }

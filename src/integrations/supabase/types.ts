@@ -204,6 +204,57 @@ export type Database = {
         }
         Relationships: []
       }
+      message_logs: {
+        Row: {
+          campaign_id: string
+          contact_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          response_message: string | null
+          status: string
+          twilio_message_sid: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          contact_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          response_message?: string | null
+          status?: string
+          twilio_message_sid: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          contact_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          response_message?: string | null
+          status?: string
+          twilio_message_sid?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_logs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_logs_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_history: {
         Row: {
           amount: number
