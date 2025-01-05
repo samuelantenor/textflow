@@ -8,6 +8,9 @@ import { CreateCampaignDialog } from "@/components/campaigns/CreateCampaignDialo
 import { CampaignList } from "@/components/campaigns/CampaignList";
 import { GroupList } from "@/components/groups/GroupList";
 import { useQuery } from "@tanstack/react-query";
+import StatsDisplay from "@/components/StatsDisplay";
+import CampaignChart from "@/components/analytics/CampaignChart";
+import CampaignROI from "@/components/analytics/CampaignROI";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -99,6 +102,15 @@ const Dashboard = () => {
         </div>
         
         <div className="grid gap-8">
+          <StatsDisplay />
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="md:col-span-2">
+              <CampaignChart />
+            </div>
+            <div>
+              <CampaignROI />
+            </div>
+          </div>
           <GroupList />
           <CampaignList />
         </div>
