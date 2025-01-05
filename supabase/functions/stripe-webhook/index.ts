@@ -12,29 +12,20 @@ const supabaseClient = createClient(
 );
 
 serve(async (req) => {
+  const signature = req.headers.get('stripe-signature');
+  
   try {
-    const signature = req.headers.get('stripe-signature');
-    
     if (!signature) {
-      console.error('No Stripe signature found');
-      return new Response(
-        JSON.stringify({ error: 'No Stripe signature found' }),
-        { status: 401 }
-      );
+      throw new Error('No Stripe signature found');
     }
 
     const body = await req.text();
     const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
     
     if (!webhookSecret) {
-      console.error('Webhook secret not configured');
-      return new Response(
-        JSON.stringify({ error: 'Webhook secret not configured' }),
-        { status: 500 }
-      );
+      throw new Error('Webhook secret not configured');
     }
 
-    console.log('Verifying Stripe signature...');
     const event = stripe.webhooks.constructEvent(
       body,
       signature,
@@ -54,7 +45,6 @@ serve(async (req) => {
           throw new Error('Customer not found or deleted');
         }
 
-        console.log('Inserting subscription into database...');
         const { error } = await supabaseClient
           .from('subscriptions')
           .insert({
@@ -63,10 +53,7 @@ serve(async (req) => {
             status: subscription.status,
           });
 
-        if (error) {
-          console.error('Error inserting subscription:', error);
-          throw error;
-        }
+        if (error) throw error;
         break;
       }
       
@@ -74,27 +61,29 @@ serve(async (req) => {
       case 'customer.subscription.deleted': {
         const subscription = event.data.object;
         
-        console.log('Updating subscription status:', subscription.status);
         const { error } = await supabaseClient
           .from('subscriptions')
           .update({ status: subscription.status })
           .eq('stripe_subscription_id', subscription.id);
 
-        if (error) {
-          console.error('Error updating subscription:', error);
-          throw error;
-        }
+        if (error) throw error;
         break;
       }
     }
 
-    return new Response(JSON.stringify({ received: true }), { status: 200 });
+    return new Response(JSON.stringify({ received: true }), {
+      headers: { 'Content-Type': 'application/json' },
+      status: 200,
+    });
 
   } catch (err) {
     console.error('Error processing webhook:', err);
     return new Response(
       JSON.stringify({ error: err.message }),
-      { status: 400 }
+      { 
+        headers: { 'Content-Type': 'application/json' },
+        status: 400,
+      }
     );
   }
 });

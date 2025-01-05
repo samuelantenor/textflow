@@ -69,7 +69,6 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       customer: customer_id,
       customer_email: customer_id ? undefined : email,
-      client_reference_id: user.id, // Add this to link the session to the user
       line_items: [
         {
           price: 'price_1QdghTB4RWKZ2dNzpWlSvqmr',
