@@ -9,7 +9,7 @@ import { ImportContactsDialog } from "./ImportContactsDialog";
 import { ViewContactsDialog } from "./ViewContactsDialog";
 import { AddContactDialog } from "./AddContactDialog";
 import { Card } from "@/components/ui/card";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 
 interface GroupListItemProps {
   group: {
@@ -50,6 +50,19 @@ export function GroupListItem({ group }: GroupListItemProps) {
     queryClient.invalidateQueries({ queryKey: ['campaign-groups'] });
   };
 
+  const formatDate = (dateString: string) => {
+    try {
+      const date = parseISO(dateString);
+      if (!isValid(date)) {
+        return "Invalid date";
+      }
+      return format(date, "MMM d, yyyy");
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Invalid date";
+    }
+  };
+
   return (
     <Card className="p-4 space-y-3 hover:shadow-lg transition-shadow">
       <div className="space-y-1">
@@ -60,7 +73,7 @@ export function GroupListItem({ group }: GroupListItemProps) {
           {group.contacts[0]?.count || 0} contacts
         </p>
         <p className="text-xs text-muted-foreground">
-          Created {format(new Date(group.created_at), "MMM d, yyyy")}
+          Created {formatDate(group.created_at)}
         </p>
       </div>
 
