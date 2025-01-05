@@ -6,13 +6,21 @@ import { ContentEditor } from "./ContentEditor";
 interface EditorPanelProps {
   selectedTemplate: string;
   primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  backgroundColor: string;
+  textColor: string;
   selectedFont: string;
+  borderRadius: number;
+  spacing: number;
   businessName: string;
   description: string;
   welcomeMessage: string;
   onTemplateChange: (template: string) => void;
-  onColorChange: (color: string) => void;
+  onColorChange: (type: string, color: string) => void;
   onFontChange: (font: string) => void;
+  onBorderRadiusChange: (value: number) => void;
+  onSpacingChange: (value: number) => void;
   onBusinessNameChange: (name: string) => void;
   onDescriptionChange: (desc: string) => void;
   onWelcomeMessageChange: (msg: string) => void;
@@ -22,13 +30,21 @@ interface EditorPanelProps {
 export function EditorPanel({
   selectedTemplate,
   primaryColor,
+  secondaryColor,
+  accentColor,
+  backgroundColor,
+  textColor,
   selectedFont,
+  borderRadius,
+  spacing,
   businessName,
   description,
   welcomeMessage,
   onTemplateChange,
   onColorChange,
   onFontChange,
+  onBorderRadiusChange,
+  onSpacingChange,
   onBusinessNameChange,
   onDescriptionChange,
   onWelcomeMessageChange,
@@ -49,9 +65,17 @@ export function EditorPanel({
 
         <BrandSettings
           primaryColor={primaryColor}
+          secondaryColor={secondaryColor}
+          accentColor={accentColor}
+          backgroundColor={backgroundColor}
+          textColor={textColor}
           selectedFont={selectedFont}
+          borderRadius={borderRadius}
+          spacing={spacing}
           onColorChange={onColorChange}
           onFontChange={onFontChange}
+          onBorderRadiusChange={onBorderRadiusChange}
+          onSpacingChange={onSpacingChange}
         />
 
         <ContentEditor
