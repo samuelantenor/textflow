@@ -7,35 +7,50 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-
-const campaigns = [
-  {
-    id: 1,
-    name: "Summer Sale 2024",
-    status: "Active",
-    recipients: 1234,
-    sent: 1200,
-    openRate: "95%",
-  },
-  {
-    id: 2,
-    name: "Welcome Flow",
-    status: "Draft",
-    recipients: 500,
-    sent: 0,
-    openRate: "-",
-  },
-  {
-    id: 3,
-    name: "Product Launch",
-    status: "Scheduled",
-    recipients: 2500,
-    sent: 0,
-    openRate: "-",
-  },
-];
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const CampaignTable = () => {
+  const { toast } = useToast();
+
+  const { data: campaigns, refetch } = useQuery({
+    queryKey: ['campaigns'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('campaigns')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase
+      .from('campaigns')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete campaign",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Campaign deleted successfully",
+    });
+    refetch();
+  };
+
   return (
     <div className="rounded-lg border bg-card">
       <Table>
@@ -43,30 +58,61 @@ const CampaignTable = () => {
           <TableRow>
             <TableHead>Campaign Name</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Recipients</TableHead>
-            <TableHead>Sent</TableHead>
-            <TableHead>Open Rate</TableHead>
+            <TableHead>Scheduled For</TableHead>
+            <TableHead>Created At</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {campaigns.map((campaign) => (
+          {campaigns?.map((campaign) => (
             <TableRow key={campaign.id}>
               <TableCell className="font-medium">{campaign.name}</TableCell>
               <TableCell>
                 <Badge
                   variant="outline"
                   className={
-                    campaign.status === "Active"
-                      ? "bg-primary/10 text-primary border-primary/20"
+                    campaign.status === "sent"
+                      ? "bg-green-100 text-green-800 border-green-200"
+                      : campaign.status === "draft"
+                      ? "bg-yellow-100 text-yellow-800 border-yellow-200"
                       : "bg-muted"
                   }
                 >
                   {campaign.status}
                 </Badge>
               </TableCell>
-              <TableCell>{campaign.recipients}</TableCell>
-              <TableCell>{campaign.sent}</TableCell>
-              <TableCell>{campaign.openRate}</TableCell>
+              <TableCell>
+                {campaign.scheduled_for
+                  ? new Date(campaign.scheduled_for).toLocaleDateString()
+                  : "-"}
+              </TableCell>
+              <TableCell>
+                {new Date(campaign.created_at).toLocaleDateString()}
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      // TODO: Implement edit functionality
+                      toast({
+                        title: "Coming soon",
+                        description: "Edit functionality will be available soon",
+                      });
+                    }}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDelete(campaign.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

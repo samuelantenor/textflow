@@ -2,10 +2,11 @@ import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { CreateCampaignDialog } from "@/components/CreateCampaignDialog";
+import CampaignTable from "@/components/CampaignTable";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -87,7 +88,7 @@ const Dashboard = () => {
     <div className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <h1 className="text-3xl font-bold">SMS Campaigns</h1>
           <div className="flex items-center gap-4">
             <CreateCampaignDialog />
             <Button variant="ghost" size="icon" onClick={handleLogout}>
@@ -97,12 +98,7 @@ const Dashboard = () => {
         </div>
         
         <div className="grid gap-6">
-          <div className="bg-card p-6 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">Welcome to your Dashboard!</h2>
-            <p className="text-muted-foreground">
-              Your subscription is active. You can now start creating and managing your SMS campaigns.
-            </p>
-          </div>
+          <CampaignTable />
         </div>
       </div>
     </div>
