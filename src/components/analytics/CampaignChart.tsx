@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
   XAxis,
   YAxis,
+  Tooltip,
 } from "recharts";
 
 const CampaignChart = () => {
@@ -79,9 +80,7 @@ const CampaignChart = () => {
           axisLine={false}
           tickFormatter={(value) => `${value}%`}
         />
-        <ChartTooltip>
-          <ChartTooltipContent />
-        </ChartTooltip>
+        <Tooltip content={<ChartTooltipContent />} />
         <Area
           type="monotone"
           dataKey="Delivery Rate"

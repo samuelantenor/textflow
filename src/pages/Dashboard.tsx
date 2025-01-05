@@ -70,11 +70,6 @@ const Dashboard = () => {
     },
   });
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/login");
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -95,7 +90,7 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold">SMS Campaigns</h1>
           <div className="flex items-center gap-4">
             <CreateCampaignDialog />
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
+            <Button variant="ghost" size="icon" onClick={() => supabase.auth.signOut()}>
               <LogOut className="h-5 w-5" />
             </Button>
           </div>
