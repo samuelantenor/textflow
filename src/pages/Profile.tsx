@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ArrowLeft, CreditCard } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 
@@ -45,44 +45,6 @@ const Profile = () => {
     },
   });
 
-  // Fetch subscription status
-  const { data: subscription } = useQuery({
-    queryKey: ['subscription'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return null;
-
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  // Fetch campaign analytics for SMS usage
-  const { data: analytics } = useQuery({
-    queryKey: ['campaign_analytics'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return null;
-
-      const { data, error } = await supabase
-        .from('campaign_analytics')
-        .select(`
-          *,
-          campaigns!inner(*)
-        `)
-        .eq('campaigns.user_id', session.user.id);
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
   const form = useForm<ProfileFormValues>({
     defaultValues: {
       full_name: profile?.full_name || '',
@@ -100,6 +62,16 @@ const Profile = () => {
     };
     checkAuth();
   }, [navigate]);
+
+  // Update form when profile data is loaded
+  useEffect(() => {
+    if (profile) {
+      form.reset({
+        email: profile.email,
+        full_name: profile.full_name || '',
+      });
+    }
+  }, [profile, form]);
 
   const onSubmit = async (values: ProfileFormValues) => {
     try {
@@ -132,39 +104,6 @@ const Profile = () => {
     }
   };
 
-  const handleSubscribe = async () => {
-    try {
-      setIsLoading(true);
-      const { data: sessionData, error: sessionError } = await supabase.functions.invoke(
-        'create-checkout-session',
-        {
-          method: 'POST',
-        }
-      );
-
-      if (sessionError) throw sessionError;
-      if (!sessionData?.url) throw new Error('No checkout URL received');
-
-      // Redirect to Stripe Checkout
-      window.location.href = sessionData.url;
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to start checkout process",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Calculate total SMS sent and success rate
-  const totalSMSSent = analytics?.reduce((sum, record) => sum + record.delivery_rate, 0) || 0;
-  const averageSuccessRate = analytics?.length 
-    ? (analytics.reduce((sum, record) => sum + record.delivery_rate, 0) / analytics.length).toFixed(2)
-    : 0;
-
   return (
     <div className="min-h-screen bg-background">
       <DashboardHeader />
@@ -182,7 +121,6 @@ const Profile = () => {
         </div>
 
         <div className="space-y-6">
-          {/* Profile Information */}
           <div className="bg-card rounded-lg p-6">
             <h2 className="text-lg font-semibold mb-6">Profile Information</h2>
             <Form {...form}>
@@ -220,43 +158,6 @@ const Profile = () => {
                 </Button>
               </form>
             </Form>
-          </div>
-
-          {/* Billing Status */}
-          <div className="bg-card rounded-lg p-6">
-            <h2 className="text-lg font-semibold mb-6">Billing Status</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Current Plan</p>
-                  <p className="text-muted-foreground">
-                    {subscription?.status === 'active' ? 'Premium Plan' : 'Free Plan'}
-                  </p>
-                </div>
-                <Button 
-                  onClick={handleSubscribe}
-                  disabled={subscription?.status === 'active' || isLoading}
-                >
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  {subscription?.status === 'active' ? 'Subscribed' : 'Subscribe Now'}
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* SMS Usage */}
-          <div className="bg-card rounded-lg p-6">
-            <h2 className="text-lg font-semibold mb-6">SMS Usage</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <p className="text-sm text-muted-foreground">Total SMS Sent</p>
-                <p className="text-2xl font-semibold">{totalSMSSent}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Average Success Rate</p>
-                <p className="text-2xl font-semibold">{averageSuccessRate}%</p>
-              </div>
-            </div>
           </div>
         </div>
       </main>

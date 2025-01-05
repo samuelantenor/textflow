@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, UserRound, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, UserRound, Settings, LogOut, Receipt } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import {
@@ -39,6 +39,10 @@ export const DashboardHeader = () => {
               <DropdownMenuItem onClick={() => navigate('/profile')}>
                 <UserRound className="mr-2 h-4 w-4" />
                 Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/billing')}>
+                <Receipt className="mr-2 h-4 w-4" />
+                Billing
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate('/settings')}>
                 <Settings className="mr-2 h-4 w-4" />
