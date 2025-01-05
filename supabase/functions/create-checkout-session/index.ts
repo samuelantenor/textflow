@@ -22,26 +22,18 @@ serve(async (req) => {
     // Get the session or user object
     const authHeader = req.headers.get('Authorization')!
     const token = authHeader.replace('Bearer ', '')
-    
-    console.log('Authenticating user...');
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token)
-    
-    if (authError || !user) {
-      console.error('Authentication error:', authError);
-      throw new Error('Authentication failed')
-    }
+    const { data } = await supabaseClient.auth.getUser(token)
+    const user = data.user
+    const email = user?.email
 
-    const email = user.email
     if (!email) {
       throw new Error('No email found')
     }
 
-    console.log('Creating Stripe instance...');
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
     })
 
-    console.log('Checking existing customers...');
     const customers = await stripe.customers.list({
       email: email,
       limit: 1
@@ -50,11 +42,9 @@ serve(async (req) => {
     let customer_id = undefined
     if (customers.data.length > 0) {
       customer_id = customers.data[0].id
-      console.log('Found existing customer:', customer_id);
-      
-      // Check if already subscribed
+      // check if already subscribed to this price
       const subscriptions = await stripe.subscriptions.list({
-        customer: customer_id,
+        customer: customers.data[0].id,
         status: 'active',
         price: 'price_1QdghTB4RWKZ2dNzpWlSvqmr',
         limit: 1
@@ -65,7 +55,7 @@ serve(async (req) => {
       }
     }
 
-    console.log('Creating checkout session...');
+    console.log('Creating payment session...')
     const session = await stripe.checkout.sessions.create({
       customer: customer_id,
       customer_email: customer_id ? undefined : email,
@@ -76,11 +66,11 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      success_url: `${req.headers.get('origin')}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${req.headers.get('origin')}/`,
       cancel_url: `${req.headers.get('origin')}/`,
     })
 
-    console.log('Checkout session created:', session.id);
+    console.log('Payment session created:', session.id)
     return new Response(
       JSON.stringify({ url: session.url }),
       { 
@@ -89,7 +79,7 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error creating payment session:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
