@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CampaignListItem } from "./CampaignListItem";
 import { Campaign } from "./types";
-import { CreateCampaignDialog } from "./CreateCampaignDialog";
 import { LayoutGrid } from "lucide-react";
 
 export function CampaignList() {
@@ -35,22 +34,15 @@ export function CampaignList() {
         <p className="text-muted-foreground">
           Create your first campaign to get started with SMS marketing.
         </p>
-        <CreateCampaignDialog />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold">Campaigns</h2>
-        <CreateCampaignDialog />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {campaigns.map((campaign) => (
-          <CampaignListItem key={campaign.id} campaign={campaign} />
-        ))}
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {campaigns.map((campaign) => (
+        <CampaignListItem key={campaign.id} campaign={campaign} />
+      ))}
     </div>
   );
 }

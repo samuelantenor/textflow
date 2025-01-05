@@ -19,10 +19,10 @@ export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
         control={form.control}
         name="name"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Campaign Name</FormLabel>
+          <FormItem className="space-y-1">
+            <FormLabel className="text-sm">Campaign Name</FormLabel>
             <FormControl>
-              <Input placeholder="Enter campaign name" {...field} />
+              <Input placeholder="Enter campaign name" {...field} className="h-8" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -33,12 +33,13 @@ export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
         control={form.control}
         name="message"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Message</FormLabel>
+          <FormItem className="space-y-1">
+            <FormLabel className="text-sm">Message</FormLabel>
             <FormControl>
               <Textarea 
                 placeholder="Type your message (max 160 characters)"
                 maxLength={160}
+                className="resize-none h-20"
                 {...field}
               />
             </FormControl>
@@ -51,12 +52,13 @@ export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
         control={form.control}
         name="media"
         render={({ field: { value, onChange, ...field } }) => (
-          <FormItem>
-            <FormLabel>Media (Optional, max 5MB)</FormLabel>
+          <FormItem className="space-y-1">
+            <FormLabel className="text-sm">Media (Optional, max 5MB)</FormLabel>
             <FormControl>
               <Input
                 type="file"
                 accept="image/*,video/*"
+                className="h-8"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file && file.size <= 5 * 1024 * 1024) {
@@ -81,8 +83,8 @@ export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
         control={form.control}
         name="scheduled_for"
         render={({ field }) => (
-          <FormItem className="flex flex-col">
-            <FormLabel>Schedule (Optional)</FormLabel>
+          <FormItem className="space-y-1">
+            <FormLabel className="text-sm">Schedule (Optional)</FormLabel>
             <Calendar
               mode="single"
               selected={field.value}
@@ -90,7 +92,7 @@ export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
               disabled={(date) =>
                 date < new Date() || date < new Date("1900-01-01")
               }
-              initialFocus
+              className="rounded-md border"
             />
             <FormMessage />
           </FormItem>
