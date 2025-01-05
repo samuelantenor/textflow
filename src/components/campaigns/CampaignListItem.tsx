@@ -21,6 +21,7 @@ interface CampaignListItemProps {
 
 export function CampaignListItem({ campaign }: CampaignListItemProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -44,6 +45,33 @@ export function CampaignListItem({ campaign }: CampaignListItemProps) {
       title: "Success",
       description: "Campaign deleted successfully",
     });
+  };
+
+  const handleSend = async () => {
+    try {
+      setIsSending(true);
+      
+      const { data, error } = await supabase.functions.invoke('send-campaign', {
+        body: { campaignId: campaign.id },
+      });
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+      toast({
+        title: "Success",
+        description: "Campaign sent successfully",
+      });
+    } catch (error) {
+      console.error('Error sending campaign:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send campaign",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -102,9 +130,14 @@ export function CampaignListItem({ campaign }: CampaignListItemProps) {
           Created {format(new Date(campaign.created_at), "MMM d, yyyy")}
         </span>
         {campaign.status === 'draft' && (
-          <Button size="sm" className="gap-2">
+          <Button 
+            size="sm" 
+            className="gap-2"
+            onClick={handleSend}
+            disabled={isSending}
+          >
             <Send className="w-4 h-4" />
-            Send
+            {isSending ? 'Sending...' : 'Send'}
           </Button>
         )}
       </div>
