@@ -54,6 +54,7 @@ export function CreateCampaignDialog() {
         message: data.message,
         media_url: mediaUrl,
         scheduled_for: data.scheduled_for?.toISOString(),
+        group_id: data.group_id,
         status: "draft",
       });
 

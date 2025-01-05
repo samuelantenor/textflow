@@ -2,10 +2,12 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { UseFormReturn } from "react-hook-form";
 import { CampaignFormData } from "./types";
-import { format } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CampaignFormFieldsProps {
   form: UseFormReturn<CampaignFormData>;
@@ -13,6 +15,18 @@ interface CampaignFormFieldsProps {
 
 export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
   const { toast } = useToast();
+
+  const { data: groups } = useQuery({
+    queryKey: ['campaign-groups'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('campaign_groups')
+        .select('id, name, contacts(count)');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   return (
     <>
@@ -25,6 +39,31 @@ export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
             <FormControl>
               <Input placeholder="Enter campaign name" {...field} />
             </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="group_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Contact Group</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a contact group" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {groups?.map((group) => (
+                  <SelectItem key={group.id} value={group.id}>
+                    {group.name} ({group.contacts[0]?.count || 0} contacts)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         )}
