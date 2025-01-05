@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,37 +8,28 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Loader2 } from "lucide-react";
-import { format } from "date-fns";
-
-type FormData = {
-  name: string;
-  message: string;
-  media?: File;
-  scheduled_for?: Date;
-};
+import { CampaignFormFields } from "./campaign/CampaignFormFields";
+import type { CampaignFormData } from "./campaign/types";
 
 export function CreateCampaignDialog() {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const form = useForm<FormData>();
+  const form = useForm<CampaignFormData>();
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: CampaignFormData) => {
     try {
       setIsLoading(true);
+
+      // Get the current user's ID
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        throw new Error("User not authenticated");
+      }
 
       let mediaUrl = null;
       if (data.media) {
@@ -59,6 +49,7 @@ export function CreateCampaignDialog() {
       }
 
       const { error } = await supabase.from("campaigns").insert({
+        user_id: session.user.id,
         name: data.name,
         message: data.message,
         media_url: mediaUrl,
@@ -101,88 +92,7 @@ export function CreateCampaignDialog() {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Campaign Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter campaign name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="message"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Message</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Type your message (max 160 characters)"
-                      maxLength={160}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="media"
-              render={({ field: { value, onChange, ...field } }) => (
-                <FormItem>
-                  <FormLabel>Media (Optional, max 5MB)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept="image/*,video/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file && file.size <= 5 * 1024 * 1024) {
-                          onChange(file);
-                        } else {
-                          toast({
-                            title: "Error",
-                            description: "File size must be less than 5MB",
-                            variant: "destructive",
-                          });
-                        }
-                      }}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="scheduled_for"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Schedule (Optional)</FormLabel>
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date < new Date() || date < new Date("1900-01-01")
-                    }
-                    initialFocus
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+            <CampaignFormFields form={form} />
             <div className="flex justify-end space-x-4 pt-4">
               <Button
                 type="button"
