@@ -148,6 +148,51 @@ export type Database = {
           },
         ]
       }
+      landing_pages: {
+        Row: {
+          created_at: string
+          description: string | null
+          font_family: string
+          id: string
+          logo_url: string | null
+          primary_color: string
+          published: boolean
+          template_id: string
+          title: string
+          updated_at: string
+          user_id: string
+          welcome_message: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          font_family?: string
+          id?: string
+          logo_url?: string | null
+          primary_color?: string
+          published?: boolean
+          template_id: string
+          title: string
+          updated_at?: string
+          user_id: string
+          welcome_message?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          font_family?: string
+          id?: string
+          logo_url?: string | null
+          primary_color?: string
+          published?: boolean
+          template_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          welcome_message?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           email: string
