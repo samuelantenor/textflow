@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import type { MessageLog } from "@/integrations/supabase/types/message-logs";
 
 interface MessageLogsProps {
   campaignId: string;
@@ -31,7 +32,7 @@ export function MessageLogs({ campaignId }: MessageLogsProps) {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as MessageLog[];
     },
   });
 
