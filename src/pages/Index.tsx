@@ -46,6 +46,11 @@ const Index = () => {
         .maybeSingle();
 
       if (error) throw error;
+      
+      // Add console log to show subscription status
+      console.log('Subscription status:', subscriptions ? 'Subscribed' : 'Not subscribed');
+      console.log('Subscription data:', subscriptions);
+      
       return subscriptions;
     },
   });
