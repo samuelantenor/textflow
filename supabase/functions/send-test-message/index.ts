@@ -29,6 +29,9 @@ serve(async (req: Request) => {
       throw new Error('Twilio credentials not configured');
     }
 
+    console.log('Sending SMS to:', phoneNumber);
+    console.log('Message:', message);
+
     // Send message via Twilio
     const twilioResponse = await fetch(
       `https://api.twilio.com/2010-04/Accounts/${accountSid}/Messages.json`,
@@ -40,7 +43,7 @@ serve(async (req: Request) => {
         },
         body: new URLSearchParams({
           To: phoneNumber,
-          From: '+15555555555', // Replace with your Twilio phone number
+          From: '+15146125967', // Using your Twilio phone number
           Body: message,
           ...(mediaUrl && { MediaUrl: mediaUrl }),
         }),
@@ -48,6 +51,11 @@ serve(async (req: Request) => {
     );
 
     const messageData = await twilioResponse.json();
+    console.log('Twilio response:', messageData);
+
+    if (!twilioResponse.ok) {
+      throw new Error(`Twilio error: ${messageData.message}`);
+    }
 
     return new Response(
       JSON.stringify({ success: true, messageId: messageData.sid }),
