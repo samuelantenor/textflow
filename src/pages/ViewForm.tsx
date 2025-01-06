@@ -1,86 +1,151 @@
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { FormData, FormField } from "@/types/form";
-import { FormFieldRenderer } from "@/components/forms/FormFieldRenderer";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FormField, FormData } from "@/types/form";
+
+interface FormResponse {
+  id: string;
+  title: string;
+  description: string | null;
+  fields: unknown;
+  user: {
+    id: string;
+  };
+}
 
 export default function ViewForm() {
   const { id } = useParams();
   const { toast } = useToast();
+  const [form, setForm] = useState<FormData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [groups, setGroups] = useState<any[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<string>("");
 
-  const { data: form, isLoading } = useQuery({
-    queryKey: ['form', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('custom_forms')
-        .select(`
-          id,
-          title,
-          description,
-          fields
-        `)
-        .eq('id', id)
-        .single();
+  useEffect(() => {
+    const fetchForm = async () => {
+      try {
+        const { data: formResponse, error: formError } = await supabase
+          .from('custom_forms')
+          .select('*, user:user_id(id)')
+          .eq('id', id)
+          .single();
 
-      if (error) throw error;
-      
-      // Validate and type check the fields array
-      if (!data.fields || !Array.isArray(data.fields)) {
-        throw new Error('Invalid form fields format');
+        if (formError) throw formError;
+        if (!formResponse) throw new Error('Form not found');
+
+        // Type guard to validate fields structure
+        const validateFields = (fields: unknown): fields is FormField[] => {
+          if (!Array.isArray(fields)) return false;
+          return fields.every(field => 
+            typeof field === 'object' && 
+            field !== null && 
+            'type' in field && 
+            'label' in field
+          );
+        };
+
+        const response = formResponse as FormResponse;
+        if (!validateFields(response.fields)) {
+          throw new Error('Invalid form fields format');
+        }
+
+        setForm({
+          id: response.id,
+          title: response.title,
+          description: response.description,
+          fields: response.fields
+        });
+
+        // Fetch groups for this form's user
+        const { data: groupsData, error: groupsError } = await supabase
+          .from('campaign_groups')
+          .select('*')
+          .eq('user_id', response.user.id);
+
+        if (groupsError) throw groupsError;
+        setGroups(groupsData || []);
+      } catch (error) {
+        console.error('Error fetching form:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load form",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // Type assertion after validation
-      const parsedFields = data.fields as FormField[];
-      
-      // Validate each field has required properties
-      if (!parsedFields.every(field => 'type' in field && 'label' in field)) {
-        throw new Error('Invalid field format: missing required properties');
-      }
-
-      return {
-        ...data,
-        fields: parsedFields
-      } as FormData;
-    },
-  });
+    fetchForm();
+  }, [id, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const { error } = await supabase
-        .from('form_submissions')
-        .insert([
-          {
-            form_id: id,
-            data: formData,
-          },
-        ]);
+    if (!selectedGroup) {
+      toast({
+        title: "Error",
+        description: "Please select a group",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      if (error) throw error;
+    try {
+      // First submit the form data
+      const { error: submissionError } = await supabase
+        .from('form_submissions')
+        .insert({
+          form_id: id,
+          data: formData,
+        });
+
+      if (submissionError) throw submissionError;
+
+      // Then create a contact in the selected group
+      const { error: contactError } = await supabase
+        .from('contacts')
+        .insert({
+          group_id: selectedGroup,
+          name: formData.name || null,
+          phone_number: formData.phone_number,
+        });
+
+      if (contactError) throw contactError;
 
       toast({
-        title: "Success!",
-        description: "Your response has been submitted.",
+        title: "Success",
+        description: "Form submitted successfully",
       });
 
       // Reset form
       setFormData({});
+      setSelectedGroup("");
+      
+      // Reset any form fields
+      const formElements = document.querySelectorAll('input, textarea, select');
+      formElements.forEach((element: any) => {
+        if (element.type !== 'submit') {
+          element.value = '';
+        }
+      });
+
     } catch (error) {
+      console.error('Error submitting form:', error);
       toast({
         title: "Error",
-        description: "Failed to submit form. Please try again.",
+        description: "Failed to submit form",
         variant: "destructive",
       });
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -138,6 +203,22 @@ export default function ViewForm() {
                 />
               </div>
             ))}
+
+            <div className="space-y-2">
+              <Label htmlFor="group-select">Select Group</Label>
+              <Select value={selectedGroup} onValueChange={setSelectedGroup}>
+                <SelectTrigger id="group-select">
+                  <SelectValue placeholder="Select a group" />
+                </SelectTrigger>
+                <SelectContent>
+                  {groups.map((group) => (
+                    <SelectItem key={group.id} value={group.id}>
+                      {group.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <Button type="submit" className="w-full">
