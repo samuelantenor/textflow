@@ -32,9 +32,9 @@ serve(async (req: Request) => {
     console.log('Sending SMS to:', phoneNumber);
     console.log('Message:', message);
 
-    // Send message via Twilio
+    // Send message via Twilio with corrected API endpoint
     const twilioResponse = await fetch(
-      `https://api.twilio.com/2010-04/Accounts/${accountSid}/Messages.json`,
+      `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
       {
         method: 'POST',
         headers: {
