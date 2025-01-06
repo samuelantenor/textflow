@@ -34,47 +34,8 @@ export default function ViewForm() {
       return;
     }
 
-    // Map the form fields to the expected format
-    const phone_number = formData.phone_number;
-    const name = formData.name;
-
-    if (!phone_number) {
-      toast({
-        title: "Error",
-        description: "Phone number is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Basic phone number validation
-    const phoneRegex = /^\+?[\d\s-()]+$/;
-    if (!phoneRegex.test(phone_number)) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid phone number",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setSubmitting(true);
     try {
-      // Normalize phone number by removing spaces, dashes, and parentheses
-      const normalizedPhoneNumber = phone_number.replace(/[\s-()]/g, '');
-
-      // First create the contact
-      const { error: contactError } = await supabase
-        .from('contacts')
-        .insert({
-          group_id: form.group_id,
-          name: name || null,
-          phone_number: normalizedPhoneNumber,
-        });
-
-      if (contactError) throw contactError;
-
-      // Then create the form submission
       const { error: submissionError } = await supabase
         .from('form_submissions')
         .insert({
@@ -83,6 +44,16 @@ export default function ViewForm() {
         });
 
       if (submissionError) throw submissionError;
+
+      const { error: contactError } = await supabase
+        .from('contacts')
+        .insert({
+          group_id: form.group_id,
+          name: formData.name || null,
+          phone_number: formData.phone_number,
+        });
+
+      if (contactError) throw contactError;
 
       toast({
         title: "Success",
