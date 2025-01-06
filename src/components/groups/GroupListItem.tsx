@@ -10,7 +10,7 @@ interface GroupListItemProps {
   group: {
     id: string;
     name: string;
-    contacts: { count: number }[];
+    contacts: { count: number }[] | null;
   };
 }
 
@@ -18,13 +18,16 @@ export function GroupListItem({ group }: GroupListItemProps) {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
+  // Safely get the contact count, defaulting to 0 if undefined
+  const contactCount = group.contacts?.[0]?.count ?? 0;
+
   return (
     <Card className="p-6">
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="text-lg font-semibold">{group.name}</h3>
           <p className="text-sm text-muted-foreground">
-            {group.contacts[0]?.count || 0} contacts
+            {contactCount} contacts
           </p>
         </div>
         <Button variant="ghost" size="icon" onClick={() => setIsEditOpen(true)}>
