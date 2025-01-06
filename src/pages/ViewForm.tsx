@@ -3,36 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-
-interface FormField {
-  type: string;
-  label: string;
-  placeholder?: string;
-  required?: boolean;
-  description?: string;
-  options?: string[];
-}
-
-interface FormData {
-  id: string;
-  title: string;
-  description: string | null;
-  fields: FormField[];
-}
+import { FormData, FormField } from "@/types/form";
+import { FormFieldRenderer } from "@/components/forms/FormFieldRenderer";
 
 export default function ViewForm() {
   const { id } = useParams();
@@ -55,10 +30,15 @@ export default function ViewForm() {
 
       if (error) throw error;
       
-      // Ensure fields is parsed as an array
+      // Parse and validate the fields array
+      const parsedFields = data.fields as FormField[];
+      if (!Array.isArray(parsedFields)) {
+        throw new Error('Invalid form fields format');
+      }
+
       return {
         ...data,
-        fields: Array.isArray(data.fields) ? data.fields : []
+        fields: parsedFields
       } as FormData;
     },
   });
@@ -90,82 +70,6 @@ export default function ViewForm() {
         description: "Failed to submit form. Please try again.",
         variant: "destructive",
       });
-    }
-  };
-
-  const renderField = (field: FormField, index: number) => {
-    const commonProps = {
-      id: `field-${index}`,
-      value: formData[field.label] || "",
-      onChange: (e: any) => {
-        const value = e.target?.value ?? e;
-        setFormData(prev => ({ ...prev, [field.label]: value }));
-      },
-      required: field.required,
-    };
-
-    switch (field.type) {
-      case 'textarea':
-        return <Textarea {...commonProps} placeholder={field.placeholder} />;
-      case 'checkbox':
-        return (
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id={`field-${index}`}
-              checked={formData[field.label] || false}
-              onCheckedChange={(checked) => {
-                setFormData(prev => ({ ...prev, [field.label]: checked }));
-              }}
-            />
-            <label htmlFor={`field-${index}`} className="text-sm">
-              {field.label}
-            </label>
-          </div>
-        );
-      case 'radio':
-        return (
-          <RadioGroup
-            value={formData[field.label] || ""}
-            onValueChange={(value) => {
-              setFormData(prev => ({ ...prev, [field.label]: value }));
-            }}
-          >
-            {field.options?.map((option: string, optionIndex: number) => (
-              <div key={optionIndex} className="flex items-center space-x-2">
-                <RadioGroupItem value={option} id={`${index}-${optionIndex}`} />
-                <Label htmlFor={`${index}-${optionIndex}`}>{option}</Label>
-              </div>
-            ))}
-          </RadioGroup>
-        );
-      case 'select':
-        return (
-          <Select
-            value={formData[field.label] || ""}
-            onValueChange={(value) => {
-              setFormData(prev => ({ ...prev, [field.label]: value }));
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={field.placeholder || "Select an option"} />
-            </SelectTrigger>
-            <SelectContent>
-              {field.options?.map((option: string, optionIndex: number) => (
-                <SelectItem key={optionIndex} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
-      default:
-        return (
-          <Input
-            {...commonProps}
-            type={field.type === 'number' || field.type === 'date' ? field.type : 'text'}
-            placeholder={field.placeholder}
-          />
-        );
     }
   };
 
@@ -217,7 +121,14 @@ export default function ViewForm() {
                     {field.description}
                   </p>
                 )}
-                {renderField(field, index)}
+                <FormFieldRenderer
+                  field={field}
+                  index={index}
+                  value={formData[field.label]}
+                  onChange={(value) => {
+                    setFormData(prev => ({ ...prev, [field.label]: value }));
+                  }}
+                />
               </div>
             ))}
           </div>
