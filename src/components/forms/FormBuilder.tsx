@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Plus, Save, Loader2 } from "lucide-react";
 import { FormFieldBuilder } from "./FormFieldBuilder";
 import { FormFieldList } from "./FormFieldList";
+import { FormPreview } from "./FormPreview";
 
 interface FormBuilderProps {
   groupId: string;
@@ -83,6 +84,8 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
     }
   };
 
+  const formData = form.watch();
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -91,7 +94,7 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
           Create Form
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[800px] h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-[1200px] h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Create Custom Form</DialogTitle>
           <DialogDescription>
@@ -99,21 +102,32 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-y-auto">
-            <div className="space-y-4 bg-muted/50 rounded-lg p-4">
-              <Input
-                placeholder="Enter form title"
-                className="text-xl font-semibold bg-background"
-                {...form.register("title", { required: true })}
-              />
-              <Textarea
-                placeholder="Describe your form (optional)"
-                className="bg-background"
-                {...form.register("description")}
-              />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden">
+            <div className="grid grid-cols-2 gap-8 h-full overflow-hidden">
+              <div className="space-y-4 overflow-y-auto pr-4">
+                <div className="space-y-4 bg-muted/50 rounded-lg p-4">
+                  <Input
+                    placeholder="Enter form title"
+                    className="text-xl font-semibold bg-background"
+                    {...form.register("title", { required: true })}
+                  />
+                  <Textarea
+                    placeholder="Describe your form (optional)"
+                    className="bg-background"
+                    {...form.register("description")}
+                  />
+                </div>
+                <FormFieldBuilder form={form} />
+                <FormFieldList form={form} />
+              </div>
+              <div className="h-full overflow-y-auto pr-4">
+                <FormPreview
+                  title={formData.title}
+                  description={formData.description}
+                  fields={formData.fields}
+                />
+              </div>
             </div>
-            <FormFieldBuilder form={form} />
-            <FormFieldList form={form} />
             <div className="flex justify-end space-x-4 pt-4 sticky bottom-0 bg-background p-4 border-t">
               <Button
                 type="button"
