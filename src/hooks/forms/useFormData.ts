@@ -8,9 +8,9 @@ interface FormResponse {
   title: string;
   description: string | null;
   fields: FormField[];
-  user: {
-    id: string;
-  };
+  user_id: string;
+  group_id: string;
+  is_active: boolean | null;
 }
 
 interface UseFormDataReturn {
@@ -40,7 +40,7 @@ export function useFormData(): UseFormDataReturn {
     try {
       const { data: formResponse, error: formError } = await supabase
         .from('custom_forms')
-        .select('*, user:user_id(id)')
+        .select('*')
         .eq('id', formId)
         .single();
 
@@ -51,17 +51,23 @@ export function useFormData(): UseFormDataReturn {
         throw new Error('Invalid form fields format');
       }
 
-      const formData = {
-        ...formResponse,
-        fields: formResponse.fields as FormField[]
+      const formData: FormResponse = {
+        id: formResponse.id,
+        title: formResponse.title,
+        description: formResponse.description,
+        fields: formResponse.fields as FormField[],
+        user_id: formResponse.user_id,
+        group_id: formResponse.group_id,
+        is_active: formResponse.is_active
       };
 
-      setForm(formData as FormResponse);
+      setForm(formData);
 
+      // Fetch groups for the form owner
       const { data: groupsData, error: groupsError } = await supabase
         .from('campaign_groups')
         .select('*')
-        .eq('user_id', formResponse.user.id);
+        .eq('user_id', formResponse.user_id);
 
       if (groupsError) throw groupsError;
       setGroups(groupsData || []);
