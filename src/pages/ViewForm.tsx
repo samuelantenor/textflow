@@ -30,10 +30,17 @@ export default function ViewForm() {
 
       if (error) throw error;
       
-      // Parse and validate the fields array
-      const parsedFields = data.fields as FormField[];
-      if (!Array.isArray(parsedFields)) {
+      // Validate and type check the fields array
+      if (!data.fields || !Array.isArray(data.fields)) {
         throw new Error('Invalid form fields format');
+      }
+
+      // Type assertion after validation
+      const parsedFields = data.fields as FormField[];
+      
+      // Validate each field has required properties
+      if (!parsedFields.every(field => 'type' in field && 'label' in field)) {
+        throw new Error('Invalid field format: missing required properties');
       }
 
       return {
