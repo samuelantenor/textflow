@@ -10,24 +10,28 @@ import { EditContactDialog } from "./EditContactDialog";
 import { Pencil, Trash2, Search } from "lucide-react";
 
 interface ViewContactsDialogProps {
-  groupId: string;
+  group: {
+    id: string;
+    name: string;
+    contacts: { count: number }[];
+  };
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function ViewContactsDialog({ groupId, open, onOpenChange }: ViewContactsDialogProps) {
+export function ViewContactsDialog({ group, open, onOpenChange }: ViewContactsDialogProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingContact, setEditingContact] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: contacts, isLoading } = useQuery({
-    queryKey: ['contacts', groupId],
+    queryKey: ['contacts', group.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('contacts')
         .select('*')
-        .eq('group_id', groupId)
+        .eq('group_id', group.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -48,7 +52,7 @@ export function ViewContactsDialog({ groupId, open, onOpenChange }: ViewContacts
         title: "Success",
         description: "Contact deleted successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ['contacts', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['contacts', group.id] });
     } catch (error) {
       toast({
         title: "Error",
