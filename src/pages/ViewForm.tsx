@@ -9,18 +9,74 @@ import { FormError } from "@/components/forms/view/FormError";
 import { FormFields } from "@/components/forms/view/FormFields";
 import { useFormData } from "@/hooks/forms/useFormData";
 
+interface FormStyle {
+  backgroundColor?: string;
+  fontFamily?: string;
+  logoUrl?: string;
+  primaryColor?: string;
+}
+
 export default function ViewForm() {
   const { id } = useParams();
   const { toast } = useToast();
   const { form, loading, fetchForm } = useFormData();
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formStyle, setFormStyle] = useState<FormStyle>({
+    backgroundColor: '#ffffff',
+    fontFamily: 'Inter',
+    primaryColor: '#ea384c'
+  });
 
   useEffect(() => {
     if (id) {
       fetchForm(id);
     }
   }, [id]);
+
+  // Load custom styles from landing_pages table
+  useEffect(() => {
+    const loadFormStyle = async () => {
+      if (!form?.user_id) return;
+
+      const { data, error } = await supabase
+        .from('landing_pages')
+        .select('*')
+        .eq('user_id', form.user_id)
+        .single();
+
+      if (error) {
+        console.error('Error loading form style:', error);
+        return;
+      }
+
+      if (data) {
+        setFormStyle({
+          backgroundColor: data.background_color || '#ffffff',
+          fontFamily: data.font_family || 'Inter',
+          logoUrl: data.logo_url,
+          primaryColor: data.primary_color || '#ea384c'
+        });
+      }
+    };
+
+    loadFormStyle();
+  }, [form?.user_id]);
+
+  // Load custom font
+  useEffect(() => {
+    if (formStyle.fontFamily === 'Inter') return; // Default font, no need to load
+
+    const loadFont = async () => {
+      const fontUrl = `https://fonts.googleapis.com/css2?family=${formStyle.fontFamily}:wght@400;500;600;700&display=swap`;
+      const link = document.createElement('link');
+      link.href = fontUrl;
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+    };
+
+    loadFont();
+  }, [formStyle.fontFamily]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +90,6 @@ export default function ViewForm() {
       return;
     }
 
-    // Find the phone number field in the form data
     const phoneField = form.fields.find(field => 
       field.label.toLowerCase().includes('phone') || 
       field.label.toLowerCase().includes('mobile')
@@ -57,7 +112,6 @@ export default function ViewForm() {
 
     setSubmitting(true);
     try {
-      // First create the contact
       const { error: contactError } = await supabase
         .from('contacts')
         .insert({
@@ -68,7 +122,6 @@ export default function ViewForm() {
 
       if (contactError) throw contactError;
 
-      // Then create the form submission
       const { error: submissionError } = await supabase
         .from('form_submissions')
         .insert({
@@ -83,10 +136,8 @@ export default function ViewForm() {
         description: "Form submitted successfully",
       });
 
-      // Reset form
       setFormData({});
       
-      // Reset form fields
       const formElements = document.querySelectorAll('input, textarea, select');
       formElements.forEach((element: any) => {
         if (element.type !== 'submit') {
@@ -115,11 +166,31 @@ export default function ViewForm() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
-      <Card className="max-w-2xl mx-auto p-6">
+    <div 
+      className="min-h-screen py-12 px-4"
+      style={{ 
+        backgroundColor: formStyle.backgroundColor,
+        fontFamily: formStyle.fontFamily
+      }}
+    >
+      <Card className="max-w-2xl mx-auto p-6 bg-white/80 backdrop-blur-sm">
+        {formStyle.logoUrl && (
+          <div className="flex justify-center mb-6">
+            <img 
+              src={formStyle.logoUrl} 
+              alt="Form Logo" 
+              className="max-h-16 w-auto"
+            />
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-8">
           <div>
-            <h1 className="text-2xl font-bold mb-2">{form.title}</h1>
+            <h1 
+              className="text-2xl font-bold mb-2"
+              style={{ color: formStyle.primaryColor }}
+            >
+              {form.title}
+            </h1>
             {form.description && (
               <p className="text-muted-foreground">{form.description}</p>
             )}
@@ -131,9 +202,18 @@ export default function ViewForm() {
             onFieldChange={(fieldName, value) => {
               setFormData(prev => ({ ...prev, [fieldName]: value }));
             }}
+            primaryColor={formStyle.primaryColor}
           />
 
-          <Button type="submit" className="w-full" disabled={submitting}>
+          <Button 
+            type="submit" 
+            className="w-full"
+            disabled={submitting}
+            style={{
+              backgroundColor: formStyle.primaryColor,
+              borderColor: formStyle.primaryColor
+            }}
+          >
             {submitting ? "Submitting..." : "Submit"}
           </Button>
         </form>
