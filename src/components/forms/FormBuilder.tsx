@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -25,9 +26,12 @@ interface FormData {
   title: string;
   description?: string;
   fields: Array<{
-    type: 'text' | 'email' | 'phone' | 'checkbox';
+    type: 'text' | 'email' | 'phone' | 'checkbox' | 'textarea' | 'number' | 'date' | 'radio' | 'select';
     label: string;
     required: boolean;
+    placeholder?: string;
+    options?: string[];
+    description?: string;
   }>;
 }
 
@@ -87,23 +91,30 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
           Create Form
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[800px] h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Create Custom Form</DialogTitle>
+          <DialogDescription>
+            Build a beautiful form to collect information from your contacts.
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <Input
-              placeholder="Form Title"
-              {...form.register("title", { required: true })}
-            />
-            <Textarea
-              placeholder="Form Description (optional)"
-              {...form.register("description")}
-            />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-y-auto">
+            <div className="space-y-4 bg-muted/50 rounded-lg p-4">
+              <Input
+                placeholder="Enter form title"
+                className="text-xl font-semibold bg-background"
+                {...form.register("title", { required: true })}
+              />
+              <Textarea
+                placeholder="Describe your form (optional)"
+                className="bg-background"
+                {...form.register("description")}
+              />
+            </div>
             <FormFieldBuilder form={form} />
             <FormFieldList form={form} />
-            <div className="flex justify-end space-x-4 pt-4">
+            <div className="flex justify-end space-x-4 pt-4 sticky bottom-0 bg-background p-4 border-t">
               <Button
                 type="button"
                 variant="outline"
