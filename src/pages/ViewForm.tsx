@@ -34,6 +34,27 @@ export default function ViewForm() {
       return;
     }
 
+    // Validate phone number
+    if (!formData.phone_number) {
+      toast({
+        title: "Error",
+        description: "Phone number is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Basic phone number validation
+    const phoneRegex = /^\+?[\d\s-()]+$/;
+    if (!phoneRegex.test(formData.phone_number)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid phone number",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
       const { error: submissionError } = await supabase
@@ -45,12 +66,15 @@ export default function ViewForm() {
 
       if (submissionError) throw submissionError;
 
+      // Normalize phone number by removing spaces, dashes, and parentheses
+      const normalizedPhoneNumber = formData.phone_number.replace(/[\s-()]/g, '');
+
       const { error: contactError } = await supabase
         .from('contacts')
         .insert({
           group_id: form.group_id,
           name: formData.name || null,
-          phone_number: formData.phone_number,
+          phone_number: normalizedPhoneNumber,
         });
 
       if (contactError) throw contactError;
