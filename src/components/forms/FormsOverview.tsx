@@ -4,8 +4,8 @@ import { FormBuilder } from "./FormBuilder";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "../ui/button";
-import { Database } from "@/integrations/supabase/types";
 import { ShareFormDialog } from "./ShareFormDialog";
+import { ViewSubmissionsDialog } from "./view/ViewSubmissionsDialog";
 import { useState } from "react";
 
 type CustomForm = {
@@ -21,6 +21,7 @@ type CustomForm = {
 export const FormsOverview = () => {
   const [selectedForm, setSelectedForm] = useState<CustomForm | null>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [submissionsDialogOpen, setSubmissionsDialogOpen] = useState(false);
 
   const { data: groups } = useQuery({
     queryKey: ['campaign-groups'],
@@ -34,7 +35,7 @@ export const FormsOverview = () => {
     },
   });
 
-  const { data: forms, isLoading } = useQuery<CustomForm[]>({
+  const { data: forms, isLoading } = useQuery({
     queryKey: ['custom-forms'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -51,7 +52,6 @@ export const FormsOverview = () => {
       
       if (error) throw error;
       
-      // Transform the data to match CustomForm type
       return (data || []).map(form => ({
         ...form,
         fields: Array.isArray(form.fields) ? form.fields : []
@@ -62,6 +62,11 @@ export const FormsOverview = () => {
   const handleShare = (form: CustomForm) => {
     setSelectedForm(form);
     setShareDialogOpen(true);
+  };
+
+  const handleViewSubmissions = (form: CustomForm) => {
+    setSelectedForm(form);
+    setSubmissionsDialogOpen(true);
   };
 
   if (!groups?.length) {
@@ -114,7 +119,11 @@ export const FormsOverview = () => {
                 Fields: {form.fields.length}
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleViewSubmissions(form)}
+                >
                   View Submissions
                 </Button>
                 <Button 
@@ -145,6 +154,14 @@ export const FormsOverview = () => {
         open={shareDialogOpen}
         onOpenChange={setShareDialogOpen}
       />
+
+      {selectedForm && (
+        <ViewSubmissionsDialog
+          formId={selectedForm.id}
+          open={submissionsDialogOpen}
+          onOpenChange={setSubmissionsDialogOpen}
+        />
+      )}
     </div>
   );
 };
