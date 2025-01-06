@@ -18,6 +18,22 @@ import {
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
+interface FormField {
+  type: string;
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+  description?: string;
+  options?: string[];
+}
+
+interface FormData {
+  id: string;
+  title: string;
+  description: string | null;
+  fields: FormField[];
+}
+
 export default function ViewForm() {
   const { id } = useParams();
   const { toast } = useToast();
@@ -38,7 +54,12 @@ export default function ViewForm() {
         .single();
 
       if (error) throw error;
-      return data;
+      
+      // Ensure fields is parsed as an array
+      return {
+        ...data,
+        fields: Array.isArray(data.fields) ? data.fields : []
+      } as FormData;
     },
   });
 
@@ -72,7 +93,7 @@ export default function ViewForm() {
     }
   };
 
-  const renderField = (field: any, index: number) => {
+  const renderField = (field: FormField, index: number) => {
     const commonProps = {
       id: `field-${index}`,
       value: formData[field.label] || "",
@@ -181,7 +202,7 @@ export default function ViewForm() {
           </div>
 
           <div className="space-y-6">
-            {form.fields.map((field: any, index: number) => (
+            {form.fields.map((field: FormField, index: number) => (
               <div key={index} className="space-y-2">
                 {field.type !== 'checkbox' && (
                   <Label htmlFor={`field-${index}`}>
