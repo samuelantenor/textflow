@@ -9,6 +9,7 @@ import Settings from "@/pages/Settings";
 import Billing from "@/pages/Billing";
 import Index from "@/pages/Index";
 import Profile from "@/pages/Profile";
+import ViewForm from "@/pages/ViewForm";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/billing" element={<Billing />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/forms/:id" element={<ViewForm />} />
           </Routes>
           <Toaster />
         </ThemeProvider>
