@@ -18,14 +18,17 @@ import { Plus, Save, Loader2 } from "lucide-react";
 import { FormFieldBuilder } from "./FormFieldBuilder";
 import { FormFieldList } from "./FormFieldList";
 import { FormPreview } from "./FormPreview";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
 
 interface FormBuilderProps {
-  groupId: string;
+  groupId?: string;
 }
 
 interface FormData {
   title: string;
   description?: string;
+  group_id: string;
   fields: Array<{
     type: 'text' | 'email' | 'phone' | 'checkbox' | 'textarea' | 'number' | 'date' | 'radio' | 'select';
     label: string;
@@ -43,6 +46,24 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
   const form = useForm<FormData>({
     defaultValues: {
       fields: [],
+      group_id: groupId || "",
+    },
+  });
+
+  // Fetch available groups
+  const { data: groups } = useQuery({
+    queryKey: ['campaign-groups'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from('campaign_groups')
+        .select('id, name')
+        .eq('user_id', session.user.id);
+      
+      if (error) throw error;
+      return data;
     },
   });
 
@@ -57,7 +78,7 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
 
       const { error } = await supabase.from("custom_forms").insert({
         user_id: session.user.id,
-        group_id: groupId,
+        group_id: data.group_id,
         title: data.title,
         description: data.description,
         fields: data.fields,
@@ -116,6 +137,24 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
                     className="bg-background"
                     {...form.register("description")}
                   />
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Select Contact Group</label>
+                    <Select
+                      value={form.watch("group_id")}
+                      onValueChange={(value) => form.setValue("group_id", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a group" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {groups?.map((group) => (
+                          <SelectItem key={group.id} value={group.id}>
+                            {group.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <FormFieldBuilder form={form} />
                 <FormFieldList form={form} />
