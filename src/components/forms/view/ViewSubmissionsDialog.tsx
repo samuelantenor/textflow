@@ -5,11 +5,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { FormField } from "@/types/form";
 
 interface ViewSubmissionsDialogProps {
   formId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+interface FormDetails {
+  fields: FormField[];
 }
 
 export function ViewSubmissionsDialog({ formId, open, onOpenChange }: ViewSubmissionsDialogProps) {
@@ -39,7 +44,7 @@ export function ViewSubmissionsDialog({ formId, open, onOpenChange }: ViewSubmis
         .single();
 
       if (error) throw error;
-      return data;
+      return data as FormDetails;
     },
   });
 
@@ -72,7 +77,7 @@ export function ViewSubmissionsDialog({ formId, open, onOpenChange }: ViewSubmis
           <Table>
             <TableHeader>
               <TableRow>
-                {form?.fields.map((field: { label: string }) => (
+                {form?.fields?.map((field: FormField) => (
                   <TableHead key={field.label}>{field.label}</TableHead>
                 ))}
                 <TableHead>Submitted At</TableHead>
@@ -82,7 +87,7 @@ export function ViewSubmissionsDialog({ formId, open, onOpenChange }: ViewSubmis
               {isLoading ? (
                 <TableRow>
                   <TableCell 
-                    colSpan={form?.fields.length + 1} 
+                    colSpan={(form?.fields?.length || 0) + 1} 
                     className="text-center"
                   >
                     Loading...
@@ -91,7 +96,7 @@ export function ViewSubmissionsDialog({ formId, open, onOpenChange }: ViewSubmis
               ) : filteredSubmissions?.length === 0 ? (
                 <TableRow>
                   <TableCell 
-                    colSpan={form?.fields.length + 1} 
+                    colSpan={(form?.fields?.length || 0) + 1} 
                     className="text-center"
                   >
                     No submissions found
@@ -100,7 +105,7 @@ export function ViewSubmissionsDialog({ formId, open, onOpenChange }: ViewSubmis
               ) : (
                 filteredSubmissions?.map((submission) => (
                   <TableRow key={submission.id}>
-                    {form?.fields.map((field: { label: string }) => (
+                    {form?.fields?.map((field: FormField) => (
                       <TableCell key={field.label}>
                         {submission.data[field.label] || 'N/A'}
                       </TableCell>
