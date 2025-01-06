@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CampaignAnalytics } from "@/components/analytics/CampaignAnalytics";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
+import { FormsOverview } from "@/components/forms/FormsOverview";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -94,6 +95,7 @@ const Dashboard = () => {
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
               <TabsTrigger value="groups">Groups</TabsTrigger>
+              <TabsTrigger value="forms">Forms</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
 
@@ -111,6 +113,10 @@ const Dashboard = () => {
 
             <TabsContent value="groups">
               <GroupList />
+            </TabsContent>
+
+            <TabsContent value="forms">
+              <FormsOverview />
             </TabsContent>
 
             <TabsContent value="analytics">
