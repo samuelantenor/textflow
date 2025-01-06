@@ -16,14 +16,12 @@ interface FormResponse {
 interface UseFormDataReturn {
   form: FormResponse | null;
   loading: boolean;
-  groups: any[];
   fetchForm: (formId: string) => Promise<void>;
 }
 
 export function useFormData(): UseFormDataReturn {
   const [form, setForm] = useState<FormResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [groups, setGroups] = useState<any[]>([]);
   const { toast } = useToast();
 
   const validateFields = (fields: unknown): fields is FormField[] => {
@@ -62,15 +60,6 @@ export function useFormData(): UseFormDataReturn {
       };
 
       setForm(formData);
-
-      // Fetch groups for the form owner
-      const { data: groupsData, error: groupsError } = await supabase
-        .from('campaign_groups')
-        .select('*')
-        .eq('user_id', formResponse.user_id);
-
-      if (groupsError) throw groupsError;
-      setGroups(groupsData || []);
     } catch (error) {
       console.error('Error fetching form:', error);
       toast({
@@ -83,5 +72,5 @@ export function useFormData(): UseFormDataReturn {
     }
   };
 
-  return { form, loading, groups, fetchForm };
+  return { form, loading, fetchForm };
 }

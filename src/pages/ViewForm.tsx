@@ -6,17 +6,15 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { FormLoader } from "@/components/forms/view/FormLoader";
 import { FormError } from "@/components/forms/view/FormError";
-import { GroupSelector } from "@/components/forms/view/GroupSelector";
 import { FormFields } from "@/components/forms/view/FormFields";
 import { useFormData } from "@/hooks/forms/useFormData";
 
 export default function ViewForm() {
   const { id } = useParams();
   const { toast } = useToast();
-  const { form, loading, groups, fetchForm } = useFormData();
+  const { form, loading, fetchForm } = useFormData();
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
-  const [selectedGroup, setSelectedGroup] = useState<string>("");
 
   useEffect(() => {
     if (id) {
@@ -26,10 +24,11 @@ export default function ViewForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedGroup) {
+    
+    if (!form?.group_id) {
       toast({
         title: "Error",
-        description: "Please select a group",
+        description: "This form is not properly configured.",
         variant: "destructive",
       });
       return;
@@ -49,7 +48,7 @@ export default function ViewForm() {
       const { error: contactError } = await supabase
         .from('contacts')
         .insert({
-          group_id: selectedGroup,
+          group_id: form.group_id,
           name: formData.name || null,
           phone_number: formData.phone_number,
         });
@@ -63,7 +62,6 @@ export default function ViewForm() {
 
       // Reset form
       setFormData({});
-      setSelectedGroup("");
       
       // Reset form fields
       const formElements = document.querySelectorAll('input, textarea, select');
@@ -110,12 +108,6 @@ export default function ViewForm() {
             onFieldChange={(fieldName, value) => {
               setFormData(prev => ({ ...prev, [fieldName]: value }));
             }}
-          />
-
-          <GroupSelector
-            groups={groups}
-            selectedGroup={selectedGroup}
-            onGroupSelect={setSelectedGroup}
           />
 
           <Button type="submit" className="w-full" disabled={submitting}>
