@@ -45,8 +45,8 @@ export function ViewSubmissionsDialog({ formId, open, onOpenChange }: ViewSubmis
 
       if (error) throw error;
       
-      // Safely type cast the JSON fields to FormField[]
-      const formFields = data?.fields as FormField[];
+      // First cast to unknown, then to the specific type to avoid direct type conversion errors
+      const formFields = (data?.fields as unknown) as FormField[];
       return { fields: formFields } as FormDetails;
     },
   });
