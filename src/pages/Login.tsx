@@ -3,7 +3,7 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,6 +14,11 @@ const Login = () => {
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
         console.error("Error checking session:", error.message);
+        toast({
+          variant: "destructive",
+          title: "Session Error",
+          description: error.message,
+        });
         return;
       }
       
@@ -40,7 +45,7 @@ const Login = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, toast]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -65,13 +70,6 @@ const Login = () => {
             }}
             theme="light"
             providers={[]}
-            onError={(error) => {
-              toast({
-                variant: "destructive",
-                title: "Authentication Error",
-                description: error.message,
-              });
-            }}
           />
         </div>
       </div>
