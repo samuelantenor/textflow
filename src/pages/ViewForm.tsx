@@ -34,8 +34,41 @@ export default function ViewForm() {
       return;
     }
 
+    // Find the phone number field in the form data
+    const phoneField = form.fields.find(field => 
+      field.label.toLowerCase().includes('phone') || 
+      field.label.toLowerCase().includes('mobile')
+    );
+
+    const phoneNumber = phoneField ? formData[phoneField.label] : null;
+    const nameField = form.fields.find(field => 
+      field.label.toLowerCase().includes('name')
+    );
+    const name = nameField ? formData[nameField.label] : null;
+
+    if (!phoneNumber) {
+      toast({
+        title: "Error",
+        description: "Phone number is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
+      // First create the contact
+      const { error: contactError } = await supabase
+        .from('contacts')
+        .insert({
+          group_id: form.group_id,
+          name: name,
+          phone_number: phoneNumber,
+        });
+
+      if (contactError) throw contactError;
+
+      // Then create the form submission
       const { error: submissionError } = await supabase
         .from('form_submissions')
         .insert({
@@ -44,16 +77,6 @@ export default function ViewForm() {
         });
 
       if (submissionError) throw submissionError;
-
-      const { error: contactError } = await supabase
-        .from('contacts')
-        .insert({
-          group_id: form.group_id,
-          name: formData.name || null,
-          phone_number: formData.phone_number,
-        });
-
-      if (contactError) throw contactError;
 
       toast({
         title: "Success",
