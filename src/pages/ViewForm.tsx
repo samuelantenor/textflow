@@ -10,12 +10,13 @@ import { useFormData } from "@/hooks/forms/useFormData";
 import { Loader2 } from "lucide-react";
 
 export default function ViewForm() {
-  const { formId } = useParams();
+  const { formId } = useParams<{ formId: string }>();
   const { toast } = useToast();
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { form, isLoading, error } = useFormData(formId);
 
+  if (!formId) return <FormError message="Form ID is required" />;
   if (isLoading) return <FormLoader />;
   if (error || !form) return <FormError message={error?.message} />;
 
@@ -32,7 +33,6 @@ export default function ViewForm() {
     try {
       setIsSubmitting(true);
 
-      // Insert form submission with the predefined group_id from the form
       const { error: submissionError } = await supabase
         .from("form_submissions")
         .insert({

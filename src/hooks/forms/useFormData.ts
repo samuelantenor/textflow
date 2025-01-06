@@ -39,16 +39,30 @@ export function useFormData(formId: string | undefined): UseFormDataReturn {
           .single();
 
         if (formError) throw formError;
+        if (!formResponse) throw new Error('Form not found');
 
-        if (!Array.isArray(formResponse.fields)) {
+        // Validate and transform the fields array
+        const fields = formResponse.fields as FormField[];
+        if (!Array.isArray(fields)) {
           throw new Error('Invalid form fields format');
+        }
+
+        // Validate each field has required properties
+        const validFields = fields.every(field => 
+          typeof field === 'object' && 
+          'type' in field && 
+          'label' in field
+        );
+
+        if (!validFields) {
+          throw new Error('Invalid field format in form data');
         }
 
         const formData: FormResponse = {
           id: formResponse.id,
           title: formResponse.title,
           description: formResponse.description,
-          fields: formResponse.fields as FormField[],
+          fields: fields,
           user_id: formResponse.user_id,
           group_id: formResponse.group_id,
           is_active: formResponse.is_active
