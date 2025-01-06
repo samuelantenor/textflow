@@ -1,9 +1,10 @@
 import { Card } from "@/components/ui/card";
-import { FileText, Plus } from "lucide-react";
+import { FileText } from "lucide-react";
 import { FormBuilder } from "./FormBuilder";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "../ui/button";
+import { Database } from "@/integrations/supabase/types";
 
 type CustomForm = {
   id: string;
@@ -34,14 +35,22 @@ export const FormsOverview = () => {
       const { data, error } = await supabase
         .from('custom_forms')
         .select(`
-          *,
+          id,
+          title,
+          description,
+          fields,
           campaign_groups (
             name
           )
         `);
       
       if (error) throw error;
-      return data;
+      
+      // Transform the data to match CustomForm type
+      return (data || []).map(form => ({
+        ...form,
+        fields: Array.isArray(form.fields) ? form.fields : []
+      })) as CustomForm[];
     },
   });
 
