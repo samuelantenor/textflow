@@ -44,7 +44,10 @@ export function ViewSubmissionsDialog({ formId, open, onOpenChange }: ViewSubmis
         .single();
 
       if (error) throw error;
-      return data as FormDetails;
+      
+      // Safely type cast the JSON fields to FormField[]
+      const formFields = data?.fields as FormField[];
+      return { fields: formFields } as FormDetails;
     },
   });
 
