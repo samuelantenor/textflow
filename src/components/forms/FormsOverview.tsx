@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "../ui/button";
 import { Database } from "@/integrations/supabase/types";
+import { ShareFormDialog } from "./ShareFormDialog";
+import { useState } from "react";
 
 type CustomForm = {
   id: string;
@@ -17,6 +19,9 @@ type CustomForm = {
 };
 
 export const FormsOverview = () => {
+  const [selectedForm, setSelectedForm] = useState<CustomForm | null>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+
   const { data: groups } = useQuery({
     queryKey: ['campaign-groups'],
     queryFn: async () => {
@@ -53,6 +58,11 @@ export const FormsOverview = () => {
       })) as CustomForm[];
     },
   });
+
+  const handleShare = (form: CustomForm) => {
+    setSelectedForm(form);
+    setShareDialogOpen(true);
+  };
 
   if (!groups?.length) {
     return (
@@ -107,7 +117,11 @@ export const FormsOverview = () => {
                 <Button variant="outline" size="sm">
                   View Submissions
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleShare(form)}
+                >
                   Share Form
                 </Button>
               </div>
@@ -125,6 +139,12 @@ export const FormsOverview = () => {
           </Card>
         )}
       </div>
+
+      <ShareFormDialog
+        form={selectedForm}
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+      />
     </div>
   );
 };
