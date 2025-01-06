@@ -25,8 +25,8 @@ export function FormFields({ fields, formData, onFieldChange }: FormFieldsProps)
           <FormFieldRenderer
             field={field}
             index={index}
-            value={formData[field.label]}
-            onChange={(value) => onFieldChange(field.label, value)}
+            value={formData[field.label.toLowerCase().replace(/\s+/g, '_')]}
+            onChange={(value) => onFieldChange(field.label.toLowerCase().replace(/\s+/g, '_'), value)}
           />
         </div>
       ))}

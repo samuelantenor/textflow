@@ -34,8 +34,11 @@ export default function ViewForm() {
       return;
     }
 
-    // Validate phone number
-    if (!formData.phone_number) {
+    // Map the form fields to the expected format
+    const phone_number = formData.phone_number;
+    const name = formData.name;
+
+    if (!phone_number) {
       toast({
         title: "Error",
         description: "Phone number is required",
@@ -46,7 +49,7 @@ export default function ViewForm() {
 
     // Basic phone number validation
     const phoneRegex = /^\+?[\d\s-()]+$/;
-    if (!phoneRegex.test(formData.phone_number)) {
+    if (!phoneRegex.test(phone_number)) {
       toast({
         title: "Error",
         description: "Please enter a valid phone number",
@@ -57,6 +60,21 @@ export default function ViewForm() {
 
     setSubmitting(true);
     try {
+      // Normalize phone number by removing spaces, dashes, and parentheses
+      const normalizedPhoneNumber = phone_number.replace(/[\s-()]/g, '');
+
+      // First create the contact
+      const { error: contactError } = await supabase
+        .from('contacts')
+        .insert({
+          group_id: form.group_id,
+          name: name || null,
+          phone_number: normalizedPhoneNumber,
+        });
+
+      if (contactError) throw contactError;
+
+      // Then create the form submission
       const { error: submissionError } = await supabase
         .from('form_submissions')
         .insert({
@@ -65,19 +83,6 @@ export default function ViewForm() {
         });
 
       if (submissionError) throw submissionError;
-
-      // Normalize phone number by removing spaces, dashes, and parentheses
-      const normalizedPhoneNumber = formData.phone_number.replace(/[\s-()]/g, '');
-
-      const { error: contactError } = await supabase
-        .from('contacts')
-        .insert({
-          group_id: form.group_id,
-          name: formData.name || null,
-          phone_number: normalizedPhoneNumber,
-        });
-
-      if (contactError) throw contactError;
 
       toast({
         title: "Success",
