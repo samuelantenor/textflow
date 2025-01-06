@@ -18,8 +18,10 @@ export function GroupListItem({ group }: GroupListItemProps) {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  // Safely get the contact count, defaulting to 0 if undefined
-  const contactCount = group.contacts?.[0]?.count ?? 0;
+  // Get the contact count from the array of counts
+  const contactCount = Array.isArray(group.contacts) && group.contacts.length > 0
+    ? group.contacts[0].count
+    : 0;
 
   return (
     <Card className="p-6">
