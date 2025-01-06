@@ -5,6 +5,16 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "../ui/button";
 
+type CustomForm = {
+  id: string;
+  title: string;
+  description: string | null;
+  fields: any[];
+  campaign_groups: {
+    name: string;
+  } | null;
+};
+
 export const FormsOverview = () => {
   const { data: groups } = useQuery({
     queryKey: ['campaign-groups'],
@@ -18,7 +28,7 @@ export const FormsOverview = () => {
     },
   });
 
-  const { data: forms, isLoading } = useQuery({
+  const { data: forms, isLoading } = useQuery<CustomForm[]>({
     queryKey: ['custom-forms'],
     queryFn: async () => {
       const { data, error } = await supabase
