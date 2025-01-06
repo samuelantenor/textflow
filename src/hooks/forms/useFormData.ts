@@ -18,6 +18,21 @@ interface UseFormDataReturn {
   error: Error | null;
 }
 
+// Type guard to validate if an object is a FormField
+function isFormField(field: any): field is FormField {
+  return (
+    typeof field === 'object' &&
+    field !== null &&
+    typeof field.type === 'string' &&
+    typeof field.label === 'string'
+  );
+}
+
+// Type guard to validate if value is FormField array
+function isFormFieldArray(value: any): value is FormField[] {
+  return Array.isArray(value) && value.every(isFormField);
+}
+
 export function useFormData(formId: string | undefined): UseFormDataReturn {
   const [form, setForm] = useState<FormResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,20 +56,13 @@ export function useFormData(formId: string | undefined): UseFormDataReturn {
         if (formError) throw formError;
         if (!formResponse) throw new Error('Form not found');
 
-        // Validate and transform the fields array
-        const fields = formResponse.fields as FormField[];
-        if (!Array.isArray(fields)) {
+        // Validate fields array
+        if (!Array.isArray(formResponse.fields)) {
           throw new Error('Invalid form fields format');
         }
 
-        // Validate each field has required properties
-        const validFields = fields.every(field => 
-          typeof field === 'object' && 
-          'type' in field && 
-          'label' in field
-        );
-
-        if (!validFields) {
+        // Type check the fields array
+        if (!isFormFieldArray(formResponse.fields)) {
           throw new Error('Invalid field format in form data');
         }
 
@@ -62,7 +70,7 @@ export function useFormData(formId: string | undefined): UseFormDataReturn {
           id: formResponse.id,
           title: formResponse.title,
           description: formResponse.description,
-          fields: fields,
+          fields: formResponse.fields,
           user_id: formResponse.user_id,
           group_id: formResponse.group_id,
           is_active: formResponse.is_active
