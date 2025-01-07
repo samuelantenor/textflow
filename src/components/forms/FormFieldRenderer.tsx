@@ -37,6 +37,8 @@ export const FormFieldRenderer = ({ field, value, onChange, customization }: For
           country={'us'}
           value={value || ''}
           onChange={(phone) => onChange(phone)}
+          enableSearch={true}
+          searchPlaceholder="Search countries..."
           inputStyle={{
             ...commonInputStyles,
             width: '100%',
@@ -62,6 +64,9 @@ export const FormFieldRenderer = ({ field, value, onChange, customization }: For
             backgroundColor: '#000000',
             color: '#ffffff',
             border: '1px solid #333333',
+            margin: '0',
+            width: '100%',
+            height: '30px',
           }}
           inputProps={{
             required: field.required,
