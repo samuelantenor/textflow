@@ -33,44 +33,41 @@ export const FormFieldRenderer = ({ field, value, onChange, customization }: For
   switch (field.type) {
     case 'phone':
       return (
-        <div className="relative w-full">
-          <PhoneInput
-            country={'us'}
-            value={value || ''}
-            onChange={(phone) => onChange(phone)}
-            inputStyle={{
-              ...commonInputStyles,
-              width: '100%',
-              height: '40px',
-              backgroundColor: '#000000',
-              color: '#ffffff',
-              border: '1px solid #333333',
-              paddingLeft: '48px', // Adjusted to accommodate the flag
-            }}
-            buttonStyle={{
-              backgroundColor: '#000000',
-              borderColor: '#333333',
-              borderRight: '1px solid #333333',
-            }}
-            dropdownStyle={{
-              backgroundColor: '#000000',
-              color: '#ffffff',
-              border: '1px solid #333333',
-            }}
-            containerStyle={{
-              width: '100%',
-            }}
-            searchStyle={{
-              backgroundColor: '#000000',
-              color: '#ffffff',
-              border: '1px solid #333333',
-            }}
-            inputProps={{
-              required: field.required,
-              placeholder: field.placeholder,
-            }}
-          />
-        </div>
+        <PhoneInput
+          country={'us'}
+          value={value || ''}
+          onChange={(phone) => onChange(phone)}
+          inputStyle={{
+            ...commonInputStyles,
+            width: '100%',
+            height: '40px',
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            border: '1px solid #333333',
+          }}
+          buttonStyle={{
+            backgroundColor: '#000000',
+            borderColor: '#333333',
+            borderRight: '1px solid #333333',
+          }}
+          containerStyle={{
+            width: '100%',
+          }}
+          dropdownStyle={{
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            border: '1px solid #333333',
+          }}
+          searchStyle={{
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            border: '1px solid #333333',
+          }}
+          inputProps={{
+            required: field.required,
+            placeholder: field.placeholder,
+          }}
+        />
       );
     case 'textarea':
       return (
