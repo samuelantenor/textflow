@@ -38,19 +38,10 @@ export function CreateCampaignDialog() {
       setIsLoading(true);
 
       // Validate required fields
-      if (!data.group_id) {
+      if (!data.group_id || !data.from_number) {
         toast({
           title: "Error",
-          description: "Please select a contact group",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (!data.from_number) {
-        toast({
-          title: "Error",
-          description: "Please select a phone number to send from",
+          description: "Please select a contact group and phone number",
           variant: "destructive",
         });
         return;
@@ -176,14 +167,17 @@ export function CreateCampaignDialog() {
       <AlertDialog open={showSaveAlert} onOpenChange={setShowSaveAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Save Required</AlertDialogTitle>
+            <AlertDialogTitle>Required Fields</AlertDialogTitle>
             <AlertDialogDescription>
-              Please select a contact group and phone number before creating the campaign.
+              Please select both a contact group and phone number before creating the campaign.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => setShowSaveAlert(false)}>
+            <AlertDialogAction 
+              onClick={() => setShowSaveAlert(false)}
+              className="bg-green-500 hover:bg-green-600"
+            >
               OK
             </AlertDialogAction>
           </AlertDialogFooter>
