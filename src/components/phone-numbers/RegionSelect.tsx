@@ -12,14 +12,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface Region {
-  value: string;
-  label: string;
+  readonly value: string;
+  readonly label: string;
 }
 
 interface RegionSelectProps {
   value: string;
   onChange: (value: string) => void;
-  regions: Region[];
+  regions: readonly Region[];
 }
 
 export function RegionSelect({ value, onChange, regions }: RegionSelectProps) {
