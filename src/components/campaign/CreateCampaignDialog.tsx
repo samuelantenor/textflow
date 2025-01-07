@@ -16,7 +16,7 @@ export function CreateCampaignDialog() {
   const form = useForm<CampaignFormData>({
     defaultValues: {
       name: "",
-      message: " ", // Initialize with a space to satisfy NOT NULL constraint
+      message: "Type your message here", // Set a default message
     },
   });
 
