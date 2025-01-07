@@ -20,7 +20,13 @@ export function CreateCampaignDialog() {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const form = useForm<CampaignFormData>();
+  const form = useForm<CampaignFormData>({
+    defaultValues: {
+      name: '',
+      message: '',
+      group_id: '',
+    },
+  });
 
   const onSubmit = async (data: CampaignFormData) => {
     try {
