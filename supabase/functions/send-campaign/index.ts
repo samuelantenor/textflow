@@ -20,18 +20,10 @@ serve(async (req) => {
     const { campaignId } = await req.json()
     console.log('Processing campaign:', campaignId)
 
-    // Get campaign details with contacts
+    // First, get the campaign details
     const { data: campaign, error: campaignError } = await supabaseClient
       .from('campaigns')
-      .select(`
-        *,
-        campaign_groups (
-          contacts (
-            phone_number,
-            id
-          )
-        )
-      `)
+      .select('*')
       .eq('id', campaignId)
       .maybeSingle()
 
@@ -43,10 +35,22 @@ serve(async (req) => {
       throw new Error('Campaign not found')
     }
 
-    console.log('Campaign found:', campaign)
+    if (!campaign.group_id) {
+      throw new Error('Campaign has no associated contact group')
+    }
 
-    const contacts = campaign.campaign_groups?.contacts || []
-    if (!contacts.length) {
+    // Then, get the contacts for this group
+    const { data: contacts, error: contactsError } = await supabaseClient
+      .from('contacts')
+      .select('*')
+      .eq('group_id', campaign.group_id)
+
+    if (contactsError) {
+      console.error('Error fetching contacts:', contactsError)
+      throw contactsError
+    }
+
+    if (!contacts || contacts.length === 0) {
       throw new Error('No contacts found in the group')
     }
 
