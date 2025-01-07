@@ -18,21 +18,41 @@ export const DashboardHeader = () => {
 
   const handleLogout = async () => {
     try {
+      // First check if we have an active session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session check error:', sessionError);
+        // If we can't check the session, redirect to login
+        navigate('/login');
+        return;
+      }
+
+      if (!session) {
+        // No active session, just redirect to login
+        navigate('/login');
+        return;
+      }
+
+      // We have an active session, try to sign out
       const { error } = await supabase.auth.signOut();
+      
       if (error) {
         if (error.message.includes('session_not_found')) {
-          // If session is not found, just redirect to login
+          // Session not found in Supabase, redirect to login
           navigate('/login');
           return;
         }
         throw error;
       }
+
+      // Successful logout
       navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);
       toast({
         variant: "destructive",
-        title: "Error",
+        title: "Error during logout",
         description: "Failed to sign out properly. Please try refreshing the page.",
       });
       // Force redirect to login page even if there's an error
