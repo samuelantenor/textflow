@@ -1,19 +1,12 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Loader2 } from "lucide-react";
-import { CampaignFormFields } from "./campaign/CampaignFormFields";
+import { Loader2, Plus } from "lucide-react";
+import { CampaignFormFields } from "@/components/campaign/CampaignFormFields";
 import type { CampaignFormData } from "@/types/campaign";
 
 export function CreateCampaignDialog() {
@@ -26,7 +19,7 @@ export function CreateCampaignDialog() {
       message: "",
       group_id: "",
       from_number: "",
-    }
+    },
   });
 
   const onSubmit = async (data: CampaignFormData) => {
@@ -107,12 +100,9 @@ export function CreateCampaignDialog() {
       <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Create New Campaign</DialogTitle>
-          <DialogDescription>
-            Create a new campaign to send to your contacts.
-          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <CampaignFormFields form={form} />
             <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-4">
               <Button
