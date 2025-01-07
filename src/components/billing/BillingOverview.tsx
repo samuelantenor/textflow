@@ -1,18 +1,38 @@
+import { Button } from "@/components/ui/button";
 import { CreditCard } from "lucide-react";
-import { useEffect } from "react";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export const BillingOverview = ({ subscription }: { subscription: any }) => {
-  useEffect(() => {
-    // Load Stripe script
-    const script = document.createElement('script');
-    script.src = 'https://js.stripe.com/v3/buy-button.js';
-    script.async = true;
-    document.body.appendChild(script);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
+  const handleSubscribe = async () => {
+    try {
+      setIsLoading(true);
+      const { data: sessionData, error: sessionError } = await supabase.functions.invoke(
+        'create-checkout-session',
+        {
+          method: 'POST',
+        }
+      );
+
+      if (sessionError) throw sessionError;
+      if (!sessionData?.url) throw new Error('No checkout URL received');
+
+      window.location.href = sessionData.url;
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to start checkout process",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="bg-card rounded-lg p-6">
@@ -25,12 +45,13 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
               {subscription?.status === 'active' ? 'Premium Plan' : 'Free Plan'}
             </p>
           </div>
-          {subscription?.status !== 'active' && (
-            <stripe-buy-button
-              buy-button-id="buy_btn_1QeVcgB4RWKZ2dNza9CFKIwx"
-              publishable-key="pk_test_51QL67PB4RWKZ2dNzsxovpn7D6fAiFm6cj7aH3TDwv1HmrQgAh4CJUpBZJdKqLWPj9uNHsj3j4IgLrynaKEqbp95n00KL67n19K"
-            />
-          )}
+          <Button 
+            onClick={handleSubscribe}
+            disabled={subscription?.status === 'active' || isLoading}
+          >
+            <CreditCard className="mr-2 h-4 w-4" />
+            {subscription?.status === 'active' ? 'Subscribed' : 'Subscribe Now'}
+          </Button>
         </div>
         <div>
           <p className="font-medium">Status</p>

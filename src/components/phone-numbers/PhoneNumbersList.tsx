@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Phone } from "lucide-react";
 import { BuyPhoneNumberForm } from "./BuyPhoneNumberForm";
@@ -73,18 +73,6 @@ export function PhoneNumbersList() {
       setIsSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('payment') === 'success') {
-      toast({
-        title: "Payment Successful",
-        description: "Thank you for your payment. Your new phone number is on its way!",
-      });
-      // Clean up the URL
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-  }, [toast]);
 
   if (isLoading) {
     return <div>Loading phone numbers...</div>;
