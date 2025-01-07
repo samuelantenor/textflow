@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { MessageSquare, Settings, LogOut, Receipt } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +14,20 @@ import {
 
 export const DashboardHeader = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to sign out",
+      });
+    }
+  };
 
   return (
     <div className="border-b">
@@ -46,7 +61,7 @@ export const DashboardHeader = () => {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                onClick={() => supabase.auth.signOut()}
+                onClick={handleLogout}
                 className="text-red-600"
               >
                 <LogOut className="mr-2 h-4 w-4" />
