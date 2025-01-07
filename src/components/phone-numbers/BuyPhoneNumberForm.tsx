@@ -4,29 +4,14 @@ import { Label } from "@/components/ui/label";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export const BuyPhoneNumberForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [country, setCountry] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const sessionId = searchParams.get("session_id");
-
-  // Show success message if coming from successful payment
-  useEffect(() => {
-    if (sessionId) {
-      toast({
-        title: "Payment Successful!",
-        description: "Your new phone number is on its way. We'll notify you once it's ready.",
-      });
-      // Clean up the URL and redirect to phone numbers tab
-      navigate("/dashboard?tab=phone-numbers", { replace: true });
-    }
-  }, [sessionId, toast, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
