@@ -42,6 +42,7 @@ export function SendTestMessageDialog() {
   const { toast } = useToast();
   const form = useForm<SendTestMessageFormData>();
 
+  // Fetch user's phone numbers
   const { data: phoneNumbers } = useQuery({
     queryKey: ['phone-numbers'],
     queryFn: async () => {
@@ -92,12 +93,12 @@ export function SendTestMessageDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="w-full sm:w-auto">
+        <Button variant="outline" size="sm">
           <SendHorizontal className="w-4 h-4 mr-2" />
           Send Test Message
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Send Test Message</DialogTitle>
           <DialogDescription>
@@ -114,7 +115,7 @@ export function SendTestMessageDialog() {
                   <FormLabel>From Number</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger>
                         <SelectValue placeholder="Select a number to send from">
                           <div className="flex items-center">
                             <Phone className="w-4 h-4 mr-2" />
@@ -150,7 +151,7 @@ export function SendTestMessageDialog() {
                 <FormItem>
                   <FormLabel>To Number</FormLabel>
                   <FormControl>
-                    <div className="flex items-center w-full">
+                    <div className="flex items-center">
                       <Phone className="w-4 h-4 mr-2 text-muted-foreground" />
                       <input
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -172,7 +173,6 @@ export function SendTestMessageDialog() {
                   <FormControl>
                     <Textarea 
                       placeholder="Type your test message here"
-                      className="min-h-[100px]"
                       {...field}
                     />
                   </FormControl>
@@ -180,16 +180,15 @@ export function SendTestMessageDialog() {
                 </FormItem>
               )}
             />
-            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-4">
+            <div className="flex justify-end space-x-4 pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
-                className="w-full sm:w-auto"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+              <Button type="submit" disabled={isLoading}>
                 {isLoading && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
