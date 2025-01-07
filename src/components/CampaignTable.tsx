@@ -8,15 +8,16 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, AlertCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Card } from "@/components/ui/card";
 
 const CampaignTable = () => {
   const { toast } = useToast();
 
-  const { data: campaigns, refetch } = useQuery({
+  const { data: campaigns, refetch, isLoading } = useQuery({
     queryKey: ['campaigns'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -51,8 +52,37 @@ const CampaignTable = () => {
     refetch();
   };
 
+  if (isLoading) {
+    return (
+      <Card className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-muted rounded w-1/4"></div>
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-12 bg-muted rounded"></div>
+            ))}
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (!campaigns?.length) {
+    return (
+      <Card className="p-12 text-center space-y-4">
+        <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto" />
+        <div>
+          <h3 className="text-lg font-semibold">No Campaigns Yet</h3>
+          <p className="text-muted-foreground">
+            Create your first campaign to get started.
+          </p>
+        </div>
+      </Card>
+    );
+  }
+
   return (
-    <div className="rounded-lg border bg-card">
+    <Card className="border bg-card">
       <Table>
         <TableHeader>
           <TableRow>
@@ -65,16 +95,16 @@ const CampaignTable = () => {
         </TableHeader>
         <TableBody>
           {campaigns?.map((campaign) => (
-            <TableRow key={campaign.id}>
+            <TableRow key={campaign.id} className="hover:bg-muted/50">
               <TableCell className="font-medium">{campaign.name}</TableCell>
               <TableCell>
                 <Badge
                   variant="outline"
                   className={
                     campaign.status === "sent"
-                      ? "bg-green-100 text-green-800 border-green-200"
+                      ? "bg-green-500/10 text-green-500 border-green-500/20"
                       : campaign.status === "draft"
-                      ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                      ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
                       : "bg-muted"
                   }
                 >
@@ -95,7 +125,6 @@ const CampaignTable = () => {
                     variant="ghost"
                     size="icon"
                     onClick={() => {
-                      // TODO: Implement edit functionality
                       toast({
                         title: "Coming soon",
                         description: "Edit functionality will be available soon",
@@ -117,7 +146,7 @@ const CampaignTable = () => {
           ))}
         </TableBody>
       </Table>
-    </div>
+    </Card>
   );
 };
 
