@@ -2,70 +2,30 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 
 const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Get access token from URL hash
   useEffect(() => {
-    // Get access token from URL hash
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const token = hashParams.get("access_token");
-    
-    if (!token) {
+    if (!hashParams.get("access_token")) {
       toast({
         variant: "destructive",
         title: "Invalid Reset Link",
         description: "This password reset link is invalid or has expired.",
       });
       navigate("/login");
-      return;
     }
-
-    // Set the access token in session
-    supabase.auth.setSession({
-      access_token: token,
-      refresh_token: "",
-    });
-    setAccessToken(token);
   }, [navigate, toast]);
-
-  const validatePassword = (password: string): string | null => {
-    if (password.length < 6) {
-      return "Password must be at least 6 characters long";
-    }
-    if (!/[A-Z]/.test(password)) {
-      return "Password must contain at least one uppercase letter";
-    }
-    if (!/[a-z]/.test(password)) {
-      return "Password must contain at least one lowercase letter";
-    }
-    if (!/[0-9]/.test(password)) {
-      return "Password must contain at least one number";
-    }
-    return null;
-  };
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!accessToken) {
-      toast({
-        variant: "destructive",
-        title: "Session Error",
-        description: "Unable to verify your session. Please try the reset link again.",
-      });
-      navigate("/login");
-      return;
-    }
-
     if (newPassword !== confirmPassword) {
       toast({
         variant: "destructive",
@@ -75,12 +35,11 @@ const ResetPassword = () => {
       return;
     }
 
-    const validationError = validatePassword(newPassword);
-    if (validationError) {
+    if (newPassword.length < 6) {
       toast({
         variant: "destructive",
-        title: "Invalid Password",
-        description: validationError,
+        title: "Password Too Short",
+        description: "Password must be at least 6 characters long.",
       });
       return;
     }
@@ -95,11 +54,9 @@ const ResetPassword = () => {
 
       toast({
         title: "Password Updated",
-        description: "Your password has been successfully reset. Please log in with your new password.",
+        description: "Your password has been successfully reset.",
       });
       
-      // Sign out the user to ensure they log in with new password
-      await supabase.auth.signOut();
       navigate("/login");
     } catch (error: any) {
       toast({
@@ -113,61 +70,52 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md space-y-8 p-8">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">Reset Password</h1>
+          <h1 className="text-3xl font-bold">Reset Password</h1>
           <p className="text-muted-foreground mt-2">Enter your new password below</p>
         </div>
-        <form onSubmit={handlePasswordReset} className="space-y-6">
-          <div className="space-y-2">
-            <label htmlFor="newPassword" className="block text-sm font-medium">
-              New Password
-            </label>
-            <Input
-              id="newPassword"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full"
-              placeholder="Enter new password"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="confirmPassword" className="block text-sm font-medium">
-              Confirm Password
-            </label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full"
-              placeholder="Confirm new password"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Password must:
-            </p>
-            <ul className="text-sm text-muted-foreground list-disc pl-5">
-              <li>Be at least 6 characters long</li>
-              <li>Contain at least one uppercase letter</li>
-              <li>Contain at least one lowercase letter</li>
-              <li>Contain at least one number</li>
-            </ul>
-          </div>
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading}
-          >
-            {loading ? "Resetting..." : "Reset Password"}
-          </Button>
-        </form>
-      </Card>
+        <div className="bg-card p-6 rounded-lg shadow-lg border">
+          <form onSubmit={handlePasswordReset} className="space-y-4">
+            <div>
+              <label htmlFor="newPassword" className="block text-sm font-medium mb-1">
+                New Password
+              </label>
+              <input
+                id="newPassword"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full p-2 rounded bg-muted text-white border border-border"
+                placeholder="Enter new password"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">
+                Confirm Password
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full p-2 rounded bg-muted text-white border border-border"
+                placeholder="Confirm new password"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-primary text-white p-2 rounded hover:bg-primary/90 transition disabled:opacity-50"
+            >
+              {loading ? "Resetting..." : "Reset Password"}
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };
