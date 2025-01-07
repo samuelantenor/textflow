@@ -25,6 +25,7 @@ export function CreateCampaignDialog() {
       name: '',
       message: '',
       group_id: '',
+      from_number: '',
       scheduled_for: undefined,
       scheduled_time: '',
     },
@@ -69,7 +70,8 @@ export function CreateCampaignDialog() {
         message: data.message,
         media_url: mediaUrl,
         scheduled_for: scheduledFor?.toISOString(),
-        group_id: data.group_id,
+        group_id: data.group_id || null,
+        from_number: data.from_number || null,
         status: "draft",
       });
 

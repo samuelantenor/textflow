@@ -24,6 +24,7 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
       message: campaign.message,
       group_id: campaign.group_id || '',
       scheduled_for: campaign.scheduled_for ? new Date(campaign.scheduled_for) : undefined,
+      from_number: campaign.from_number || '',
     },
   });
 
@@ -64,6 +65,7 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
           media_url: mediaUrl,
           scheduled_for: scheduledFor?.toISOString(),
           group_id: data.group_id,
+          from_number: data.from_number || null,
         })
         .eq('id', campaign.id);
 
