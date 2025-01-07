@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Search } from "lucide-react";
 
 const regions = [
   { value: "us", label: "United States (+1)" },
@@ -139,19 +140,28 @@ export const BuyPhoneNumberForm = () => {
           </SelectTrigger>
           <SelectContent className="h-[300px]">
             <div className="sticky top-0 p-2 bg-popover border-b">
-              <Input
-                placeholder="Search countries..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
-              />
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search countries..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-8"
+                />
+              </div>
             </div>
             <ScrollArea className="h-[calc(300px-56px)]" type="always">
-              {filteredRegions.map((region) => (
-                <SelectItem key={region.value} value={region.value}>
-                  {region.label}
-                </SelectItem>
-              ))}
+              <div className="p-2">
+                {filteredRegions.map((region) => (
+                  <SelectItem 
+                    key={region.value} 
+                    value={region.value}
+                    className="rounded-md cursor-pointer"
+                  >
+                    {region.label}
+                  </SelectItem>
+                ))}
+              </div>
             </ScrollArea>
           </SelectContent>
         </Select>
