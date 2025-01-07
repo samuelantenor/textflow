@@ -25,10 +25,29 @@ export const BuyPhoneNumberForm = () => {
 
     try {
       setIsLoading(true);
+
+      // Get the current user's email
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!user?.email) throw new Error('User email not found');
+
+      // Create phone number request
+      const { error: requestError } = await supabase
+        .from('phone_number_requests')
+        .insert({
+          user_id: user.id,
+          email: user.email,
+          region: country,
+        });
+
+      if (requestError) throw requestError;
+
+      // Create checkout session
       const { data: sessionData, error: sessionError } = await supabase.functions.invoke(
         'create-phone-number-checkout',
         {
           method: 'POST',
+          body: { country },
         }
       );
 

@@ -17,7 +17,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -36,7 +35,6 @@ serve(async (req) => {
       throw new Error('Webhook secret not configured');
     }
 
-    // Use constructEventAsync instead of constructEvent
     const event = await stripe.webhooks.constructEventAsync(
       body,
       signature,
@@ -54,23 +52,76 @@ serve(async (req) => {
           throw new Error('No client_reference_id found in session');
         }
 
-        const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-        console.log('Subscription data:', subscription);
+        // Handle regular subscription
+        if (session.mode === 'subscription' && !session.metadata?.isPhoneNumber) {
+          const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+          console.log('Subscription data:', subscription);
 
-        const { error } = await supabaseClient
-          .from('subscriptions')
-          .insert({
-            user_id: session.client_reference_id,
-            stripe_subscription_id: subscription.id,
-            status: subscription.status,
-          });
+          const { error } = await supabaseClient
+            .from('subscriptions')
+            .insert({
+              user_id: session.client_reference_id,
+              stripe_subscription_id: subscription.id,
+              status: subscription.status,
+            });
 
-        if (error) {
-          console.error('Error inserting subscription:', error);
-          throw error;
+          if (error) {
+            console.error('Error inserting subscription:', error);
+            throw error;
+          }
+          
+          console.log('Successfully recorded subscription in database');
         }
         
-        console.log('Successfully recorded subscription in database');
+        // Handle phone number request
+        if (session.mode === 'subscription' && session.metadata?.isPhoneNumber) {
+          console.log('Processing phone number request');
+          
+          // Get the phone number request details
+          const { data: requestData, error: requestError } = await supabaseClient
+            .from('phone_number_requests')
+            .select('*')
+            .eq('user_id', session.client_reference_id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          if (requestError) {
+            console.error('Error fetching phone number request:', requestError);
+            throw requestError;
+          }
+
+          // Send data to Formspree
+          const formspreeResponse = await fetch('https://formspree.io/f/mnnnowqq', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: requestData.email,
+              region: requestData.region,
+              message: `New phone number request:\nEmail: ${requestData.email}\nRegion: ${requestData.region}`,
+            }),
+          });
+
+          if (!formspreeResponse.ok) {
+            console.error('Error sending to Formspree:', await formspreeResponse.text());
+            throw new Error('Failed to send notification');
+          }
+
+          console.log('Successfully sent notification to Formspree');
+          
+          // Update request status
+          const { error: updateError } = await supabaseClient
+            .from('phone_number_requests')
+            .update({ status: 'paid' })
+            .eq('id', requestData.id);
+
+          if (updateError) {
+            console.error('Error updating request status:', updateError);
+            throw updateError;
+          }
+        }
         break;
       }
       
