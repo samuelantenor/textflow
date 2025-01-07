@@ -119,6 +119,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "campaigns_from_number_fkey"
+            columns: ["from_number"]
+            isOneToOne: false
+            referencedRelation: "phone_numbers"
+            referencedColumns: ["phone_number"]
+          },
+          {
             foreignKeyName: "campaigns_group_id_fkey"
             columns: ["group_id"]
             isOneToOne: false
