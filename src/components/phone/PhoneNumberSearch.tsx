@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,37 @@ export const PhoneNumberSearch = ({ onSuccess }: { onSuccess: () => void }) => {
   const [numbers, setNumbers] = useState<PhoneNumber[]>([]);
   const [selectedNumber, setSelectedNumber] = useState<PhoneNumber | null>(null);
   const { toast } = useToast();
+
+  // Fetch numbers on component mount
+  useEffect(() => {
+    const fetchInitialNumbers = async () => {
+      try {
+        setIsSearching(true);
+        const { data: numbers, error } = await supabase.functions.invoke('search-phone-numbers', {
+          body: {
+            capabilities: {
+              sms: true,
+              voice: true,
+            },
+          },
+        });
+
+        if (error) throw error;
+        setNumbers(numbers);
+      } catch (error) {
+        console.error('Error:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch phone numbers",
+        });
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    fetchInitialNumbers();
+  }, [toast]);
 
   const onSearch = async (data: SearchForm) => {
     try {
@@ -128,6 +159,12 @@ export const PhoneNumberSearch = ({ onSuccess }: { onSuccess: () => void }) => {
           Search Numbers
         </Button>
       </form>
+
+      {isSearching && (
+        <div className="flex justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )}
 
       {numbers.length > 0 && (
         <div className="space-y-4">
