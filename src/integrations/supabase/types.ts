@@ -517,36 +517,24 @@ export type Database = {
       }
       subscriptions: {
         Row: {
-          campaign_limit: number
           created_at: string
-          has_been_paid: boolean | null
           id: string
-          monthly_message_limit: number
-          plan_type: string
           status: string
           stripe_subscription_id: string
           updated_at: string
           user_id: string
         }
         Insert: {
-          campaign_limit?: number
           created_at?: string
-          has_been_paid?: boolean | null
           id?: string
-          monthly_message_limit?: number
-          plan_type?: string
           status: string
           stripe_subscription_id: string
           updated_at?: string
           user_id: string
         }
         Update: {
-          campaign_limit?: number
           created_at?: string
-          has_been_paid?: boolean | null
           id?: string
-          monthly_message_limit?: number
-          plan_type?: string
           status?: string
           stripe_subscription_id?: string
           updated_at?: string
@@ -559,16 +547,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_user_plan_limits: {
-        Args: {
-          user_id: string
-        }
-        Returns: {
-          message_limit: number
-          campaign_limit: number
-          can_buy_phone_numbers: boolean
-        }[]
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

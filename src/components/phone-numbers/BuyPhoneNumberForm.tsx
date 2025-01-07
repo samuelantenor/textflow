@@ -5,30 +5,11 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
 
 export const BuyPhoneNumberForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [country, setCountry] = useState("");
   const { toast } = useToast();
-
-  // Check if user can buy phone numbers
-  const { data: planLimits } = useQuery({
-    queryKey: ['user-plan-limits'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return null;
-
-      const { data, error } = await supabase.rpc('get_user_plan_limits', {
-        user_id: session.user.id
-      });
-
-      if (error) throw error;
-      return data[0];
-    }
-  });
-
-  const canBuyPhoneNumbers = planLimits?.can_buy_phone_numbers ?? false;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,22 +23,15 @@ export const BuyPhoneNumberForm = () => {
       return;
     }
 
-    if (!canBuyPhoneNumbers) {
-      toast({
-        variant: "destructive",
-        title: "Subscription Required",
-        description: "Please upgrade to a paid plan to buy phone numbers.",
-      });
-      return;
-    }
-
     try {
       setIsLoading(true);
 
+      // Get the current user's email
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
       if (!user?.email) throw new Error('User email not found');
 
+      // Create phone number request
       const { error: requestError } = await supabase
         .from('phone_number_requests')
         .insert({
@@ -68,6 +42,7 @@ export const BuyPhoneNumberForm = () => {
 
       if (requestError) throw requestError;
 
+      // Create checkout session
       const { data: sessionData, error: sessionError } = await supabase.functions.invoke(
         'create-phone-number-checkout',
         {
@@ -79,6 +54,7 @@ export const BuyPhoneNumberForm = () => {
       if (sessionError) throw sessionError;
       if (!sessionData?.url) throw new Error('No checkout URL received');
 
+      // Redirect to Stripe Checkout
       window.location.href = sessionData.url;
     } catch (error) {
       console.error('Error:', error);
@@ -116,19 +92,10 @@ export const BuyPhoneNumberForm = () => {
         <p className="text-sm text-muted-foreground">
           Monthly fee: $5/month
         </p>
-        {!canBuyPhoneNumbers && (
-          <p className="text-sm text-yellow-600">
-            Upgrade to a paid plan to buy phone numbers
-          </p>
-        )}
       </div>
 
-      <Button 
-        type="submit" 
-        className="w-full" 
-        disabled={isLoading || !canBuyPhoneNumbers}
-      >
-        {isLoading ? "Processing..." : canBuyPhoneNumbers ? "Pay Now" : "Upgrade Required"}
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? "Processing..." : "Pay Now"}
       </Button>
     </form>
   );

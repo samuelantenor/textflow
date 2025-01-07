@@ -21,27 +21,16 @@ export const UsageStats = () => {
 
       if (messageLogsError) throw messageLogsError;
 
-      // Get user's plan limits
-      const { data: planLimits, error: planLimitsError } = await supabase
-        .rpc('get_user_plan_limits', {
-          user_id: session.user.id
-        });
-
-      if (planLimitsError) throw planLimitsError;
-
-      const limits = planLimits[0] || { message_limit: 20, campaign_limit: 3 };
-
       return {
         totalSent: messageLogs?.length || 0,
         delivered: messageLogs?.filter(log => log.status === 'delivered').length || 0,
         failed: messageLogs?.filter(log => log.status === 'failed').length || 0,
         pending: messageLogs?.filter(log => log.status === 'pending').length || 0,
-        monthlyLimit: limits.message_limit
       };
     },
   });
 
-  const monthlyLimit = messageStats?.monthlyLimit || 20;
+  const monthlyLimit = 1000; // This should come from your subscription plan
   const usagePercentage = ((messageStats?.totalSent || 0) / monthlyLimit) * 100;
   const isLimitReached = usagePercentage >= 100;
 
