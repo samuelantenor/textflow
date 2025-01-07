@@ -13,12 +13,25 @@ serve(async (req) => {
   }
 
   try {
-    const { areaCode, pattern, capabilities } = await req.json();
-
     const client = new Twilio(
       Deno.env.get('TWILIO_ACCOUNT_SID'),
       Deno.env.get('TWILIO_AUTH_TOKEN')
     );
+
+    if (!client) {
+      throw new Error('Failed to initialize Twilio client');
+    }
+
+    let body = {};
+    try {
+      body = await req.json();
+    } catch (e) {
+      console.log('No request body or invalid JSON');
+    }
+
+    const { areaCode, pattern, capabilities = { sms: true, voice: true } } = body;
+
+    console.log('Request body:', { areaCode, pattern, capabilities });
 
     const searchParams: any = {
       limit: 20,
@@ -64,13 +77,27 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify(formattedNumbers),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
+      },
     );
   } catch (error) {
     console.error('Error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      JSON.stringify({ 
+        error: error.message,
+        details: error.stack 
+      }),
+      { 
+        status: 500, 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
+      },
     );
   }
 });
