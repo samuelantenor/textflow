@@ -84,7 +84,7 @@ export type Database = {
           group_id: string | null
           id: string
           media_url: string | null
-          message: string | null
+          message: string
           name: string
           scheduled_for: string | null
           status: string
@@ -97,7 +97,7 @@ export type Database = {
           group_id?: string | null
           id?: string
           media_url?: string | null
-          message?: string | null
+          message: string
           name: string
           scheduled_for?: string | null
           status?: string
@@ -110,7 +110,7 @@ export type Database = {
           group_id?: string | null
           id?: string
           media_url?: string | null
-          message?: string | null
+          message?: string
           name?: string
           scheduled_for?: string | null
           status?: string
