@@ -37,7 +37,6 @@ export function FormPreview({ title, description, fields, customization }: FormP
     const commonProps = {
       id: `field-${index}`,
       placeholder: field.placeholder,
-      className: "bg-background",
       style: {
         borderColor: customization?.primaryColor,
         borderRadius: '0.375rem',
@@ -50,7 +49,15 @@ export function FormPreview({ title, description, fields, customization }: FormP
       case 'checkbox':
         return (
           <div className="flex items-center space-x-2">
-            <Checkbox id={`field-${index}`} />
+            <Checkbox 
+              id={`field-${index}`}
+              style={{ 
+                borderColor: customization?.primaryColor,
+                '&:checked': {
+                  backgroundColor: customization?.primaryColor,
+                }
+              }}
+            />
             <label htmlFor={`field-${index}`} className="text-sm">
               {field.label}
             </label>
@@ -61,7 +68,16 @@ export function FormPreview({ title, description, fields, customization }: FormP
           <RadioGroup>
             {field.options?.map((option, optionIndex) => (
               <div key={optionIndex} className="flex items-center space-x-2">
-                <RadioGroupItem value={option} id={`${index}-${optionIndex}`} />
+                <RadioGroupItem 
+                  value={option} 
+                  id={`${index}-${optionIndex}`}
+                  style={{ 
+                    borderColor: customization?.primaryColor,
+                    '&:checked': {
+                      backgroundColor: customization?.primaryColor,
+                    }
+                  }}
+                />
                 <Label htmlFor={`${index}-${optionIndex}`}>{option}</Label>
               </div>
             ))}
@@ -70,7 +86,7 @@ export function FormPreview({ title, description, fields, customization }: FormP
       case 'select':
         return (
           <Select>
-            <SelectTrigger>
+            <SelectTrigger style={{ borderColor: customization?.primaryColor }}>
               <SelectValue placeholder={field.placeholder || "Select an option"} />
             </SelectTrigger>
             <SelectContent>
