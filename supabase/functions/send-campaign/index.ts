@@ -18,8 +18,9 @@ serve(async (req) => {
     )
 
     const { campaignId } = await req.json()
+    console.log('Processing campaign:', campaignId)
 
-    // Get campaign details
+    // Get campaign details with contacts
     const { data: campaign, error: campaignError } = await supabaseClient
       .from('campaigns')
       .select(`
@@ -32,17 +33,26 @@ serve(async (req) => {
         )
       `)
       .eq('id', campaignId)
-      .single()
+      .maybeSingle()
 
-    if (campaignError) throw campaignError
-    if (!campaign) throw new Error('Campaign not found')
+    if (campaignError) {
+      console.error('Error fetching campaign:', campaignError)
+      throw campaignError
+    }
+    if (!campaign) {
+      throw new Error('Campaign not found')
+    }
+
+    console.log('Campaign found:', campaign)
 
     const contacts = campaign.campaign_groups?.contacts || []
     if (!contacts.length) {
       throw new Error('No contacts found in the group')
     }
 
-    // Get the Twilio credentials
+    console.log(`Found ${contacts.length} contacts to message`)
+
+    // Get Twilio credentials
     const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
     const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN')
     if (!twilioAccountSid || !twilioAuthToken) {
@@ -52,6 +62,15 @@ serve(async (req) => {
     // Send messages to all contacts
     const messagePromises = contacts.map(async (contact) => {
       try {
+        console.log(`Sending message to ${contact.phone_number}`)
+        
+        const formData = new URLSearchParams({
+          To: contact.phone_number,
+          From: campaign.from_number || '+15146125967', // Using default number if not specified
+          Body: campaign.message,
+          ...(campaign.media_url ? { MediaUrl: campaign.media_url } : {}),
+        })
+
         const response = await fetch(
           `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`,
           {
@@ -60,16 +79,12 @@ serve(async (req) => {
               'Authorization': `Basic ${btoa(`${twilioAccountSid}:${twilioAuthToken}`)}`,
               'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: new URLSearchParams({
-              To: contact.phone_number,
-              From: campaign.from_number || '',
-              Body: campaign.message,
-              ...(campaign.media_url ? { MediaUrl: campaign.media_url } : {}),
-            }),
+            body: formData,
           }
         )
 
         const result = await response.json()
+        console.log('Twilio response:', result)
 
         // Log the message
         await supabaseClient
@@ -91,6 +106,17 @@ serve(async (req) => {
 
     await Promise.all(messagePromises)
 
+    // Update campaign status to sent
+    const { error: updateError } = await supabaseClient
+      .from('campaigns')
+      .update({ status: 'sent' })
+      .eq('id', campaignId)
+
+    if (updateError) {
+      console.error('Error updating campaign status:', updateError)
+      throw updateError
+    }
+
     return new Response(
       JSON.stringify({ success: true }),
       {
@@ -99,7 +125,7 @@ serve(async (req) => {
       },
     )
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error in send-campaign function:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       {
