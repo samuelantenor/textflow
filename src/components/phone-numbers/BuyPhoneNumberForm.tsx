@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -58,7 +59,12 @@ const regions = [
 export const BuyPhoneNumberForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [country, setCountry] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+
+  const filteredRegions = regions.filter((region) =>
+    region.label.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,8 +138,16 @@ export const BuyPhoneNumberForm = () => {
             <SelectValue placeholder="Choose a region" />
           </SelectTrigger>
           <SelectContent className="h-[300px]">
-            <ScrollArea className="h-full" type="always">
-              {regions.map((region) => (
+            <div className="sticky top-0 p-2 bg-popover border-b">
+              <Input
+                placeholder="Search countries..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <ScrollArea className="h-[calc(300px-56px)]" type="always">
+              {filteredRegions.map((region) => (
                 <SelectItem key={region.value} value={region.value}>
                   {region.label}
                 </SelectItem>
