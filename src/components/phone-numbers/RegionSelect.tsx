@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Select,
   SelectContent,
@@ -24,15 +24,34 @@ interface RegionSelectProps {
 
 export function RegionSelect({ value, onChange, regions }: RegionSelectProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const filteredRegions = regions.filter((region) =>
     region.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open) {
+      // Reset search when opening
+      setSearchQuery("");
+      // Wait for the content to be mounted before focusing
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    }
+  };
+
   return (
     <div className="space-y-2">
       <Label>Select Region</Label>
-      <Select value={value} onValueChange={onChange}>
+      <Select 
+        value={value} 
+        onValueChange={onChange}
+        open={isOpen}
+        onOpenChange={handleOpenChange}
+      >
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Choose a region" />
         </SelectTrigger>
@@ -41,10 +60,12 @@ export function RegionSelect({ value, onChange, regions }: RegionSelectProps) {
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
+                ref={inputRef}
                 placeholder="Search countries..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-8"
+                onClick={(e) => e.stopPropagation()}
               />
             </div>
           </div>
