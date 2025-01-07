@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { LandingPage } from "@/integrations/supabase/types";
+import { LandingPage } from "@/integrations/supabase/types/landing-pages";
 
 interface FormContainerProps {
   landingPage: LandingPage;

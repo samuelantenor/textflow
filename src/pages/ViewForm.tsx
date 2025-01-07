@@ -9,6 +9,7 @@ import { FormFields } from "@/components/forms/view/FormFields";
 import { FormContainer } from "@/components/forms/view/FormContainer";
 import { FormHeader } from "@/components/forms/view/FormHeader";
 import { useToast } from "@/hooks/use-toast";
+import { FormField } from "@/types/form";
 
 export default function ViewForm() {
   const { id } = useParams();
@@ -20,12 +21,23 @@ export default function ViewForm() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('custom_forms')
-        .select('*, landing_pages(*)')
+        .select(`
+          *,
+          landing_pages:landing_pages(*)
+        `)
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      return data;
+      if (!data) throw new Error('Form not found');
+      
+      // Ensure fields is parsed as FormField[]
+      const fields = data.fields as FormField[];
+      return {
+        ...data,
+        fields,
+        landing_pages: data.landing_pages
+      };
     },
   });
 
