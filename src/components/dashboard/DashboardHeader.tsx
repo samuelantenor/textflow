@@ -18,27 +18,16 @@ export const DashboardHeader = () => {
 
   const handleSignOut = async () => {
     try {
-      // First check if we have an active session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        console.error('Session error:', sessionError);
-        // If there's a session error, we should redirect to login anyway
-        navigate("/login", { replace: true });
-        return;
-      }
-
-      if (!session) {
-        // If no session exists, just redirect to login
-        navigate("/login", { replace: true });
-        return;
-      }
-
-      // If we have a valid session, attempt to sign out
       const { error: signOutError } = await supabase.auth.signOut();
       
       if (signOutError) {
         console.error('Error signing out:', signOutError);
+        // If it's a missing session error, we can just redirect to login
+        if (signOutError.message.includes('Auth session missing')) {
+          navigate("/login", { replace: true });
+          return;
+        }
+        
         toast({
           variant: "destructive",
           title: "Error signing out",
@@ -51,7 +40,7 @@ export const DashboardHeader = () => {
         });
       }
 
-      // Always redirect to login page, even if there was an error
+      // Always redirect to login page
       navigate("/login", { replace: true });
     } catch (error) {
       console.error('Unexpected error during sign out:', error);
