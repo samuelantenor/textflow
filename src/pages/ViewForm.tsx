@@ -6,21 +6,45 @@ import { useToast } from "@/hooks/use-toast";
 import { FormLoader } from "@/components/forms/view/FormLoader";
 import { FormError } from "@/components/forms/view/FormError";
 import { FormFields } from "@/components/forms/view/FormFields";
-import { useFormData } from "@/hooks/forms/useFormData";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function ViewForm() {
   const { id } = useParams();
   const { toast } = useToast();
-  const { form, loading, fetchForm } = useFormData();
+  const [form, setForm] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
 
   useEffect(() => {
+    const fetchForm = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('custom_forms')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (!data) throw new Error('Form not found');
+
+        setForm(data);
+      } catch (error) {
+        console.error('Error fetching form:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load form",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (id) {
-      fetchForm(id);
+      fetchForm();
     }
-  }, [id, fetchForm]);
+  }, [id, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,14 +58,13 @@ export default function ViewForm() {
       return;
     }
 
-    // Find the phone number field in the form data
-    const phoneField = form.fields.find(field => 
+    const phoneField = form.fields.find((field: any) => 
       field.label.toLowerCase().includes('phone') || 
       field.label.toLowerCase().includes('mobile')
     );
 
     const phoneNumber = phoneField ? formData[phoneField.label] : null;
-    const nameField = form.fields.find(field => 
+    const nameField = form.fields.find((field: any) => 
       field.label.toLowerCase().includes('name')
     );
     const name = nameField ? formData[nameField.label] : null;
@@ -57,7 +80,7 @@ export default function ViewForm() {
 
     setSubmitting(true);
     try {
-      // First create the contact
+      // Create the contact
       const { error: contactError } = await supabase
         .from('contacts')
         .insert({
@@ -68,7 +91,7 @@ export default function ViewForm() {
 
       if (contactError) throw contactError;
 
-      // Then create the form submission
+      // Create the form submission
       const { error: submissionError } = await supabase
         .from('form_submissions')
         .insert({
