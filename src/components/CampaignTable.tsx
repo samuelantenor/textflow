@@ -21,12 +21,7 @@ const CampaignTable = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('campaigns')
-        .select(`
-          *,
-          campaign_groups (
-            name
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -62,7 +57,6 @@ const CampaignTable = () => {
         <TableHeader>
           <TableRow>
             <TableHead>Campaign Name</TableHead>
-            <TableHead>Group</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Scheduled For</TableHead>
             <TableHead>Created At</TableHead>
@@ -73,9 +67,6 @@ const CampaignTable = () => {
           {campaigns?.map((campaign) => (
             <TableRow key={campaign.id}>
               <TableCell className="font-medium">{campaign.name}</TableCell>
-              <TableCell>
-                {campaign.campaign_groups?.name || "No group assigned"}
-              </TableCell>
               <TableCell>
                 <Badge
                   variant="outline"
