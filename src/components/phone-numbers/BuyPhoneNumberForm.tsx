@@ -22,6 +22,19 @@ export function BuyPhoneNumberForm() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Load Stripe script
+    const script = document.createElement('script');
+    script.src = 'https://js.stripe.com/v3/buy-button.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      // Cleanup script when component unmounts
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  useEffect(() => {
     // Check if the URL has a success parameter
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('payment') === 'success') {
