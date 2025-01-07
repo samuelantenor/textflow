@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { FormBuilder } from "./FormBuilder";
 import { useState, useEffect } from "react";
+import { ShareFormDialog } from "./ShareFormDialog";
 import { ViewSubmissionsDialog } from "./view/ViewSubmissionsDialog";
 import { EditFormDialog } from "./EditFormDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const FormsOverview = () => {
   const [selectedForm, setSelectedForm] = useState<CustomForm | null>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [submissionsDialogOpen, setSubmissionsDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -48,6 +50,11 @@ export const FormsOverview = () => {
       supabase.removeChannel(channel);
     };
   }, [queryClient]);
+
+  const handleShare = (form: CustomForm) => {
+    setSelectedForm(form);
+    setShareDialogOpen(true);
+  };
 
   const handleViewSubmissions = (form: CustomForm) => {
     setSelectedForm(form);
@@ -142,9 +149,16 @@ export const FormsOverview = () => {
       <FormsList
         forms={forms}
         isLoading={isLoadingForms}
+        onShare={handleShare}
         onViewSubmissions={handleViewSubmissions}
         onEdit={handleEdit}
         onDelete={handleDelete}
+      />
+
+      <ShareFormDialog
+        form={selectedForm}
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
       />
 
       {selectedForm && (

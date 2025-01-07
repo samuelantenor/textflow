@@ -1,10 +1,11 @@
 import { Card } from "@/components/ui/card";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Share2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CustomForm } from "./types";
 
 interface FormsCardProps {
   form: CustomForm;
+  onShare: (form: CustomForm) => void;
   onViewSubmissions: (form: CustomForm) => void;
   onEdit: (form: CustomForm) => void;
   onDelete: (form: CustomForm) => void;
@@ -12,6 +13,7 @@ interface FormsCardProps {
 
 export const FormsCard = ({ 
   form, 
+  onShare,
   onViewSubmissions, 
   onEdit, 
   onDelete 
@@ -31,6 +33,14 @@ export const FormsCard = ({
         Fields: {form.fields.length}
       </div>
       <div className="flex items-center gap-2 flex-wrap">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => onShare(form)}
+        >
+          <Share2 className="w-4 h-4 mr-2" />
+          Share
+        </Button>
         <Button 
           variant="outline" 
           size="sm"
@@ -57,4 +67,4 @@ export const FormsCard = ({
       </div>
     </Card>
   );
-};
+}

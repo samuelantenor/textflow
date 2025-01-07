@@ -6,6 +6,7 @@ import { CustomForm } from "./types";
 interface FormsListProps {
   forms: CustomForm[] | undefined;
   isLoading: boolean;
+  onShare: (form: CustomForm) => void;
   onViewSubmissions: (form: CustomForm) => void;
   onEdit: (form: CustomForm) => void;
   onDelete: (form: CustomForm) => void;
@@ -14,6 +15,7 @@ interface FormsListProps {
 export const FormsList = ({
   forms,
   isLoading,
+  onShare,
   onViewSubmissions,
   onEdit,
   onDelete
@@ -39,6 +41,7 @@ export const FormsList = ({
         <FormsCard
           key={form.id}
           form={form}
+          onShare={onShare}
           onViewSubmissions={onViewSubmissions}
           onEdit={onEdit}
           onDelete={onDelete}
@@ -46,4 +49,4 @@ export const FormsList = ({
       ))}
     </div>
   );
-};
+}

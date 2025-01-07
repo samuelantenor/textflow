@@ -55,7 +55,7 @@ export default function ViewForm() {
     if (id) {
       fetchForm();
     }
-  }, [id, toast]);
+  }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
