@@ -67,7 +67,10 @@ serve(async (req) => {
               user_id: session.client_reference_id,
               stripe_subscription_id: subscription.id,
               status: subscription.status,
-              plan_name: product.name
+              plan_name: product.name,
+              plan_type: 'paid', // Set plan_type to 'paid' for new subscriptions
+              monthly_message_limit: 1000, // Set higher limits for paid plan
+              campaign_limit: 999999
             });
 
           if (error) {
@@ -82,7 +85,6 @@ serve(async (req) => {
         if (session.mode === 'subscription' && session.metadata?.isPhoneNumber) {
           console.log('Processing phone number request');
           
-          // Get the phone number request details
           const { data: requestData, error: requestError } = await supabaseClient
             .from('phone_number_requests')
             .select('*')
@@ -142,7 +144,10 @@ serve(async (req) => {
           .from('subscriptions')
           .update({ 
             status: subscription.status,
-            plan_name: product.name 
+            plan_name: product.name,
+            plan_type: subscription.status === 'active' ? 'paid' : 'free', // Update plan_type based on subscription status
+            monthly_message_limit: subscription.status === 'active' ? 1000 : 20, // Update limits based on status
+            campaign_limit: subscription.status === 'active' ? 999999 : 3
           })
           .eq('stripe_subscription_id', subscription.id);
 
