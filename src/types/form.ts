@@ -1,20 +1,20 @@
 export interface FormField {
   id: string;
-  type: string;
+  type: 'text' | 'email' | 'phone' | 'checkbox' | 'textarea' | 'number' | 'date' | 'radio' | 'select';
   label: string;
+  required: boolean;
   placeholder?: string;
-  required?: boolean;
+  options?: Array<{ label: string; value: string }>;
   description?: string;
-  options?: { label: string; value: string; }[];
 }
 
 export interface FormData {
-  id: string;
   title: string;
-  description: string | null;
-  fields: FormField[];
+  description?: string;
+  group_id: string;
   background_color?: string;
   font_family?: string;
   logo_url?: string;
   primary_color?: string;
+  fields: FormField[];
 }

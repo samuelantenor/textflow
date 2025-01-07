@@ -3,10 +3,8 @@ import { useParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { FormLoader } from "@/components/forms/view/FormLoader";
-import { FormError } from "@/components/forms/view/FormError";
-import { FormFields } from "@/components/forms/view/FormFields";
 import { supabase } from "@/integrations/supabase/client";
+import { FormFields } from "@/components/forms/view/FormFields";
 
 export default function ViewForm() {
   const { id } = useParams();
@@ -49,47 +47,8 @@ export default function ViewForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!form?.group_id) {
-      toast({
-        title: "Error",
-        description: "This form is not properly configured.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const phoneField = form.fields.find((field: any) => 
-      field.label.toLowerCase().includes('phone') || 
-      field.label.toLowerCase().includes('mobile')
-    );
-
-    const phoneNumber = phoneField ? formData[phoneField.label] : null;
-    const nameField = form.fields.find((field: any) => 
-      field.label.toLowerCase().includes('name')
-    );
-    const name = nameField ? formData[nameField.label] : null;
-
-    if (!phoneNumber) {
-      toast({
-        title: "Error",
-        description: "Phone number is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSubmitting(true);
     try {
-      // Create the contact
-      const { error: contactError } = await supabase
-        .from('contacts')
-        .insert({
-          group_id: form.group_id,
-          name: name,
-          phone_number: phoneNumber,
-        });
-
-      if (contactError) throw contactError;
+      setSubmitting(true);
 
       // Create the form submission
       const { error: submissionError } = await supabase
@@ -101,6 +60,23 @@ export default function ViewForm() {
 
       if (submissionError) throw submissionError;
 
+      // Create contact if phone field exists
+      const phoneField = form.fields.find((field: any) => 
+        field.type === 'phone' || field.label.toLowerCase().includes('phone')
+      );
+
+      if (phoneField && formData[phoneField.label]) {
+        const { error: contactError } = await supabase
+          .from('contacts')
+          .insert({
+            group_id: form.group_id,
+            phone_number: formData[phoneField.label],
+            name: formData['name'] || null,
+          });
+
+        if (contactError) throw contactError;
+      }
+
       toast({
         title: "Success",
         description: "Form submitted successfully",
@@ -109,14 +85,6 @@ export default function ViewForm() {
       // Reset form
       setFormData({});
       
-      // Reset form fields
-      const formElements = document.querySelectorAll('input, textarea, select');
-      formElements.forEach((element: any) => {
-        if (element.type !== 'submit') {
-          element.value = '';
-        }
-      });
-
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
@@ -130,11 +98,22 @@ export default function ViewForm() {
   };
 
   if (loading) {
-    return <FormLoader />;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   if (!form) {
-    return <FormError />;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Form not found</h1>
+          <p className="text-muted-foreground">The form you're looking for doesn't exist.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
