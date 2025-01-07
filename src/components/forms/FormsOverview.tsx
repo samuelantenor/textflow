@@ -1,14 +1,15 @@
 import { Card } from "@/components/ui/card";
-import { FileText, Pencil, Trash2 } from "lucide-react";
 import { FormBuilder } from "./FormBuilder";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "../ui/button";
+import { useState, useEffect } from "react";
 import { ShareFormDialog } from "./ShareFormDialog";
 import { ViewSubmissionsDialog } from "./view/ViewSubmissionsDialog";
-import { useState } from "react";
 import { EditFormDialog } from "./EditFormDialog";
 import { useToast } from "@/hooks/use-toast";
+import { FormsCard } from "./FormsCard";
+import { EmptyFormsState } from "./EmptyFormsState";
+import { CustomForm } from "./types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,21 +21,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-type CustomForm = {
-  id: string;
-  title: string;
-  description: string | null;
-  fields: any[];
-  campaign_groups: {
-    name: string;
-  } | null;
-  group_id: string;
-  background_color?: string;
-  font_family?: string;
-  logo_url?: string;
-  primary_color?: string;
-};
-
 export const FormsOverview = () => {
   const [selectedForm, setSelectedForm] = useState<CustomForm | null>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -42,6 +28,7 @@ export const FormsOverview = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: groups, isLoading: isLoadingGroups } = useQuery({
     queryKey: ['campaign-groups'],
@@ -55,7 +42,7 @@ export const FormsOverview = () => {
     },
   });
 
-  const { data: forms, isLoading, refetch } = useQuery({
+  const { data: forms, isLoading } = useQuery({
     queryKey: ['custom-forms'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -84,6 +71,29 @@ export const FormsOverview = () => {
     },
   });
 
+  // Subscribe to real-time changes
+  useEffect(() => {
+    const channel = supabase
+      .channel('custom_forms_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'custom_forms'
+        },
+        () => {
+          // Invalidate and refetch forms when changes occur
+          queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   const handleShare = (form: CustomForm) => {
     setSelectedForm(form);
     setShareDialogOpen(true);
@@ -108,6 +118,15 @@ export const FormsOverview = () => {
     if (!selectedForm) return;
 
     try {
+      // First delete all form submissions
+      const { error: submissionsError } = await supabase
+        .from('form_submissions')
+        .delete()
+        .eq('form_id', selectedForm.id);
+
+      if (submissionsError) throw submissionsError;
+
+      // Then delete the form
       const { error } = await supabase
         .from('custom_forms')
         .delete()
@@ -120,7 +139,7 @@ export const FormsOverview = () => {
         description: "Form deleted successfully.",
       });
 
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
     } catch (error) {
       console.error('Error deleting form:', error);
       toast({
@@ -169,63 +188,17 @@ export const FormsOverview = () => {
           </Card>
         ) : forms?.length ? (
           forms.map((form) => (
-            <Card key={form.id} className="p-6 space-y-4">
-              <div>
-                <h3 className="font-semibold text-lg">{form.title}</h3>
-                {form.description && (
-                  <p className="text-sm text-muted-foreground">{form.description}</p>
-                )}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                Group: {form.campaign_groups?.name}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                Fields: {form.fields.length}
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleViewSubmissions(form)}
-                >
-                  View Submissions
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleShare(form)}
-                >
-                  Share Form
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleEdit(form)}
-                >
-                  <Pencil className="w-4 h-4 mr-2" />
-                  Edit
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleDelete(form)}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </Button>
-              </div>
-            </Card>
+            <FormsCard
+              key={form.id}
+              form={form}
+              onShare={handleShare}
+              onViewSubmissions={handleViewSubmissions}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           ))
         ) : (
-          <Card className="p-12 text-center space-y-4 col-span-full">
-            <FileText className="w-12 h-12 text-muted-foreground mx-auto" />
-            <div>
-              <h3 className="text-lg font-semibold">No Forms Yet</h3>
-              <p className="text-muted-foreground">
-                Create your first form to start collecting contacts.
-              </p>
-            </div>
-          </Card>
+          <EmptyFormsState />
         )}
       </div>
 
