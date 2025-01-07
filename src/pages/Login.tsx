@@ -1,22 +1,15 @@
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if we have a hash in the URL (from password reset email)
-    if (location.hash && location.hash.includes('access_token')) {
-      navigate('/reset-password' + location.hash);
-      return;
-    }
-
     // Check current session on mount
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
@@ -51,7 +44,7 @@ const Login = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, toast, location]);
+  }, [navigate, toast]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
