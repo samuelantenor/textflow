@@ -18,7 +18,9 @@ const Dashboard = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const sessionId = searchParams.get("session_id");
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(() => {
+    return sessionId ? "phone-numbers" : "overview";
+  });
 
   // Check authentication
   useEffect(() => {
@@ -41,12 +43,13 @@ const Dashboard = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Show welcome message if coming from successful payment
+  // Show success message if coming from successful phone number payment
   useEffect(() => {
     if (sessionId) {
       toast({
-        title: "Welcome to FlowText!",
-        description: "Your subscription has been activated successfully.",
+        title: "Payment Successful! 🎉",
+        description: "Your new phone number is on its way! We'll notify you once it's ready.",
+        duration: 6000,
       });
       // Clean up the URL
       window.history.replaceState({}, document.title, "/dashboard");

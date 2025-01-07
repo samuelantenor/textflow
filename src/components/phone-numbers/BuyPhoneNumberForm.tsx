@@ -5,6 +5,20 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const regions = [
+  { value: "us", label: "United States" },
+  { value: "ca", label: "Canada" },
+  { value: "gb", label: "United Kingdom" },
+  { value: "au", label: "Australia" },
+];
 
 export const BuyPhoneNumberForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +32,7 @@ export const BuyPhoneNumberForm = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please select a country",
+        description: "Please select a region",
       });
       return;
     }
@@ -54,6 +68,12 @@ export const BuyPhoneNumberForm = () => {
       if (sessionError) throw sessionError;
       if (!sessionData?.url) throw new Error('No checkout URL received');
 
+      // Show success message before redirect
+      toast({
+        title: "Redirecting to checkout...",
+        description: "You'll be redirected to complete your payment.",
+      });
+
       // Redirect to Stripe Checkout
       window.location.href = sessionData.url;
     } catch (error) {
@@ -71,20 +91,19 @@ export const BuyPhoneNumberForm = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
-        <Label>Choose Region Number</Label>
-        <PhoneInput
-          country={"us"}
-          enableSearch
-          disableSearchIcon
-          inputProps={{
-            required: true,
-          }}
-          onChange={(value) => setCountry(value)}
-          containerClass="!w-full"
-          inputClass="!w-full !h-10 !text-base"
-          buttonClass="!h-10"
-          searchClass="!w-full"
-        />
+        <Label>Select Region</Label>
+        <Select value={country} onValueChange={setCountry}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Choose a region" />
+          </SelectTrigger>
+          <SelectContent>
+            {regions.map((region) => (
+              <SelectItem key={region.value} value={region.value}>
+                {region.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">
