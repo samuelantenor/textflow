@@ -16,6 +16,7 @@ export function CreateCampaignDialog() {
   const form = useForm<CampaignFormData>({
     defaultValues: {
       name: "",
+      message: " ", // Initialize with a space to satisfy NOT NULL constraint
     },
   });
 
@@ -31,7 +32,7 @@ export function CreateCampaignDialog() {
       const { error } = await supabase.from("campaigns").insert({
         user_id: session.user.id,
         name: data.name,
-        message: "", // Add a default empty message to satisfy the NOT NULL constraint
+        message: data.message,
         status: "draft",
       });
 
