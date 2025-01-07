@@ -89,6 +89,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   const onSubmit = async (data: any) => {
     try {
       setIsLoading(true);
+      console.log("Submitting form data:", data); // Debug log
 
       const { error } = await supabase
         .from("custom_forms")
