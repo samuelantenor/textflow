@@ -23,27 +23,16 @@ const Login = () => {
       }
       
       if (session) {
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       }
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth state changed:', event, session); // Debug log
       
       if (event === 'SIGNED_IN' && session) {
-        navigate("/dashboard");
-      } else if (event === 'SIGNED_OUT') {
-        // Clear any local storage or state if needed
-        navigate("/login");
-        toast({
-          title: "Signed out successfully",
-          description: "You have been logged out of your account.",
-        });
-      } else if (event === 'TOKEN_REFRESHED') {
-        console.log('Token refreshed successfully');
-      } else if (event === 'USER_UPDATED') {
-        console.log('User data updated');
+        navigate("/dashboard", { replace: true });
       }
     });
 

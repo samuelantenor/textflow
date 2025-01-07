@@ -18,44 +18,15 @@ export const DashboardHeader = () => {
 
   const handleSignOut = async () => {
     try {
-      // First check if we have a session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        console.error('Error checking session:', sessionError);
-        navigate("/login");
-        toast({
-          title: "Session error",
-          description: "There was a problem with your session. Please log in again.",
-        });
-        return;
-      }
-
-      // If no active session, redirect to login
-      if (!session) {
-        navigate("/login");
-        toast({
-          title: "No active session",
-          description: "Please log in to continue.",
-        });
-        return;
-      }
-
-      // Attempt to sign out
-      await supabase.auth.signOut({
-        scope: 'local'  // Only clear local session first
-      });
-      
-      navigate("/login");
+      await supabase.auth.signOut();
+      navigate("/login", { replace: true }); // Use replace to prevent going back to dashboard
       toast({
         title: "Signed out successfully",
         description: "You have been logged out of your account.",
       });
-      
     } catch (error) {
       console.error('Error signing out:', error);
-      // Always redirect to login on error, but with an error message
-      navigate("/login");
+      navigate("/login", { replace: true });
       toast({
         variant: "destructive",
         title: "Error signing out",
