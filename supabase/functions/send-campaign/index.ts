@@ -63,7 +63,7 @@ serve(async (req: Request) => {
             },
             body: new URLSearchParams({
               To: contact.phone_number,
-              From: '+15555555555', // Replace with your Twilio phone number
+              From: campaign.from_number,
               Body: campaign.message,
               ...(campaign.media_url && { MediaUrl: campaign.media_url }),
             }),
