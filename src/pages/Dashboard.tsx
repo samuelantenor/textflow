@@ -11,6 +11,7 @@ import { CampaignAnalytics } from "@/components/analytics/CampaignAnalytics";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { FormsOverview } from "@/components/forms/FormsOverview";
+import { PhoneNumberList } from "@/components/phone/PhoneNumberList";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -97,6 +98,7 @@ const Dashboard = () => {
               <TabsTrigger value="groups">Groups</TabsTrigger>
               <TabsTrigger value="forms">Forms</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="phone">Phone Numbers</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview">
@@ -124,6 +126,10 @@ const Dashboard = () => {
                 <h2 className="text-2xl font-bold">Campaign Analytics</h2>
                 <CampaignAnalytics />
               </div>
+            </TabsContent>
+
+            <TabsContent value="phone">
+              <PhoneNumberList />
             </TabsContent>
           </Tabs>
         </div>
