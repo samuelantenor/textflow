@@ -1,12 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { CreditCard } from "lucide-react";
+import { CreditCard, Settings } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export const BillingOverview = ({ subscription }: { subscription: any }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isCancelling, setIsCancelling] = useState(false);
   const { toast } = useToast();
 
   const handleSubscribe = async () => {
@@ -35,46 +34,29 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
     }
   };
 
-  const handleUnsubscribe = async () => {
-    if (!window.confirm('Are you sure you want to cancel your subscription? This will take effect at the end of your current billing period.')) {
-      return;
-    }
-
+  const handleManageSubscription = async () => {
     try {
-      setIsCancelling(true);
-      
-      // Get the current session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) throw sessionError;
-      if (!session) {
-        throw new Error('No active session found');
-      }
-
-      const { error } = await supabase.functions.invoke(
-        'cancel-subscription',
+      setIsLoading(true);
+      const { data: sessionData, error: sessionError } = await supabase.functions.invoke(
+        'create-portal-session',
         {
           method: 'POST',
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
         }
       );
 
-      if (error) throw error;
+      if (sessionError) throw sessionError;
+      if (!sessionData?.url) throw new Error('No portal URL received');
 
-      toast({
-        title: "Subscription Cancelled",
-        description: "Your subscription will end at the end of the current billing period.",
-      });
+      window.location.href = sessionData.url;
     } catch (error) {
       console.error('Error:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to cancel subscription",
+        description: error.message || "Failed to open subscription management",
       });
     } finally {
-      setIsCancelling(false);
+      setIsLoading(false);
     }
   };
 
@@ -86,17 +68,16 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
           <div>
             <p className="font-medium">Current Plan</p>
             <p className="text-muted-foreground">
-              {subscription?.status === 'active' ? 'Premium Plan' : 'Free Plan'}
+              {subscription?.status === 'active' ? subscription.plan_name || 'Premium Plan' : 'Free Plan'}
             </p>
           </div>
           {subscription?.status === 'active' ? (
             <Button 
-              variant="destructive"
-              onClick={handleUnsubscribe}
-              disabled={isCancelling}
+              onClick={handleManageSubscription}
+              disabled={isLoading}
             >
-              <CreditCard className="mr-2 h-4 w-4" />
-              {isCancelling ? 'Cancelling...' : 'Cancel Subscription'}
+              <Settings className="mr-2 h-4 w-4" />
+              Manage Subscription
             </Button>
           ) : (
             <Button 
