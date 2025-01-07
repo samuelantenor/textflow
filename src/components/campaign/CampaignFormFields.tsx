@@ -5,6 +5,7 @@ import { GroupSelectField } from "./form-fields/GroupSelectField";
 import { MessageField } from "./form-fields/MessageField";
 import { MediaField } from "./form-fields/MediaField";
 import { ScheduleField } from "./form-fields/ScheduleField";
+import { PhoneNumberField } from "./form-fields/PhoneNumberField";
 
 interface CampaignFormFieldsProps {
   form: UseFormReturn<CampaignFormData>;
@@ -12,9 +13,12 @@ interface CampaignFormFieldsProps {
 
 export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
   return (
-    <div className="space-y-4">
-      <CampaignNameField form={form} />
-      <GroupSelectField form={form} />
+    <div className="space-y-6">
+      <div className="grid gap-6 sm:grid-cols-2">
+        <CampaignNameField form={form} />
+        <GroupSelectField form={form} />
+      </div>
+      <PhoneNumberField form={form} />
       <MessageField form={form} />
       <MediaField form={form} />
       <ScheduleField form={form} />
