@@ -108,25 +108,16 @@ export const FormsOverview = () => {
     if (!selectedForm) return;
 
     try {
-      // First delete all form submissions
-      const { error: submissionsError } = await supabase
-        .from('form_submissions')
-        .delete()
-        .eq('form_id', selectedForm.id);
-
-      if (submissionsError) throw submissionsError;
-
-      // Then delete the form itself
-      const { error: formError } = await supabase
+      const { error } = await supabase
         .from('custom_forms')
         .delete()
         .eq('id', selectedForm.id);
 
-      if (formError) throw formError;
+      if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Form and its submissions deleted successfully.",
+        description: "Form deleted successfully.",
       });
 
       refetch();

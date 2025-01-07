@@ -30,7 +30,6 @@ interface FormPreviewProps {
     fontFamily?: string;
     logoUrl?: string;
     primaryColor?: string;
-    borderRadius?: number;
   };
 }
 
@@ -39,23 +38,29 @@ export function FormPreview({ title, description, fields, customization }: FormP
     const commonProps = {
       id: `field-${index}`,
       placeholder: field.placeholder,
+      className: cn(
+        "transition-all duration-200",
+        "focus:ring-2 focus:ring-offset-2",
+        "hover:border-primary/50"
+      ),
       style: {
         borderColor: customization?.primaryColor,
-        borderRadius: `${customization?.borderRadius || 8}px`,
+        borderRadius: '0.375rem',
       },
     };
 
     switch (field.type) {
       case 'textarea':
-        return <Textarea {...commonProps} />;
+        return <Textarea {...commonProps} className={cn(commonProps.className, "min-h-[100px] resize-y")} />;
       case 'checkbox':
         return (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 animate-in">
             <Checkbox 
               id={`field-${index}`}
               className={cn(
-                "border-2",
-                "data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                "border-2 transition-all duration-200",
+                "data-[state=checked]:bg-primary data-[state=checked]:border-primary",
+                "hover:border-primary/50"
               )}
               style={{ 
                 borderColor: customization?.primaryColor,
@@ -68,15 +73,16 @@ export function FormPreview({ title, description, fields, customization }: FormP
         );
       case 'radio':
         return (
-          <RadioGroup>
+          <RadioGroup className="space-y-2 animate-in">
             {field.options?.map((option, optionIndex) => (
               <div key={optionIndex} className="flex items-center space-x-2">
                 <RadioGroupItem 
                   value={option} 
                   id={`${index}-${optionIndex}`}
                   className={cn(
-                    "border-2",
-                    "data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                    "border-2 transition-all duration-200",
+                    "data-[state=checked]:bg-primary data-[state=checked]:border-primary",
+                    "hover:border-primary/50"
                   )}
                   style={{ 
                     borderColor: customization?.primaryColor,
@@ -90,12 +96,22 @@ export function FormPreview({ title, description, fields, customization }: FormP
       case 'select':
         return (
           <Select>
-            <SelectTrigger style={{ borderColor: customization?.primaryColor }}>
+            <SelectTrigger 
+              className={cn(
+                "transition-all duration-200",
+                "hover:border-primary/50"
+              )}
+              style={{ borderColor: customization?.primaryColor }}
+            >
               <SelectValue placeholder={field.placeholder || "Select an option"} />
             </SelectTrigger>
             <SelectContent>
               {field.options?.map((option, optionIndex) => (
-                <SelectItem key={optionIndex} value={option}>
+                <SelectItem 
+                  key={optionIndex} 
+                  value={option}
+                  className="hover:bg-primary/10"
+                >
                   {option}
                 </SelectItem>
               ))}
@@ -107,22 +123,10 @@ export function FormPreview({ title, description, fields, customization }: FormP
           <Input
             {...commonProps}
             type={field.type === 'number' || field.type === 'date' ? field.type : 'text'}
+            className={cn(commonProps.className, "animate-in")}
           />
         );
     }
-  };
-
-  const formStyle = {
-    backgroundColor: customization?.backgroundColor || '#FFFFFF',
-    fontFamily: customization?.fontFamily || 'Inter',
-    background: customization?.backgroundColor?.includes('gradient') 
-      ? customization.backgroundColor 
-      : undefined,
-  };
-
-  const headerStyle = {
-    color: customization?.primaryColor,
-    borderRadius: `${customization?.borderRadius || 8}px`,
   };
 
   return (
@@ -132,23 +136,32 @@ export function FormPreview({ title, description, fields, customization }: FormP
         <span className="text-sm font-medium">Form Preview</span>
       </div>
       <Card 
-        className="p-6 bg-card/50 backdrop-blur-sm h-[calc(100%-2rem)] overflow-y-auto transition-all duration-300"
-        style={formStyle}
+        className={cn(
+          "form-preview-card p-6 bg-card/50",
+          "transition-all duration-300"
+        )}
+        style={{
+          backgroundColor: customization?.backgroundColor || '#FFFFFF',
+          fontFamily: customization?.fontFamily || 'Inter',
+        }}
       >
         <div className="space-y-6">
           {customization?.logoUrl && (
-            <div className="flex justify-center mb-6 animate-fade-in">
+            <div className="flex justify-center mb-6 animate-in">
               <img 
                 src={customization.logoUrl} 
                 alt="Form logo" 
-                className="max-h-20 object-contain hover:scale-105 transition-transform duration-200"
+                className="max-h-20 object-contain hover-lift"
               />
             </div>
           )}
-          <div className="animate-fade-in">
+          <div className="animate-in">
             <h2 
-              className="text-2xl font-bold mb-2 transition-colors duration-200"
-              style={headerStyle}
+              className={cn(
+                "text-2xl font-bold mb-2",
+                "transition-colors duration-200"
+              )}
+              style={{ color: customization?.primaryColor }}
             >
               {title || "Untitled Form"}
             </h2>
@@ -158,15 +171,11 @@ export function FormPreview({ title, description, fields, customization }: FormP
           </div>
           <div className="space-y-8">
             {fields.map((field, index) => (
-              <div 
-                key={index} 
-                className="space-y-2 animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
+              <div key={index} className="space-y-2 animate-in">
                 {field.type !== 'checkbox' && (
                   <Label
-                    style={{ color: customization?.primaryColor }}
                     className="transition-colors duration-200"
+                    style={{ color: customization?.primaryColor }}
                   >
                     {field.label}
                     {field.required && (
