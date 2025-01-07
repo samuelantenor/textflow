@@ -1,4 +1,5 @@
 import type { MessageLog, MessageLogInsert, MessageLogUpdate } from './message-logs';
+import type { LandingPage, LandingPageInsert, LandingPageUpdate } from './landing-pages';
 
 export interface Database {
   public: {
@@ -23,6 +24,12 @@ export interface Database {
             referencedColumns: ["id"]
           }
         ]
+      }
+      landing_pages: {
+        Row: LandingPage;
+        Insert: LandingPageInsert;
+        Update: LandingPageUpdate;
+        Relationships: []
       }
       campaign_analytics: {
         Row: {
@@ -174,51 +181,6 @@ export interface Database {
           },
         ]
       }
-      landing_pages: {
-        Row: {
-          created_at: string
-          description: string | null
-          font_family: string
-          id: string
-          logo_url: string | null
-          primary_color: string
-          published: boolean
-          template_id: string
-          title: string
-          updated_at: string
-          user_id: string
-          welcome_message: string | null
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          font_family?: string
-          id?: string
-          logo_url?: string | null
-          primary_color?: string
-          published?: boolean
-          template_id: string
-          title: string
-          updated_at?: string
-          user_id: string
-          welcome_message?: string | null
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          font_family?: string
-          id?: string
-          logo_url?: string | null
-          primary_color?: string
-          published?: boolean
-          template_id?: string
-          title?: string
-          updated_at?: string
-          user_id?: string
-          welcome_message?: string | null
-        }
-        Relationships: []
-      }
       payment_history: {
         Row: {
           amount: number
@@ -249,7 +211,7 @@ export interface Database {
           id?: string
           payment_date?: string
           payment_method?: string | null
-          status?: string
+          status: string
           updated_at?: string
           user_id?: string
         }
@@ -266,7 +228,7 @@ export interface Database {
           email: string
           full_name?: string | null
           id: string
-          updated_at?: string
+          updated_at: string
         }
         Update: {
           email?: string
@@ -296,7 +258,7 @@ export interface Database {
         Update: {
           created_at?: string
           id?: string
-          status?: string
+          status: string
           stripe_subscription_id?: string
           updated_at?: string
           user_id?: string
