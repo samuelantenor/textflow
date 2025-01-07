@@ -30,6 +30,8 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("fields");
   const { toast } = useToast();
+  
+  // Reset form when initialForm changes
   const form = useForm({
     defaultValues: {
       title: initialForm.title,
@@ -42,6 +44,22 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       primary_color: initialForm.primary_color || "#ea384c",
     },
   });
+
+  // Reset form values when initialForm changes
+  useState(() => {
+    if (open) {
+      form.reset({
+        title: initialForm.title,
+        description: initialForm.description || "",
+        fields: initialForm.fields,
+        group_id: initialForm.group_id,
+        background_color: initialForm.background_color || "#FFFFFF",
+        font_family: initialForm.font_family || "Inter",
+        logo_url: initialForm.logo_url,
+        primary_color: initialForm.primary_color || "#ea384c",
+      });
+    }
+  }, [initialForm, open]);
 
   const handleLogoUpload = async (file: File) => {
     try {
@@ -111,7 +129,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[1200px] h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Edit Form</DialogTitle>
+          <DialogTitle>Edit Form: {initialForm.title}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden">
