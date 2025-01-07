@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone } from "lucide-react";
+import { Phone, Users } from "lucide-react";
 
 interface CampaignFormFieldsProps {
   form: UseFormReturn<CampaignFormData>;
@@ -24,6 +24,18 @@ export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
         .from('phone_numbers')
         .select('*')
         .eq('status', 'active');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: groups } = useQuery({
+    queryKey: ['campaign-groups'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('campaign_groups')
+        .select('*, contacts(count)');
       
       if (error) throw error;
       return data;
@@ -61,6 +73,44 @@ export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
                 {(!phoneNumbers || phoneNumbers.length === 0) && (
                   <SelectItem value="none" disabled>
                     No phone numbers available
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="group_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Contact Group</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a contact group">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      <span>Select a contact group</span>
+                    </div>
+                  </SelectValue>
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {groups?.map((group) => (
+                  <SelectItem key={group.id} value={group.id}>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      <span>{group.name} ({group.contacts[0]?.count || 0} contacts)</span>
+                    </div>
+                  </SelectItem>
+                ))}
+                {(!groups || groups.length === 0) && (
+                  <SelectItem value="none" disabled>
+                    No contact groups available
                   </SelectItem>
                 )}
               </SelectContent>
