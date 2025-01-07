@@ -45,8 +45,7 @@ export const CampaignAnalytics = () => {
     queryFn: async () => {
       const { data: messageData, error: messageError } = await supabase
         .from('message_logs')
-        .select('status, campaign_id')
-        .neq('status', 'draft'); // Exclude draft messages from analytics
+        .select('status, campaign_id');
 
       if (messageError) throw messageError;
 
@@ -69,11 +68,7 @@ export const CampaignAnalytics = () => {
           case 'failed':
             acc[msg.campaign_id].failed++;
             break;
-          case 'queued':
-            acc[msg.campaign_id].pending++;
-            break;
           default:
-            // Handle any other status as pending
             acc[msg.campaign_id].pending++;
         }
         
@@ -89,17 +84,14 @@ export const CampaignAnalytics = () => {
         return acc;
       }, { total_messages: 0, delivered: 0, failed: 0, pending: 0 });
 
-      // Calculate rates only for non-draft messages
-      const activeMessages = totalStats.total_messages;
-      
       return {
-        total_messages: activeMessages,
-        delivery_rate: activeMessages > 0 
-          ? ((totalStats.delivered / activeMessages) * 100).toFixed(1)
+        total_messages: totalStats.total_messages,
+        delivery_rate: totalStats.total_messages > 0 
+          ? ((totalStats.delivered / totalStats.total_messages) * 100).toFixed(1)
           : '0',
         failed_messages: totalStats.failed,
-        response_rate: activeMessages > 0
-          ? ((totalStats.delivered / activeMessages) * 100).toFixed(1)
+        response_rate: totalStats.total_messages > 0
+          ? ((totalStats.delivered / totalStats.total_messages) * 100).toFixed(1)
           : '0',
         delivery_status: {
           delivered: totalStats.delivered,
@@ -166,7 +158,7 @@ export const CampaignAnalytics = () => {
               <XCircle className="w-4 h-4 text-red-500" />
               <span>Failed</span>
             </div>
-            <span>{analytics?.delivery_status?.failed || 0}</span>
+            <span>{analytics?.delivery_status?.failed || 0} ({analytics?.failed_messages || 0})</span>
           </div>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
