@@ -9,16 +9,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +18,6 @@ import type { CampaignFormData } from "@/types/campaign";
 
 export function CreateCampaignDialog() {
   const [open, setOpen] = useState(false);
-  const [showSaveAlert, setShowSaveAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const form = useForm<CampaignFormData>();
@@ -38,10 +27,19 @@ export function CreateCampaignDialog() {
       setIsLoading(true);
 
       // Validate required fields
-      if (!data.group_id || !data.from_number) {
+      if (!data.group_id) {
         toast({
           title: "Error",
-          description: "Please select a contact group and phone number",
+          description: "Please select a contact group",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!data.from_number) {
+        toast({
+          title: "Error",
+          description: "Please select a phone number to send from",
           variant: "destructive",
         });
         return;
@@ -110,79 +108,43 @@ export function CreateCampaignDialog() {
     }
   };
 
-  const handleCreateClick = () => {
-    const formData = form.getValues();
-    if (!formData.group_id || !formData.from_number) {
-      setShowSaveAlert(true);
-    } else {
-      form.handleSubmit(onSubmit)();
-    }
-  };
-
   return (
-    <>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button className="w-full sm:w-auto">
-            <Plus className="w-4 h-4 mr-2" />
-            New Campaign
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
-          <DialogHeader>
-            <DialogTitle>Create New Campaign</DialogTitle>
-            <DialogDescription>
-              Create a new campaign to send to your contacts.
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <CampaignFormFields form={form} />
-              <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setOpen(false)}
-                  className="w-full sm:w-auto"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  onClick={handleCreateClick}
-                  disabled={isLoading}
-                  className="w-full sm:w-auto bg-green-500 hover:bg-green-600"
-                >
-                  {isLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Create Campaign
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-
-      <AlertDialog open={showSaveAlert} onOpenChange={setShowSaveAlert}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Required Fields</AlertDialogTitle>
-            <AlertDialogDescription>
-              Please select both a contact group and phone number before creating the campaign.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={() => setShowSaveAlert(false)}
-              className="bg-green-500 hover:bg-green-600"
-            >
-              OK
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="w-full sm:w-auto">
+          <Plus className="w-4 h-4 mr-2" />
+          New Campaign
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+        <DialogHeader>
+          <DialogTitle>Create New Campaign</DialogTitle>
+          <DialogDescription>
+            Create a new campaign to send to your contacts.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <CampaignFormFields form={form} />
+            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+                className="w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+                {isLoading && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Save as Draft
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 }
