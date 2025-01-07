@@ -44,6 +44,7 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("fields");
+  const [formId, setFormId] = useState<string | undefined>();
   const { toast } = useToast();
   const form = useForm<FormData>({
     defaultValues: {
@@ -106,7 +107,7 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
         throw new Error("User not authenticated");
       }
 
-      const { error } = await supabase.from("custom_forms").insert({
+      const { data: formData, error } = await supabase.from("custom_forms").insert({
         user_id: session.user.id,
         group_id: data.group_id,
         title: data.title,
@@ -116,17 +117,21 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
         font_family: data.font_family,
         logo_url: data.logo_url,
         primary_color: data.primary_color,
-      });
+      }).select().single();
 
       if (error) throw error;
+
+      setFormId(formData.id);
 
       toast({
         title: "Form created",
         description: "Your custom form has been created successfully.",
       });
 
-      setOpen(false);
-      form.reset();
+      // Don't close the dialog after creation so user can continue designing
+      if (activeTab === "fields") {
+        setActiveTab("design");
+      }
     } catch (error) {
       console.error("Error creating form:", error);
       toast({
@@ -167,7 +172,7 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
               </TabsContent>
 
               <TabsContent value="design" className="flex-1 overflow-hidden">
-                <FormDesignTab form={form} handleLogoUpload={handleLogoUpload} />
+                <FormDesignTab form={form} handleLogoUpload={handleLogoUpload} formId={formId} />
               </TabsContent>
             </Tabs>
 
