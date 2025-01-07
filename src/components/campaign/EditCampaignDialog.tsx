@@ -18,12 +18,27 @@ interface EditCampaignDialogProps {
 export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaignDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  
+  // Convert scheduled_for to Date object if it exists
+  const scheduledDate = campaign.scheduled_for ? new Date(campaign.scheduled_for) : undefined;
+  
+  // Extract time from scheduled_for if it exists
+  const scheduledTime = campaign.scheduled_for 
+    ? new Date(campaign.scheduled_for).toLocaleTimeString('en-US', { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit'
+      })
+    : undefined;
+
   const form = useForm<CampaignFormData>({
     defaultValues: {
       name: campaign.name,
       message: campaign.message,
       group_id: campaign.group_id || '',
-      scheduled_for: campaign.scheduled_for ? new Date(campaign.scheduled_for) : undefined,
+      from_number: campaign.from_number,
+      scheduled_for: scheduledDate,
+      scheduled_time: scheduledTime,
     },
   });
 
@@ -64,6 +79,7 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
           media_url: mediaUrl,
           scheduled_for: scheduledFor?.toISOString(),
           group_id: data.group_id,
+          from_number: data.from_number,
         })
         .eq('id', campaign.id);
 
