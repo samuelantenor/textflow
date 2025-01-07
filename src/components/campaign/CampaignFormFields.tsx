@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
+import { GroupSelectField } from "./form-fields/GroupSelectField";
 
 interface CampaignFormFieldsProps {
   form: UseFormReturn<CampaignFormData>;
@@ -38,6 +39,8 @@ export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
           </FormItem>
         )}
       />
+
+      <GroupSelectField form={form} />
 
       <FormField
         control={form.control}
