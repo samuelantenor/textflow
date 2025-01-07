@@ -20,7 +20,14 @@ export function CreateCampaignDialog() {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const form = useForm<CampaignFormData>();
+  const form = useForm<CampaignFormData>({
+    defaultValues: {
+      name: "",
+      message: "",
+      group_id: "",
+      from_number: "",
+    }
+  });
 
   const onSubmit = async (data: CampaignFormData) => {
     try {
@@ -63,8 +70,8 @@ export function CreateCampaignDialog() {
         message: data.message,
         media_url: mediaUrl,
         scheduled_for: scheduledFor?.toISOString(),
-        group_id: data.group_id,
-        from_number: data.from_number,
+        group_id: data.group_id || null,
+        from_number: data.from_number || null,
         status: "draft",
       });
 
