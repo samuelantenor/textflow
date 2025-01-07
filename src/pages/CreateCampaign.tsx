@@ -24,46 +24,9 @@ const CreateCampaign = () => {
         throw new Error("User not authenticated");
       }
 
-      let mediaUrl = null;
-      if (data.media) {
-        if (data.media.size > 10 * 1024 * 1024) {
-          toast({
-            title: "Error",
-            description: "Image size must be less than 10MB",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        const fileExt = data.media.name.split(".").pop();
-        const fileName = `${crypto.randomUUID()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
-          .from("campaign_media")
-          .upload(fileName, data.media);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from("campaign_media")
-          .getPublicUrl(fileName);
-        
-        mediaUrl = publicUrl;
-      }
-
-      // Combine date and time if both are provided
-      let scheduledFor = data.scheduled_for;
-      if (scheduledFor && data.scheduled_time) {
-        const [hours, minutes] = data.scheduled_time.split(':');
-        scheduledFor = new Date(scheduledFor);
-        scheduledFor.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-      }
-
       const { error } = await supabase.from("campaigns").insert({
         user_id: session.user.id,
         name: data.name,
-        message: data.message,
-        media_url: mediaUrl,
-        scheduled_for: scheduledFor?.toISOString(),
         status: "draft",
       });
 
@@ -103,13 +66,13 @@ const CreateCampaign = () => {
           <div>
             <h1 className="text-2xl font-bold">Create New Campaign</h1>
             <p className="text-muted-foreground">
-              Create a new campaign to send to your contacts.
+              Start by giving your campaign a name.
             </p>
           </div>
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <CampaignFormFields form={form} />
+              <CampaignFormFields form={form} showAllFields={false} />
               <div className="flex justify-end space-x-4 pt-4">
                 <Button
                   type="button"
