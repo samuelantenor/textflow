@@ -92,7 +92,7 @@ export function CreateCampaignDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full sm:w-auto">
+        <Button>
           <Plus className="w-4 h-4 mr-2" />
           New Campaign
         </Button>
