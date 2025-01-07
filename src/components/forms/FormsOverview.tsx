@@ -20,6 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { FileText } from "lucide-react";
 
 export const FormsOverview = () => {
   const [selectedForm, setSelectedForm] = useState<CustomForm | null>(null);
