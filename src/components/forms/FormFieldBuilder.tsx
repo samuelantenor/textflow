@@ -31,6 +31,7 @@ export function FormFieldBuilder({ form }: FormFieldBuilderProps) {
 
     const currentFields = form.getValues('fields') || [];
     const newField: any = {
+      id: crypto.randomUUID(),
       type: fieldType,
       label: fieldLabel,
       required: isRequired,
@@ -39,7 +40,12 @@ export function FormFieldBuilder({ form }: FormFieldBuilderProps) {
     };
 
     if (['radio', 'select'].includes(fieldType) && options) {
-      newField.options = options.split('\n').filter(Boolean);
+      newField.options = options.split('\n')
+        .filter(Boolean)
+        .map(option => ({
+          label: option,
+          value: option.toLowerCase().replace(/\s+/g, '-')
+        }));
     }
 
     form.setValue('fields', [...currentFields, newField]);
