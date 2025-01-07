@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 export const UsageStats = () => {
   const { data: messageStats } = useQuery({
@@ -47,8 +48,10 @@ export const UsageStats = () => {
           </div>
           <Progress 
             value={usagePercentage} 
-            className={isLimitReached ? "bg-red-200" : ""}
-            indicatorClassName={isLimitReached ? "bg-red-500" : ""}
+            className={cn(
+              "h-2",
+              isLimitReached ? "bg-red-200" : ""
+            )}
           />
           {isLimitReached && (
             <p className="text-sm text-red-500 mt-2">
