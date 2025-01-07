@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
 
 interface UseFormEditorProps {
   initialForm: {
@@ -23,7 +22,6 @@ export function useFormEditor({ initialForm, onClose }: UseFormEditorProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("fields");
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   
   const form = useForm({
     defaultValues: {
@@ -85,15 +83,13 @@ export function useFormEditor({ initialForm, onClose }: UseFormEditorProps) {
 
       if (error) throw error;
 
-      // Invalidate and refetch the forms query
-      await queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
-
       toast({
         title: "Success",
         description: "Form updated successfully.",
       });
 
       onClose();
+      window.location.reload();
     } catch (error) {
       console.error("Error updating form:", error);
       toast({
