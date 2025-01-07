@@ -16,7 +16,7 @@ export function CreateCampaignDialog() {
   const form = useForm<CampaignFormData>({
     defaultValues: {
       name: "",
-      message: "",
+      message: "Type your message here",
       group_id: "",
       from_number: "",
     },
