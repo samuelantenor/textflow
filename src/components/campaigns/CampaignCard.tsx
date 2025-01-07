@@ -1,54 +1,80 @@
+import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, MessageSquare } from "lucide-react";
+import { Edit, Trash2, Send, Loader2 } from "lucide-react";
 import { Campaign } from "@/types/campaign";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { EditCampaignDialog } from "../campaign/EditCampaignDialog";
 
 interface CampaignCardProps {
   campaign: Campaign;
 }
 
 export function CampaignCard({ campaign }: CampaignCardProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const handleDelete = async () => {
-    const { error } = await supabase
-      .from('campaigns')
-      .delete()
-      .eq('id', campaign.id);
+    try {
+      const { error } = await supabase
+        .from('campaigns')
+        .delete()
+        .eq('id', campaign.id);
 
-    if (error) {
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Campaign deleted successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+    } catch (error) {
+      console.error('Error deleting campaign:', error);
       toast({
         title: "Error",
         description: "Failed to delete campaign",
         variant: "destructive",
       });
-      return;
     }
-
-    toast({
-      title: "Success",
-      description: "Campaign deleted successfully",
-    });
-    queryClient.invalidateQueries({ queryKey: ['campaigns'] });
   };
 
-  const handleEdit = () => {
-    toast({
-      title: "Coming soon",
-      description: "Edit functionality will be available soon",
-    });
-  };
+  const handleSendCampaign = async () => {
+    try {
+      setIsLoading(true);
+      
+      const { data, error } = await supabase.functions.invoke('send-campaign', {
+        body: { campaignId: campaign.id }
+      });
 
-  const handleViewMessages = () => {
-    toast({
-      title: "Coming soon",
-      description: "Message view functionality will be available soon",
-    });
+      if (error) throw error;
+
+      // Update campaign status to sent
+      await supabase
+        .from('campaigns')
+        .update({ status: 'sent' })
+        .eq('id', campaign.id);
+
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+      
+      toast({
+        title: "Success",
+        description: "Campaign sent successfully",
+      });
+    } catch (error) {
+      console.error('Error sending campaign:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send campaign",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -80,17 +106,25 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
           {campaign.message}
         </p>
         <div className="flex justify-end gap-2">
+          {campaign.status === 'draft' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSendCampaign}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
+              Send
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleViewMessages}
-          >
-            <MessageSquare className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleEdit}
+            onClick={() => setShowEditDialog(true)}
           >
             <Edit className="h-4 w-4" />
           </Button>
@@ -103,6 +137,12 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
           </Button>
         </div>
       </CardContent>
+
+      <EditCampaignDialog
+        campaign={campaign}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+      />
     </Card>
   );
 }

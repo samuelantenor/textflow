@@ -6,124 +6,106 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface SendCampaignRequest {
-  campaignId: string;
-}
-
-serve(async (req: Request) => {
-  // Handle CORS preflight requests
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { campaignId } = await req.json() as SendCampaignRequest;
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
 
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { campaignId } = await req.json()
 
     // Get campaign details
-    const { data: campaign, error: campaignError } = await supabase
+    const { data: campaign, error: campaignError } = await supabaseClient
       .from('campaigns')
       .select(`
         *,
         campaign_groups (
-          contacts (*)
+          contacts (
+            phone_number,
+            id
+          )
         )
       `)
       .eq('id', campaignId)
-      .single();
+      .single()
 
-    if (campaignError) throw campaignError;
+    if (campaignError) throw campaignError
+    if (!campaign) throw new Error('Campaign not found')
 
-    // Initialize Twilio client
-    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
-    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
-    
-    if (!accountSid || !authToken) {
-      throw new Error('Twilio credentials not configured');
+    const contacts = campaign.campaign_groups?.contacts || []
+    if (!contacts.length) {
+      throw new Error('No contacts found in the group')
     }
 
-    const contacts = campaign.campaign_groups.contacts;
-    const results = [];
+    // Get the Twilio credentials
+    const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
+    const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN')
+    if (!twilioAccountSid || !twilioAuthToken) {
+      throw new Error('Twilio credentials not configured')
+    }
 
-    // Send messages to all contacts in the group
-    for (const contact of contacts) {
+    // Send messages to all contacts
+    const messagePromises = contacts.map(async (contact) => {
       try {
-        // Send message via Twilio
-        const twilioResponse = await fetch(
-          `https://api.twilio.com/2010-04/Accounts/${accountSid}/Messages.json`,
+        const response = await fetch(
+          `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`,
           {
             method: 'POST',
             headers: {
-              'Authorization': `Basic ${btoa(`${accountSid}:${authToken}`)}`,
+              'Authorization': `Basic ${btoa(`${twilioAccountSid}:${twilioAuthToken}`)}`,
               'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: new URLSearchParams({
               To: contact.phone_number,
-              From: '+15555555555', // Replace with your Twilio phone number
+              From: campaign.from_number || '',
               Body: campaign.message,
-              ...(campaign.media_url && { MediaUrl: campaign.media_url }),
+              ...(campaign.media_url ? { MediaUrl: campaign.media_url } : {}),
             }),
           }
-        );
+        )
 
-        const messageData = await twilioResponse.json();
+        const result = await response.json()
 
-        // Log the message status
-        const { data: logData, error: logError } = await supabase
+        // Log the message
+        await supabaseClient
           .from('message_logs')
           .insert({
             campaign_id: campaignId,
             contact_id: contact.id,
-            twilio_message_sid: messageData.sid,
-            status: messageData.status,
-          });
+            twilio_message_sid: result.sid,
+            status: result.status,
+            error_message: result.error_message,
+          })
 
-        if (logError) throw logError;
-        
-        results.push({
-          contact: contact.phone_number,
-          status: 'sent',
-          messageSid: messageData.sid,
-        });
-
+        return result
       } catch (error) {
-        console.error(`Error sending message to ${contact.phone_number}:`, error);
-        results.push({
-          contact: contact.phone_number,
-          status: 'failed',
-          error: error.message,
-        });
+        console.error(`Error sending message to ${contact.phone_number}:`, error)
+        throw error
       }
-    }
+    })
 
-    // Update campaign status
-    const { error: updateError } = await supabase
-      .from('campaigns')
-      .update({ status: 'sent' })
-      .eq('id', campaignId);
-
-    if (updateError) throw updateError;
+    await Promise.all(messagePromises)
 
     return new Response(
-      JSON.stringify({ success: true, results }),
+      JSON.stringify({ success: true }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       },
-    );
-
+    )
   } catch (error) {
-    console.error('Error in send-campaign function:', error);
+    console.error('Error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
+        status: 400,
       },
-    );
+    )
   }
-});
+})
