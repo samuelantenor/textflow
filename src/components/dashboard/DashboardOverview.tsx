@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { MessageSquare, Users, BarChart3, FileText } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
+import CreateCampaignButton from "@/components/CreateCampaignButton";
 
 interface DashboardOverviewProps {
   setActiveTab: Dispatch<SetStateAction<string>>;
@@ -12,7 +13,8 @@ export const DashboardOverview = ({ setActiveTab }: DashboardOverviewProps) => {
       title: "New Campaign",
       description: "Create and send SMS campaigns",
       icon: MessageSquare,
-      tab: "campaigns"
+      tab: "campaigns",
+      action: <CreateCampaignButton />
     },
     {
       title: "Contact Groups",
@@ -43,7 +45,7 @@ export const DashboardOverview = ({ setActiveTab }: DashboardOverviewProps) => {
             <Card 
               key={action.title}
               className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => setActiveTab(action.tab)}
+              onClick={() => action.tab !== "campaigns" && setActiveTab(action.tab)}
             >
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-full bg-primary/10">
@@ -54,6 +56,11 @@ export const DashboardOverview = ({ setActiveTab }: DashboardOverviewProps) => {
                   <p className="text-sm text-muted-foreground">{action.description}</p>
                 </div>
               </div>
+              {action.action && (
+                <div className="mt-4">
+                  {action.action}
+                </div>
+              )}
             </Card>
           ))}
         </div>
