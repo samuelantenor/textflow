@@ -61,7 +61,7 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
   };
 
   const isActiveSubscription = subscription?.status === 'active' && subscription?.plan_type === 'paid';
-  const isCancelled = subscription?.status === 'active' && subscription?.plan_type === 'free';
+  const isCancelled = subscription?.status === 'active' && subscription?.plan_type === 'free' && subscription?.has_been_paid;
 
   return (
     <div className="bg-card rounded-lg p-6">
