@@ -33,11 +33,15 @@ const Login = () => {
         navigate("/");
       } else if (event === 'SIGNED_OUT') {
         navigate("/login");
+      } else if (event === 'PASSWORD_RECOVERY') {
+        // Handle password recovery event
+        toast({
+          title: "Password Recovery Email Sent",
+          description: "Check your email for the password reset link.",
+        });
       } else if (event === 'TOKEN_REFRESHED') {
-        // Handle successful token refresh
         console.log('Token refreshed successfully');
       } else if (event === 'USER_UPDATED') {
-        // Handle user data update
         console.log('User data updated');
       }
     });
@@ -70,6 +74,9 @@ const Login = () => {
             }}
             theme="light"
             providers={[]}
+            view="magic_link"
+            showLinks={true}
+            redirectTo={window.location.origin}
           />
         </div>
       </div>
