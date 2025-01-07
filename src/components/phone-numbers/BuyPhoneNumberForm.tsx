@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -12,12 +10,49 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const regions = [
-  { value: "us", label: "United States" },
-  { value: "ca", label: "Canada" },
-  { value: "gb", label: "United Kingdom" },
-  { value: "au", label: "Australia" },
+  { value: "us", label: "United States (+1)" },
+  { value: "ca", label: "Canada (+1)" },
+  { value: "gb", label: "United Kingdom (+44)" },
+  { value: "au", label: "Australia (+61)" },
+  { value: "de", label: "Germany (+49)" },
+  { value: "fr", label: "France (+33)" },
+  { value: "it", label: "Italy (+39)" },
+  { value: "es", label: "Spain (+34)" },
+  { value: "pt", label: "Portugal (+351)" },
+  { value: "nl", label: "Netherlands (+31)" },
+  { value: "be", label: "Belgium (+32)" },
+  { value: "ch", label: "Switzerland (+41)" },
+  { value: "at", label: "Austria (+43)" },
+  { value: "se", label: "Sweden (+46)" },
+  { value: "no", label: "Norway (+47)" },
+  { value: "dk", label: "Denmark (+45)" },
+  { value: "fi", label: "Finland (+358)" },
+  { value: "ie", label: "Ireland (+353)" },
+  { value: "nz", label: "New Zealand (+64)" },
+  { value: "jp", label: "Japan (+81)" },
+  { value: "kr", label: "South Korea (+82)" },
+  { value: "sg", label: "Singapore (+65)" },
+  { value: "hk", label: "Hong Kong (+852)" },
+  { value: "mx", label: "Mexico (+52)" },
+  { value: "br", label: "Brazil (+55)" },
+  { value: "ar", label: "Argentina (+54)" },
+  { value: "cl", label: "Chile (+56)" },
+  { value: "za", label: "South Africa (+27)" },
+  { value: "in", label: "India (+91)" },
+  { value: "ph", label: "Philippines (+63)" },
+  { value: "my", label: "Malaysia (+60)" },
+  { value: "id", label: "Indonesia (+62)" },
+  { value: "th", label: "Thailand (+66)" },
+  { value: "vn", label: "Vietnam (+84)" },
+  { value: "ae", label: "United Arab Emirates (+971)" },
+  { value: "sa", label: "Saudi Arabia (+966)" },
+  { value: "il", label: "Israel (+972)" },
+  { value: "tr", label: "Turkey (+90)" },
+  { value: "ru", label: "Russia (+7)" },
+  { value: "pl", label: "Poland (+48)" },
 ];
 
 export const BuyPhoneNumberForm = () => {
@@ -97,11 +132,13 @@ export const BuyPhoneNumberForm = () => {
             <SelectValue placeholder="Choose a region" />
           </SelectTrigger>
           <SelectContent>
-            {regions.map((region) => (
-              <SelectItem key={region.value} value={region.value}>
-                {region.label}
-              </SelectItem>
-            ))}
+            <ScrollArea className="h-[300px]">
+              {regions.map((region) => (
+                <SelectItem key={region.value} value={region.value}>
+                  {region.label}
+                </SelectItem>
+              ))}
+            </ScrollArea>
           </SelectContent>
         </Select>
       </div>
