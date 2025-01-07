@@ -57,12 +57,17 @@ serve(async (req) => {
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
           console.log('Subscription data:', subscription);
 
+          // Fetch the product details to get the name
+          const product = await stripe.products.retrieve('prod_RWkBT7Yqvn0DkE');
+          console.log('Product data:', product);
+
           const { error } = await supabaseClient
             .from('subscriptions')
             .insert({
               user_id: session.client_reference_id,
               stripe_subscription_id: subscription.id,
               status: subscription.status,
+              plan_name: product.name
             });
 
           if (error) {
@@ -130,9 +135,15 @@ serve(async (req) => {
         const subscription = event.data.object;
         console.log('Updating subscription status:', subscription.id, subscription.status);
         
+        // Fetch the product details to get the name for updates
+        const product = await stripe.products.retrieve('prod_RWkBT7Yqvn0DkE');
+        
         const { error } = await supabaseClient
           .from('subscriptions')
-          .update({ status: subscription.status })
+          .update({ 
+            status: subscription.status,
+            plan_name: product.name 
+          })
           .eq('stripe_subscription_id', subscription.id);
 
         if (error) {

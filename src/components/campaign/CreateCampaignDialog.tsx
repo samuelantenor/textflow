@@ -9,6 +9,7 @@ import { Loader2, Plus } from "lucide-react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import type { CampaignFormData } from "@/types/campaign";
+import { useQuery } from "@tanstack/react-query";
 
 export function CreateCampaignDialog() {
   const [open, setOpen] = useState(false);
@@ -16,8 +17,41 @@ export function CreateCampaignDialog() {
   const { toast } = useToast();
   const form = useForm<CampaignFormData>();
 
+  // Check monthly usage
+  const { data: messageStats } = useQuery({
+    queryKey: ['message_stats'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+
+      const { data: messageLogs, error: messageLogsError } = await supabase
+        .from('message_logs')
+        .select(`
+          *,
+          campaigns!inner(*)
+        `)
+        .eq('campaigns.user_id', session.user.id)
+        .gte('created_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString());
+
+      if (messageLogsError) throw messageLogsError;
+      return messageLogs?.length || 0;
+    },
+  });
+
+  const monthlyLimit = 1000;
+  const isLimitReached = (messageStats || 0) >= monthlyLimit;
+
   const onSubmit = async (data: CampaignFormData) => {
     try {
+      if (isLimitReached) {
+        toast({
+          title: "Monthly limit reached",
+          description: "Please upgrade your plan to send more messages.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setIsLoading(true);
 
       const { data: { session } } = await supabase.auth.getSession();
@@ -55,7 +89,7 @@ export function CreateCampaignDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button disabled={isLimitReached}>
           <Plus className="w-4 h-4 mr-2" />
           New Campaign
         </Button>
@@ -87,7 +121,7 @@ export function CreateCampaignDialog() {
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading || isLimitReached}>
                 {isLoading && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
