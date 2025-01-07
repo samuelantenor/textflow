@@ -18,19 +18,49 @@ export const DashboardHeader = () => {
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
-      navigate("/login", { replace: true }); // Use replace to prevent going back to dashboard
-      toast({
-        title: "Signed out successfully",
-        description: "You have been logged out of your account.",
-      });
+      // First check if we have an active session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        // If there's a session error, we should redirect to login anyway
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      if (!session) {
+        // If no session exists, just redirect to login
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      // If we have a valid session, attempt to sign out
+      const { error: signOutError } = await supabase.auth.signOut();
+      
+      if (signOutError) {
+        console.error('Error signing out:', signOutError);
+        toast({
+          variant: "destructive",
+          title: "Error signing out",
+          description: signOutError.message,
+        });
+      } else {
+        toast({
+          title: "Signed out successfully",
+          description: "You have been logged out of your account.",
+        });
+      }
+
+      // Always redirect to login page, even if there was an error
+      navigate("/login", { replace: true });
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Unexpected error during sign out:', error);
+      // Ensure we redirect to login even if something unexpected happens
       navigate("/login", { replace: true });
       toast({
         variant: "destructive",
         title: "Error signing out",
-        description: "There was a problem signing you out, but you've been redirected to the login page.",
+        description: "An unexpected error occurred, but you've been redirected to the login page.",
       });
     }
   };

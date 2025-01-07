@@ -13,15 +13,35 @@ import { Toaster } from "@/components/ui/toaster";
 const Billing = () => {
   const navigate = useNavigate();
 
-  // Check authentication
+  // Check authentication and session
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Session error:', error);
+        navigate("/login", { replace: true });
+        return;
+      }
+      
       if (!session) {
-        navigate("/login");
+        navigate("/login", { replace: true });
+        return;
       }
     };
+    
     checkAuth();
+    
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        navigate("/login", { replace: true });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   // Fetch subscription status
