@@ -20,6 +20,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CampaignFormFieldsProps {
   form: UseFormReturn<CampaignFormData>;
@@ -27,7 +28,7 @@ interface CampaignFormFieldsProps {
 
 export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
   const { toast } = useToast();
-  const { data: groups } = useQuery({
+  const { data: groups, isLoading } = useQuery({
     queryKey: ['campaign-groups'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -61,20 +62,24 @@ export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Contact Group</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a contact group" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {groups?.map((group) => (
-                  <SelectItem key={group.id} value={group.id}>
-                    {group.name} ({group.contacts[0]?.count || 0} contacts)
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {isLoading ? (
+              <Skeleton className="h-10 w-full" />
+            ) : (
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a contact group" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {groups?.map((group) => (
+                    <SelectItem key={group.id} value={group.id}>
+                      {group.name} ({group.contacts?.[0]?.count || 0} contacts)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <FormMessage />
           </FormItem>
         )}
