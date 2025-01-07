@@ -42,7 +42,7 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
           <div>
             <p className="font-medium">Current Plan</p>
             <p className="text-muted-foreground">
-              {subscription?.status === 'active' ? 'Premium Plan' : 'Free Plan'}
+              {subscription?.status === 'active' ? subscription.plan_name || 'Premium Plan' : 'Free Plan'}
             </p>
           </div>
           <Button 
