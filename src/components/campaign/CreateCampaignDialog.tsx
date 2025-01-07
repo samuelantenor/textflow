@@ -17,36 +17,47 @@ export function CreateCampaignDialog() {
   const { toast } = useToast();
   const form = useForm<CampaignFormData>();
 
-  // Check monthly usage
-  const { data: messageStats } = useQuery({
-    queryKey: ['message_stats'],
+  // Check monthly usage and campaign limits
+  const { data: limits } = useQuery({
+    queryKey: ['user-plan-limits'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return null;
 
-      const { data: messageLogs, error: messageLogsError } = await supabase
-        .from('message_logs')
-        .select(`
-          *,
-          campaigns!inner(*)
-        `)
-        .eq('campaigns.user_id', session.user.id)
-        .gte('created_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString());
+      const { data, error } = await supabase.rpc('get_user_plan_limits', {
+        user_id: session.user.id
+      });
 
-      if (messageLogsError) throw messageLogsError;
-      return messageLogs?.length || 0;
+      if (error) throw error;
+      return data[0];
     },
   });
 
-  const monthlyLimit = 1000;
-  const isLimitReached = (messageStats || 0) >= monthlyLimit;
+  // Get current campaign count
+  const { data: campaignCount } = useQuery({
+    queryKey: ['campaign-count'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+
+      const { count, error } = await supabase
+        .from('campaigns')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', session.user.id);
+
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
+  const isAtCampaignLimit = (campaignCount || 0) >= (limits?.campaign_limit || 3);
 
   const onSubmit = async (data: CampaignFormData) => {
     try {
-      if (isLimitReached) {
+      if (isAtCampaignLimit) {
         toast({
-          title: "Monthly limit reached",
-          description: "Please upgrade your plan to send more messages.",
+          title: "Campaign limit reached",
+          description: "Please upgrade your plan to create more campaigns.",
           variant: "destructive",
         });
         return;
@@ -89,9 +100,10 @@ export function CreateCampaignDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button disabled={isLimitReached}>
+        <Button disabled={isAtCampaignLimit}>
           <Plus className="w-4 h-4 mr-2" />
           New Campaign
+          {isAtCampaignLimit && " (Limit Reached)"}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -121,7 +133,7 @@ export function CreateCampaignDialog() {
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading || isLimitReached}>
+              <Button type="submit" disabled={isLoading || isAtCampaignLimit}>
                 {isLoading && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
