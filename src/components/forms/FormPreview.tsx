@@ -30,6 +30,7 @@ interface FormPreviewProps {
     fontFamily?: string;
     logoUrl?: string;
     primaryColor?: string;
+    borderRadius?: number;
   };
 }
 
@@ -40,7 +41,7 @@ export function FormPreview({ title, description, fields, customization }: FormP
       placeholder: field.placeholder,
       style: {
         borderColor: customization?.primaryColor,
-        borderRadius: '0.375rem',
+        borderRadius: `${customization?.borderRadius || 8}px`,
       },
     };
 
@@ -111,6 +112,19 @@ export function FormPreview({ title, description, fields, customization }: FormP
     }
   };
 
+  const formStyle = {
+    backgroundColor: customization?.backgroundColor || '#FFFFFF',
+    fontFamily: customization?.fontFamily || 'Inter',
+    background: customization?.backgroundColor?.includes('gradient') 
+      ? customization.backgroundColor 
+      : undefined,
+  };
+
+  const headerStyle = {
+    color: customization?.primaryColor,
+    borderRadius: `${customization?.borderRadius || 8}px`,
+  };
+
   return (
     <div className="h-full">
       <div className="flex items-center gap-2 mb-4 text-muted-foreground">
@@ -118,26 +132,23 @@ export function FormPreview({ title, description, fields, customization }: FormP
         <span className="text-sm font-medium">Form Preview</span>
       </div>
       <Card 
-        className="p-6 bg-card/50 backdrop-blur-sm h-[calc(100%-2rem)] overflow-y-auto"
-        style={{
-          backgroundColor: customization?.backgroundColor || '#FFFFFF',
-          fontFamily: customization?.fontFamily || 'Inter',
-        }}
+        className="p-6 bg-card/50 backdrop-blur-sm h-[calc(100%-2rem)] overflow-y-auto transition-all duration-300"
+        style={formStyle}
       >
         <div className="space-y-6">
           {customization?.logoUrl && (
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-6 animate-fade-in">
               <img 
                 src={customization.logoUrl} 
                 alt="Form logo" 
-                className="max-h-20 object-contain"
+                className="max-h-20 object-contain hover:scale-105 transition-transform duration-200"
               />
             </div>
           )}
-          <div>
+          <div className="animate-fade-in">
             <h2 
-              className="text-2xl font-bold mb-2"
-              style={{ color: customization?.primaryColor }}
+              className="text-2xl font-bold mb-2 transition-colors duration-200"
+              style={headerStyle}
             >
               {title || "Untitled Form"}
             </h2>
@@ -147,10 +158,15 @@ export function FormPreview({ title, description, fields, customization }: FormP
           </div>
           <div className="space-y-8">
             {fields.map((field, index) => (
-              <div key={index} className="space-y-2">
+              <div 
+                key={index} 
+                className="space-y-2 animate-fade-in"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
                 {field.type !== 'checkbox' && (
                   <Label
                     style={{ color: customization?.primaryColor }}
+                    className="transition-colors duration-200"
                   >
                     {field.label}
                     {field.required && (
