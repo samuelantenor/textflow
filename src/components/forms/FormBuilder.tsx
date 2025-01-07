@@ -17,7 +17,7 @@ import { FormFieldBuilder } from "./FormFieldBuilder";
 import { FormFieldList } from "./FormFieldList";
 import { FormDesignTab } from "./form-builder/FormDesignTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FormData } from "@/types/form";
+import { FormData, isJsonFields } from "@/types/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -91,12 +91,17 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
         throw new Error("User not authenticated");
       }
 
+      // Validate fields are in correct Json format
+      if (!isJsonFields(data.fields)) {
+        throw new Error("Invalid form fields format");
+      }
+
       const { error } = await supabase.from("custom_forms").insert({
         user_id: session.user.id,
         group_id: data.group_id,
         title: data.title,
         description: data.description,
-        fields: data.fields,
+        fields: data.fields as any, // Type assertion needed here since we validated above
         background_color: data.background_color,
         font_family: data.font_family,
         logo_url: data.logo_url,
