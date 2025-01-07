@@ -26,12 +26,13 @@ export interface FormData {
   fields: FormField[];
 }
 
-// Type guard to ensure FormField array is valid Json
-export function isJsonFields(fields: FormField[]): fields is Json[] {
+// Type guard to validate form fields structure
+export function isJsonFields(fields: FormField[]): fields is FormField[] {
   return Array.isArray(fields) && fields.every(field => 
     typeof field === 'object' && 
     field !== null && 
-    typeof (field as FormField).type === 'string' &&
-    typeof (field as FormField).label === 'string'
+    typeof field.type === 'string' &&
+    typeof field.label === 'string' &&
+    ['text', 'email', 'phone', 'checkbox', 'textarea', 'number', 'date', 'radio', 'select'].includes(field.type)
   );
 }
