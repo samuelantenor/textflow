@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { MessageSquare, Users, BarChart3, FileText } from "lucide-react";
+import { Users, BarChart3, FileText } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 
 interface DashboardOverviewProps {
@@ -8,12 +8,6 @@ interface DashboardOverviewProps {
 
 export const DashboardOverview = ({ setActiveTab }: DashboardOverviewProps) => {
   const quickActions = [
-    {
-      title: "New Campaign",
-      description: "Create and send SMS campaigns",
-      icon: MessageSquare,
-      tab: "campaigns"
-    },
     {
       title: "Contact Groups",
       description: "Manage your contact lists",
@@ -38,7 +32,7 @@ export const DashboardOverview = ({ setActiveTab }: DashboardOverviewProps) => {
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {quickActions.map((action) => (
             <Card 
               key={action.title}
