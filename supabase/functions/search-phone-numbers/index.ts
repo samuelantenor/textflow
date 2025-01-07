@@ -13,14 +13,14 @@ serve(async (req) => {
   }
 
   try {
-    const client = new Twilio(
-      Deno.env.get('TWILIO_ACCOUNT_SID'),
-      Deno.env.get('TWILIO_AUTH_TOKEN')
-    );
+    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
+    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
 
-    if (!client) {
-      throw new Error('Failed to initialize Twilio client');
+    if (!accountSid || !authToken) {
+      throw new Error('Missing Twilio credentials');
     }
+
+    const client = new Twilio(accountSid, authToken);
 
     let body = {};
     try {
@@ -57,7 +57,7 @@ serve(async (req) => {
       }
     }
 
-    console.log('Searching for numbers with params:', searchParams);
+    console.log('Searching with params:', searchParams);
 
     const numbers = await client.availablePhoneNumbers('US')
       .local
@@ -69,7 +69,7 @@ serve(async (req) => {
       phoneNumber: number.phoneNumber,
       friendlyName: number.friendlyName,
       capabilities: [
-        ...(number.capabilities.sms ? ['SMS'] : []),
+        ...(number.capabilities.SMS ? ['SMS'] : []),
         ...(number.capabilities.voice ? ['Voice'] : []),
       ],
       monthlyCost: parseFloat(number.pricePerMonth),

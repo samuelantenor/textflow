@@ -1,64 +1,59 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { BuyPhoneNumberDialog } from "./BuyPhoneNumberDialog";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { PhoneNumber } from "./types";
 
-export const PhoneNumberList = () => {
-  const { data: phoneNumbers, isLoading } = useQuery({
-    queryKey: ['phone-numbers'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('phone_numbers')
-        .select('*')
-        .order('created_at', { ascending: false });
+interface PhoneNumberListProps {
+  numbers: PhoneNumber[];
+  onSelect: (number: PhoneNumber) => void;
+  onPurchase: (number: PhoneNumber) => Promise<void>;
+  isPurchasing: boolean;
+}
 
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  if (isLoading) {
-    return <div>Loading...</div>;
+export function PhoneNumberList({ numbers, onSelect, onPurchase, isPurchasing }: PhoneNumberListProps) {
+  if (numbers.length === 0) {
+    return (
+      <Card className="p-6 text-center text-muted-foreground">
+        No phone numbers found. Try adjusting your search criteria.
+      </Card>
+    );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Phone Numbers</h2>
-        <BuyPhoneNumberDialog />
-      </div>
-
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Phone Number</TableHead>
-            <TableHead>Capabilities</TableHead>
-            <TableHead>Monthly Cost</TableHead>
-            <TableHead>Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {phoneNumbers?.map((number) => (
-            <TableRow key={number.id}>
-              <TableCell>{number.phone_number}</TableCell>
-              <TableCell>
-                {Array.isArray(number.capabilities)
-                  ? number.capabilities.join(", ")
-                  : "N/A"}
-              </TableCell>
-              <TableCell>${number.monthly_cost}/month</TableCell>
-              <TableCell>{number.status}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <div className="grid gap-4 md:grid-cols-2">
+      {numbers.map((number) => (
+        <Card
+          key={number.phoneNumber}
+          className="p-4 cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => onSelect(number)}
+        >
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="font-medium">{number.friendlyName}</p>
+              <p className="text-sm text-muted-foreground">
+                Capabilities: {number.capabilities.join(", ")}
+              </p>
+            </div>
+            <p className="text-sm font-medium">
+              ${number.monthlyCost}/month
+            </p>
+          </div>
+          <Button
+            className="mt-4 w-full"
+            onClick={(e) => {
+              e.stopPropagation();
+              onPurchase(number);
+            }}
+            disabled={isPurchasing}
+          >
+            {isPurchasing ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              "Purchase"
+            )}
+          </Button>
+        </Card>
+      ))}
     </div>
   );
-};
+}
