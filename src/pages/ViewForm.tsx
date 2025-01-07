@@ -115,11 +115,36 @@ export default function ViewForm() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
-      <Card className="max-w-2xl mx-auto p-6">
+    <div 
+      className="min-h-screen py-12 px-4"
+      style={{
+        backgroundColor: form.background_color || '#FFFFFF',
+        fontFamily: form.font_family || 'Inter',
+      }}
+    >
+      <Card 
+        className="max-w-2xl mx-auto p-6"
+        style={{
+          backgroundColor: form.background_color || '#FFFFFF',
+        }}
+      >
+        {form.logo_url && (
+          <div className="flex justify-center mb-6">
+            <img 
+              src={form.logo_url} 
+              alt="Form logo" 
+              className="max-h-20 object-contain"
+            />
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-8">
           <div>
-            <h1 className="text-2xl font-bold mb-2">{form.title}</h1>
+            <h1 
+              className="text-2xl font-bold mb-2"
+              style={{ color: form.primary_color }}
+            >
+              {form.title}
+            </h1>
             {form.description && (
               <p className="text-muted-foreground">{form.description}</p>
             )}
@@ -131,9 +156,20 @@ export default function ViewForm() {
             onFieldChange={(fieldName, value) => {
               setFormData(prev => ({ ...prev, [fieldName]: value }));
             }}
+            customization={{
+              primaryColor: form.primary_color,
+            }}
           />
 
-          <Button type="submit" className="w-full" disabled={submitting}>
+          <Button 
+            type="submit" 
+            className="w-full"
+            disabled={submitting}
+            style={{
+              backgroundColor: form.primary_color,
+              borderColor: form.primary_color,
+            }}
+          >
             {submitting ? "Submitting..." : "Submit"}
           </Button>
         </form>

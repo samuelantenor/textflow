@@ -6,17 +6,25 @@ interface FormFieldsProps {
   fields: FormField[];
   formData: Record<string, any>;
   onFieldChange: (fieldName: string, value: any) => void;
+  customization?: {
+    primaryColor?: string;
+  };
 }
 
-export function FormFields({ fields, formData, onFieldChange }: FormFieldsProps) {
+export function FormFields({ fields, formData, onFieldChange, customization }: FormFieldsProps) {
   return (
     <div className="space-y-6">
       {fields.map((field: FormField, index: number) => (
         <div key={index} className="space-y-2">
           {field.type !== 'checkbox' && (
-            <Label htmlFor={`field-${index}`}>
+            <Label 
+              htmlFor={`field-${index}`}
+              style={{ color: customization?.primaryColor }}
+            >
               {field.label}
-              {field.required && <span className="text-destructive ml-1">*</span>}
+              {field.required && (
+                <span className="text-destructive ml-1">*</span>
+              )}
             </Label>
           )}
           {field.description && (
@@ -27,6 +35,7 @@ export function FormFields({ fields, formData, onFieldChange }: FormFieldsProps)
             index={index}
             value={formData[field.label]}
             onChange={(value) => onFieldChange(field.label, value)}
+            customization={customization}
           />
         </div>
       ))}

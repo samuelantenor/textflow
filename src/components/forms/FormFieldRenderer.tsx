@@ -1,49 +1,67 @@
-import { FormField } from "@/types/form";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 interface FormFieldRendererProps {
-  field: FormField;
+  field: {
+    type: string;
+    label: string;
+    required?: boolean;
+    placeholder?: string;
+    options?: string[];
+    description?: string;
+  };
   index: number;
   value: any;
   onChange: (value: any) => void;
+  customization?: {
+    primaryColor?: string;
+  };
 }
 
-export function FormFieldRenderer({ field, index, value, onChange }: FormFieldRendererProps) {
-  const commonProps = {
-    id: `field-${index}`,
-    value: value || "",
-    onChange: (e: any) => {
-      const value = e.target?.value ?? e;
-      onChange(value);
-    },
-    required: field.required,
+export function FormFieldRenderer({ field, index, value, onChange, customization }: FormFieldRendererProps) {
+  const commonInputStyles = {
+    borderColor: customization?.primaryColor,
+    borderRadius: '0.375rem',
   };
 
   switch (field.type) {
     case 'textarea':
-      return <Textarea {...commonProps} placeholder={field.placeholder} />;
+      return (
+        <Textarea
+          id={`field-${index}`}
+          placeholder={field.placeholder}
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          required={field.required}
+          style={commonInputStyles}
+        />
+      );
     case 'checkbox':
       return (
         <div className="flex items-center space-x-2">
           <Checkbox
             id={`field-${index}`}
             checked={value || false}
-            onCheckedChange={(checked) => {
-              onChange(checked);
+            onCheckedChange={onChange}
+            required={field.required}
+            className={cn(
+              "border-2",
+              "data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+            )}
+            style={{ 
+              borderColor: customization?.primaryColor,
             }}
           />
-          <label htmlFor={`field-${index}`} className="text-sm">
+          <label 
+            htmlFor={`field-${index}`}
+            className="text-sm"
+            style={{ color: customization?.primaryColor }}
+          >
             {field.label}
           </label>
         </div>
@@ -51,15 +69,29 @@ export function FormFieldRenderer({ field, index, value, onChange }: FormFieldRe
     case 'radio':
       return (
         <RadioGroup
-          value={value || ""}
-          onValueChange={(value) => {
-            onChange(value);
-          }}
+          value={value || ''}
+          onValueChange={onChange}
+          required={field.required}
         >
-          {field.options?.map((option: string, optionIndex: number) => (
+          {field.options?.map((option, optionIndex) => (
             <div key={optionIndex} className="flex items-center space-x-2">
-              <RadioGroupItem value={option} id={`${index}-${optionIndex}`} />
-              <Label htmlFor={`${index}-${optionIndex}`}>{option}</Label>
+              <RadioGroupItem
+                value={option}
+                id={`${index}-${optionIndex}`}
+                className={cn(
+                  "border-2",
+                  "data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                )}
+                style={{ 
+                  borderColor: customization?.primaryColor,
+                }}
+              />
+              <Label 
+                htmlFor={`${index}-${optionIndex}`}
+                style={{ color: customization?.primaryColor }}
+              >
+                {option}
+              </Label>
             </div>
           ))}
         </RadioGroup>
@@ -67,16 +99,15 @@ export function FormFieldRenderer({ field, index, value, onChange }: FormFieldRe
     case 'select':
       return (
         <Select
-          value={value || ""}
-          onValueChange={(value) => {
-            onChange(value);
-          }}
+          value={value || ''}
+          onValueChange={onChange}
+          required={field.required}
         >
-          <SelectTrigger>
+          <SelectTrigger style={commonInputStyles}>
             <SelectValue placeholder={field.placeholder || "Select an option"} />
           </SelectTrigger>
           <SelectContent>
-            {field.options?.map((option: string, optionIndex: number) => (
+            {field.options?.map((option, optionIndex) => (
               <SelectItem key={optionIndex} value={option}>
                 {option}
               </SelectItem>
@@ -87,9 +118,13 @@ export function FormFieldRenderer({ field, index, value, onChange }: FormFieldRe
     default:
       return (
         <Input
-          {...commonProps}
+          id={`field-${index}`}
           type={field.type === 'number' || field.type === 'date' ? field.type : 'text'}
           placeholder={field.placeholder}
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          required={field.required}
+          style={commonInputStyles}
         />
       );
   }
