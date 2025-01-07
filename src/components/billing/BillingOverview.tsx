@@ -60,9 +60,6 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
     }
   };
 
-  const isActiveSubscription = subscription?.status === 'active' && subscription?.plan_type === 'paid';
-  const isCancelled = subscription?.status === 'active' && subscription?.plan_type === 'free';
-
   return (
     <div className="bg-card rounded-lg p-6">
       <h2 className="text-lg font-semibold mb-6">Subscription Overview</h2>
@@ -71,15 +68,10 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
           <div>
             <p className="font-medium">Current Plan</p>
             <p className="text-muted-foreground">
-              {isActiveSubscription ? 'Premium Plan' : 'Free Plan'}
+              {subscription?.status === 'active' ? subscription.plan_name || 'Premium Plan' : 'Free Plan'}
             </p>
-            {isCancelled && (
-              <p className="text-sm text-muted-foreground">
-                Your premium features will remain active until the end of your billing period
-              </p>
-            )}
           </div>
-          {isActiveSubscription ? (
+          {subscription?.status === 'active' ? (
             <Button 
               onClick={handleManageSubscription}
               disabled={isLoading}
@@ -90,19 +82,16 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
           ) : (
             <Button 
               onClick={handleSubscribe}
-              disabled={isLoading || isCancelled}
-              className={isCancelled ? "bg-muted text-muted-foreground cursor-not-allowed" : ""}
+              disabled={isLoading}
             >
               <CreditCard className="mr-2 h-4 w-4" />
-              {isCancelled ? 'Subscription Ending Soon' : 'Subscribe Now'}
+              Subscribe Now
             </Button>
           )}
         </div>
         <div>
           <p className="font-medium">Status</p>
-          <p className="text-muted-foreground capitalize">
-            {isActiveSubscription ? 'Active' : (isCancelled ? 'Cancellation Pending' : 'Not subscribed')}
-          </p>
+          <p className="text-muted-foreground capitalize">{subscription?.status || 'Not subscribed'}</p>
         </div>
       </div>
     </div>
