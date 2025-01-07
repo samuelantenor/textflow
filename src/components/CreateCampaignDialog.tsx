@@ -13,7 +13,7 @@ import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Loader2 } from "lucide-react";
-import { CampaignFormFields } from "./campaign/CampaignFormFields";
+import { CampaignFormFields } from "./CampaignFormFields";
 import type { CampaignFormData } from "@/types/campaign";
 
 export function CreateCampaignDialog() {
@@ -25,6 +25,7 @@ export function CreateCampaignDialog() {
       name: '',
       message: '',
       group_id: '',
+      from_number: '',
     },
   });
 
