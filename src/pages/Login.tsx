@@ -1,22 +1,15 @@
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if we have a hash in the URL (from password reset email)
-    if (location.hash && location.hash.includes('access_token')) {
-      navigate('/reset-password' + location.hash);
-      return;
-    }
-
     // Check current session on mount
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
@@ -40,18 +33,13 @@ const Login = () => {
       
       if (event === 'SIGNED_IN' && session) {
         navigate("/dashboard", { replace: true });
-      } else if (event === 'PASSWORD_RECOVERY') {
-        toast({
-          title: "Password Recovery Email Sent",
-          description: "Please check your email for the password reset link.",
-        });
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, toast, location]);
+  }, [navigate, toast]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -83,9 +71,6 @@ const Login = () => {
             }}
             theme="dark"
             providers={[]}
-            view="sign_in"
-            showLinks={true}
-            redirectTo={window.location.origin + "/dashboard"}
           />
         </div>
       </div>
