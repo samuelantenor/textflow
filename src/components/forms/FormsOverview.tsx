@@ -76,23 +76,28 @@ export const FormsOverview = () => {
     if (!selectedForm) return;
 
     try {
+      // First, delete all form submissions for this form
       const { error: submissionsError } = await supabase
         .from('form_submissions')
         .delete()
         .eq('form_id', selectedForm.id);
 
-      if (submissionsError) throw submissionsError;
+      if (submissionsError) {
+        console.error('Error deleting form submissions:', submissionsError);
+        throw submissionsError;
+      }
 
-      const { error } = await supabase
+      // Then, delete the form itself
+      const { error: formError } = await supabase
         .from('custom_forms')
         .delete()
         .eq('id', selectedForm.id);
 
-      if (error) throw error;
+      if (formError) throw formError;
 
       toast({
         title: "Success",
-        description: "Form deleted successfully.",
+        description: "Form and its submissions deleted successfully.",
       });
 
       queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
