@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { CreateCampaignButton } from "@/components/CreateCampaignButton";
-import { CampaignListItem } from "@/components/campaigns/CampaignListItem";
-import { Campaign } from "./types";
+import { CampaignCard } from "./CampaignCard";
+import { Campaign } from "@/types/campaign";
 import { MessageSquare } from "lucide-react";
 
 export function CampaignList() {
@@ -67,9 +67,9 @@ export function CampaignList() {
         <h2 className="text-xl font-semibold">Campaigns ({campaigns.length})</h2>
         <CreateCampaignButton />
       </div>
-      <div className="grid gap-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {campaigns.map((campaign) => (
-          <CampaignListItem key={campaign.id} campaign={campaign} />
+          <CampaignCard key={campaign.id} campaign={campaign} />
         ))}
       </div>
     </div>
