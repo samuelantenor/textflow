@@ -33,16 +33,30 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
 
       let mediaUrl = campaign.media_url;
       if (data.media) {
+        // Delete old media if it exists
+        if (campaign.media_url) {
+          const oldFileName = campaign.media_url.split('/').pop();
+          if (oldFileName) {
+            await supabase.storage
+              .from('campaign_media')
+              .remove([oldFileName]);
+          }
+        }
+
+        // Upload new media
         const fileExt = data.media.name.split(".").pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
         const { error: uploadError } = await supabase.storage
-          .from("campaign_media")
+          .from('campaign_media')
           .upload(fileName, data.media);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw uploadError;
+        }
 
         const { data: { publicUrl } } = supabase.storage
-          .from("campaign_media")
+          .from('campaign_media')
           .getPublicUrl(fileName);
         
         mediaUrl = publicUrl;
