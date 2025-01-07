@@ -1,50 +1,48 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
-export function BuyPhoneNumberForm() {
+export const BuyPhoneNumberForm = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [country, setCountry] = useState('us');
+  const [country, setCountry] = useState("");
   const { toast } = useToast();
 
-  const handlePayment = async () => {
-    setIsLoading(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast({
-          title: "Authentication required",
-          description: "Please sign in to purchase a phone number.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const response = await fetch('/functions/create-phone-number-checkout', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ country }),
-      });
-
-      const { url, error } = await response.json();
-      
-      if (error) throw new Error(error);
-      if (url) window.location.href = url;
-      
-    } catch (error) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!country) {
       toast({
-        title: "Error",
-        description: "Failed to initiate payment. Please try again.",
         variant: "destructive",
+        title: "Error",
+        description: "Please select a country",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const { data: sessionData, error: sessionError } = await supabase.functions.invoke(
+        'create-phone-number-checkout',
+        {
+          method: 'POST',
+        }
+      );
+
+      if (sessionError) throw sessionError;
+      if (!sessionData?.url) throw new Error('No checkout URL received');
+
+      // Redirect to Stripe Checkout
+      window.location.href = sessionData.url;
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to start checkout process",
       });
     } finally {
       setIsLoading(false);
@@ -52,69 +50,33 @@ export function BuyPhoneNumberForm() {
   };
 
   return (
-    <Card className="p-6 max-w-md mx-auto">
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-lg font-semibold mb-2">Request a New Phone Number</h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            Choose your preferred region to get a local phone number.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="email">Your Email</Label>
-          <Input
-            id="email"
-            type="email"
-            required
-            placeholder="your@email.com"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="company">Company Name</Label>
-          <Input
-            id="company"
-            type="text"
-            required
-            placeholder="Your Company Name"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Choose Region</Label>
-          <PhoneInput
-            country={country}
-            onChange={(value) => setCountry(value)}
-            enableSearch
-            inputClass="!w-full"
-            containerClass="!w-full"
-            searchClass="!w-full"
-            dropdownClass="!w-full"
-            disableSearchIcon
-            inputProps={{
-              required: true,
-              className: "w-full"
-            }}
-            disabled
-          />
-        </div>
-
-        <div className="border-t pt-4">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-sm font-medium">Monthly fee</span>
-            <span className="text-lg font-semibold">$5.00/month</span>
-          </div>
-          
-          <Button 
-            onClick={handlePayment}
-            className="w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? "Processing..." : "Pay Now"}
-          </Button>
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <Label>Choose Region Number</Label>
+        <PhoneInput
+          country={"us"}
+          enableSearch
+          disableSearchIcon
+          inputProps={{
+            required: true,
+          }}
+          onChange={(value) => setCountry(value)}
+          containerClass="!w-full"
+          inputClass="!w-full !h-10 !text-base"
+          buttonClass="!h-10"
+          searchClass="!w-full"
+        />
       </div>
-    </Card>
+
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">
+          Monthly fee: $5/month
+        </p>
+      </div>
+
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? "Processing..." : "Pay Now"}
+      </Button>
+    </form>
   );
-}
+};

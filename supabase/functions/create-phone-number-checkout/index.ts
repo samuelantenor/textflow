@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -18,12 +19,15 @@ serve(async (req) => {
   );
 
   try {
+    // Get the session or user object
     const authHeader = req.headers.get('Authorization')!;
     const token = authHeader.replace('Bearer ', '');
     
+    console.log('Authenticating user...');
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
     
     if (authError || !user) {
+      console.error('Authentication error:', authError);
       throw new Error('Authentication failed');
     }
 
@@ -32,10 +36,12 @@ serve(async (req) => {
       throw new Error('No email found');
     }
 
+    console.log('Creating Stripe instance...');
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
     });
 
+    console.log('Checking existing customers...');
     const customers = await stripe.customers.list({
       email: email,
       limit: 1
@@ -44,11 +50,14 @@ serve(async (req) => {
     let customer_id = undefined;
     if (customers.data.length > 0) {
       customer_id = customers.data[0].id;
+      console.log('Found existing customer:', customer_id);
     }
 
+    console.log('Creating checkout session...');
     const session = await stripe.checkout.sessions.create({
       customer: customer_id,
       customer_email: customer_id ? undefined : email,
+      client_reference_id: user.id,
       line_items: [
         {
           price: 'price_1QeVc9B4RWKZ2dNzcZkA0mS4',
@@ -60,6 +69,7 @@ serve(async (req) => {
       cancel_url: `${req.headers.get('origin')}/dashboard`,
     });
 
+    console.log('Checkout session created:', session.id);
     return new Response(
       JSON.stringify({ url: session.url }),
       { 
@@ -68,6 +78,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
+    console.error('Error:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
