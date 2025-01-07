@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import CreateCampaignButton from "@/components/CreateCampaignButton";
+import { CreateCampaignButton } from "@/components/CreateCampaignButton";
 import StatsDisplay from "@/components/StatsDisplay";
 import CampaignTable from "@/components/CampaignTable";
 import SubscribeButton from "@/components/SubscribeButton";
