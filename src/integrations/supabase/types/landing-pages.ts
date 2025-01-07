@@ -9,9 +9,9 @@ export interface LandingPage {
   font_family: string;
   logo_url: string | null;
   published: boolean;
+  background_color: string | null;
   created_at: string;
   updated_at: string;
-  background_color: string | null;
 }
 
 export interface LandingPageInsert extends Omit<LandingPage, 'id' | 'created_at' | 'updated_at'> {

@@ -10,6 +10,16 @@ import { FormContainer } from "@/components/forms/view/FormContainer";
 import { FormHeader } from "@/components/forms/view/FormHeader";
 import { useToast } from "@/hooks/use-toast";
 import { FormField } from "@/types/form";
+import { LandingPage } from "@/integrations/supabase/types/landing-pages";
+
+interface FormResponse {
+  id: string;
+  title: string;
+  description: string | null;
+  fields: FormField[];
+  is_active: boolean;
+  landing_page: LandingPage;
+}
 
 export default function ViewForm() {
   const { id } = useParams();
@@ -22,22 +32,48 @@ export default function ViewForm() {
       const { data, error } = await supabase
         .from('custom_forms')
         .select(`
-          *,
-          landing_pages:landing_pages(*)
+          id,
+          title,
+          description,
+          fields,
+          is_active,
+          landing_pages (
+            id,
+            user_id,
+            title,
+            description,
+            welcome_message,
+            template_id,
+            primary_color,
+            font_family,
+            logo_url,
+            published,
+            background_color
+          )
         `)
         .eq('id', id)
         .maybeSingle();
 
       if (error) throw error;
       if (!data) throw new Error('Form not found');
+
+      // Parse fields as FormField[]
+      const parsedFields = data.fields as FormField[];
       
-      // Ensure fields is parsed as FormField[]
-      const fields = data.fields as FormField[];
-      return {
-        ...data,
-        fields,
-        landing_pages: data.landing_pages
+      // Get the first landing page (assuming one-to-one relationship)
+      const landingPage = data.landing_pages[0];
+      if (!landingPage) throw new Error('Landing page not found');
+
+      const formResponse: FormResponse = {
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        fields: parsedFields,
+        is_active: data.is_active,
+        landing_page: landingPage
       };
+
+      return formResponse;
     },
   });
 
@@ -88,7 +124,7 @@ export default function ViewForm() {
   };
 
   return (
-    <FormContainer landingPage={form.landing_pages}>
+    <FormContainer landingPage={form.landing_page}>
       <form onSubmit={handleSubmit} className="space-y-8">
         <FormHeader 
           title={form.title} 
@@ -98,12 +134,12 @@ export default function ViewForm() {
           fields={form.fields}
           formData={formData}
           onFieldChange={handleFieldChange}
-          primaryColor={form.landing_pages.primary_color}
+          primaryColor={form.landing_page.primary_color}
         />
         <Button 
           type="submit"
           className="w-full"
-          style={{ backgroundColor: form.landing_pages.primary_color }}
+          style={{ backgroundColor: form.landing_page.primary_color }}
         >
           Submit
         </Button>
