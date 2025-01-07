@@ -17,10 +17,15 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const sessionId = searchParams.get("session_id");
-  const [activeTab, setActiveTab] = useState(() => {
-    return sessionId ? "phone-numbers" : "overview";
-  });
+  const [activeTab, setActiveTab] = useState("overview");
+
+  // Set initial tab from URL parameter
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   // Check authentication
   useEffect(() => {
@@ -42,19 +47,6 @@ const Dashboard = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
-
-  // Show success message if coming from successful phone number payment
-  useEffect(() => {
-    if (sessionId) {
-      toast({
-        title: "Payment Successful! 🎉",
-        description: "Your new phone number is on its way! We'll notify you once it's ready.",
-        duration: 6000,
-      });
-      // Clean up the URL
-      window.history.replaceState({}, document.title, "/dashboard");
-    }
-  }, [sessionId, toast]);
 
   // Fetch subscription status
   const { data: subscription, isLoading } = useQuery({
