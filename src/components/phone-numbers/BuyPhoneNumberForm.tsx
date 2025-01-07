@@ -1,32 +1,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect } from "react";
+import { RegionSelect } from "./RegionSelect";
+import { regions } from "./constants";
 
 export const BuyPhoneNumberForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [country, setCountry] = useState("");
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const sessionId = searchParams.get("session_id");
-
-  // Show success message if coming from successful payment
-  useEffect(() => {
-    if (sessionId) {
-      toast({
-        title: "Payment Successful!",
-        description: "Your new phone number is on its way. We'll notify you once it's ready.",
-      });
-      // Clean up the URL and redirect to phone numbers tab
-      navigate("/dashboard?tab=phone-numbers", { replace: true });
-    }
-  }, [sessionId, toast, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +17,7 @@ export const BuyPhoneNumberForm = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please select a country",
+        description: "Please select a region",
       });
       return;
     }
@@ -71,6 +53,12 @@ export const BuyPhoneNumberForm = () => {
       if (sessionError) throw sessionError;
       if (!sessionData?.url) throw new Error('No checkout URL received');
 
+      // Show success message before redirect
+      toast({
+        title: "Redirecting to checkout...",
+        description: "You'll be redirected to complete your payment.",
+      });
+
       // Redirect to Stripe Checkout
       window.location.href = sessionData.url;
     } catch (error) {
@@ -87,22 +75,11 @@ export const BuyPhoneNumberForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-2">
-        <Label className="text-black">Choose Region Number</Label>
-        <PhoneInput
-          country={"us"}
-          enableSearch
-          disableSearchIcon
-          inputProps={{
-            required: true,
-          }}
-          onChange={(value) => setCountry(value)}
-          containerClass="!w-full"
-          inputClass="!w-full !h-10 !text-base"
-          buttonClass="!h-10"
-          searchClass="!w-full"
-        />
-      </div>
+      <RegionSelect
+        value={country}
+        onChange={setCountry}
+        regions={regions}
+      />
 
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">
