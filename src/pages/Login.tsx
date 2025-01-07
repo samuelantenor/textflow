@@ -58,11 +58,18 @@ const Login = () => {
                   colors: {
                     brand: '#000000',
                     brandAccent: '#666666',
+                    inputText: '#ffffff',
+                    inputBackground: '#1a1a1a',
+                    inputPlaceholder: '#666666',
                   },
                 },
               },
+              className: {
+                input: 'text-white',
+                label: 'text-white',
+              },
             }}
-            theme="light"
+            theme="dark"
             providers={[]}
           />
         </div>
