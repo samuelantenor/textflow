@@ -18,8 +18,34 @@ export const DashboardHeader = () => {
 
   const handleSignOut = async () => {
     try {
+      // First check if we have a session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // If no session, just redirect to login
+      if (!session) {
+        navigate("/login");
+        toast({
+          title: "Session expired",
+          description: "Your session has expired. Please log in again.",
+        });
+        return;
+      }
+
+      // Attempt to sign out
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      
+      if (error) {
+        // If we get a session_not_found error, handle it gracefully
+        if (error.message.includes('session_not_found')) {
+          navigate("/login");
+          toast({
+            title: "Session expired",
+            description: "Your session has expired. Please log in again.",
+          });
+          return;
+        }
+        throw error;
+      }
       
       navigate("/login");
       toast({
