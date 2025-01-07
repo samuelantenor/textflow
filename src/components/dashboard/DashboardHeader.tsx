@@ -19,13 +19,24 @@ export const DashboardHeader = () => {
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('session_not_found')) {
+          // If session is not found, just redirect to login
+          navigate('/login');
+          return;
+        }
+        throw error;
+      }
+      navigate('/login');
     } catch (error) {
+      console.error('Logout error:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to sign out",
+        description: "Failed to sign out properly. Please try refreshing the page.",
       });
+      // Force redirect to login page even if there's an error
+      navigate('/login');
     }
   };
 
