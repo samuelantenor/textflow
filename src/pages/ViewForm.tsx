@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -7,7 +8,6 @@ import { FormLoader } from "@/components/forms/view/FormLoader";
 import { FormError } from "@/components/forms/view/FormError";
 import { FormFields } from "@/components/forms/view/FormFields";
 import { useFormData } from "@/hooks/forms/useFormData";
-import { supabase } from "@/integrations/supabase/client";
 
 export default function ViewForm() {
   const { id } = useParams();
@@ -20,7 +20,7 @@ export default function ViewForm() {
     if (id) {
       fetchForm(id);
     }
-  }, [id, fetchForm]);
+  }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
