@@ -13,15 +13,17 @@ interface CampaignFormFieldsProps {
 
 export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
   return (
-    <div className="space-y-6">
-      <div className="grid gap-6 sm:grid-cols-2">
+    <>
+      <div className="space-y-6">
         <CampaignNameField form={form} />
         <GroupSelectField form={form} />
+        <PhoneNumberField form={form} />
       </div>
-      <PhoneNumberField form={form} />
-      <MessageField form={form} />
-      <MediaField form={form} />
-      <ScheduleField form={form} />
-    </div>
+      <div className="space-y-6">
+        <MessageField form={form} />
+        <MediaField form={form} />
+        <ScheduleField form={form} />
+      </div>
+    </>
   );
 }

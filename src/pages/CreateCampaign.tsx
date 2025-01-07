@@ -80,7 +80,7 @@ const CreateCampaign = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Button
           variant="ghost"
           className="mb-6"
@@ -100,7 +100,9 @@ const CreateCampaign = () => {
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <CampaignFormFields form={form} />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <CampaignFormFields form={form} />
+              </div>
               <div className="flex justify-end space-x-4 pt-4">
                 <Button
                   type="button"
