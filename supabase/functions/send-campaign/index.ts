@@ -18,26 +18,38 @@ serve(async (req) => {
     )
 
     const { campaignId } = await req.json()
+    console.log('Processing campaign:', campaignId)
 
-    // Get campaign details
+    // Get campaign details with contacts
     const { data: campaign, error: campaignError } = await supabaseClient
       .from('campaigns')
       .select(`
         *,
-        campaign_groups (
+        campaign_groups!inner (
+          id,
           contacts (
-            phone_number,
-            id
+            id,
+            phone_number
           )
         )
       `)
       .eq('id', campaignId)
       .single()
 
-    if (campaignError) throw campaignError
-    if (!campaign) throw new Error('Campaign not found')
+    if (campaignError) {
+      console.error('Error fetching campaign:', campaignError)
+      throw campaignError
+    }
+    
+    if (!campaign) {
+      throw new Error('Campaign not found')
+    }
 
+    console.log('Found campaign:', campaign.name)
+    
     const contacts = campaign.campaign_groups?.contacts || []
+    console.log('Number of contacts found:', contacts.length)
+    
     if (!contacts.length) {
       throw new Error('No contacts found in the group')
     }
@@ -52,6 +64,8 @@ serve(async (req) => {
     // Send messages to all contacts
     const messagePromises = contacts.map(async (contact) => {
       try {
+        console.log('Sending message to:', contact.phone_number)
+        
         const response = await fetch(
           `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`,
           {
@@ -70,6 +84,7 @@ serve(async (req) => {
         )
 
         const result = await response.json()
+        console.log('Twilio response:', result)
 
         // Log the message
         await supabaseClient
@@ -90,6 +105,17 @@ serve(async (req) => {
     })
 
     await Promise.all(messagePromises)
+
+    // Update campaign status to sent
+    const { error: updateError } = await supabaseClient
+      .from('campaigns')
+      .update({ status: 'sent' })
+      .eq('id', campaignId)
+
+    if (updateError) {
+      console.error('Error updating campaign status:', updateError)
+      throw updateError
+    }
 
     return new Response(
       JSON.stringify({ success: true }),
