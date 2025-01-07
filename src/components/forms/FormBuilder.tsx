@@ -56,22 +56,6 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
     },
   });
 
-  const { data: groups } = useQuery({
-    queryKey: ['campaign-groups'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) throw new Error("Not authenticated");
-
-      const { data, error } = await supabase
-        .from('campaign_groups')
-        .select('id, name')
-        .eq('user_id', session.user.id);
-      
-      if (error) throw error;
-      return data;
-    },
-  });
-
   const handleLogoUpload = async (file: File) => {
     try {
       const fileExt = file.name.split(".").pop();
@@ -168,7 +152,7 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
               </TabsList>
 
               <TabsContent value="fields" className="flex-1 overflow-hidden">
-                <FormFieldsTab form={form} groups={groups} />
+                <FormFieldsTab form={form} />
               </TabsContent>
 
               <TabsContent value="design" className="flex-1 overflow-hidden">
