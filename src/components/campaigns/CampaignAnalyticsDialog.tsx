@@ -20,10 +20,15 @@ export function CampaignAnalyticsDialog({
   const { data: analytics, isLoading } = useQuery({
     queryKey: ['campaign-analytics', campaign.id],
     queryFn: async () => {
-      const { data: messageStats } = await supabase
+      const { data: messageStats, error } = await supabase
         .from('message_logs')
         .select('status')
         .eq('campaign_id', campaign.id);
+
+      if (error) {
+        console.error('Error fetching message stats:', error);
+        throw error;
+      }
 
       if (!messageStats) return null;
 
