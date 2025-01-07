@@ -33,11 +33,6 @@ const Login = () => {
       
       if (event === 'SIGNED_IN' && session) {
         navigate("/dashboard", { replace: true });
-      } else if (event === 'PASSWORD_RECOVERY') {
-        toast({
-          title: "Password Recovery Email Sent",
-          description: "Please check your email for the password reset link.",
-        });
       }
     });
 
@@ -76,9 +71,6 @@ const Login = () => {
             }}
             theme="dark"
             providers={[]}
-            view="sign_in"
-            showLinks={true}
-            redirectTo={window.location.origin + "/dashboard"}
           />
         </div>
       </div>
