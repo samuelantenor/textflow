@@ -7,7 +7,7 @@ import { FormPreview } from "../FormPreview";
 import { FONT_OPTIONS } from "./constants";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { EyeDropper } from "lucide-react";
+import { Palette } from "lucide-react";
 
 interface FormDesignTabProps {
   form: UseFormReturn<any>;
@@ -40,7 +40,7 @@ export function FormDesignTab({ form, handleLogoUpload }: FormDesignTabProps) {
               className="w-12 h-12 p-1"
               style={{ backgroundColor: value }}
             >
-              <EyeDropper className="h-4 w-4" />
+              <Palette className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-64">
