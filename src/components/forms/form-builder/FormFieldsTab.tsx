@@ -6,14 +6,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FormPreview } from "../FormPreview";
 import { FormFieldBuilder } from "../FormFieldBuilder";
 import { FormFieldList } from "../FormFieldList";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FormFieldsTabProps {
   form: UseFormReturn<any>;
-  groups?: Array<{ id: string; name: string }>;
 }
 
-export function FormFieldsTab({ form, groups }: FormFieldsTabProps) {
+export function FormFieldsTab({ form }: FormFieldsTabProps) {
   const formData = form.watch();
+
+  const { data: groups, isLoading } = useQuery({
+    queryKey: ['campaign-groups'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('campaign_groups')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   return (
     <div className="grid grid-cols-2 gap-8 h-full">
