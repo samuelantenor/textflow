@@ -4,6 +4,7 @@ export type CampaignFormData = {
   media?: File;
   scheduled_for?: Date;
   scheduled_time?: string;
+  group_id: string;
 };
 
 export type CampaignStatus = 'draft' | 'sent';
@@ -18,4 +19,5 @@ export interface Campaign {
   status: CampaignStatus;
   created_at: string;
   updated_at: string;
+  group_id?: string;
 }
