@@ -12,67 +12,38 @@ import {
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Loader2, Save } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { CampaignFormFields } from "./campaign/CampaignFormFields";
 import type { CampaignFormData } from "@/types/campaign";
 
 export function CreateCampaignDialog() {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const { toast } = useToast();
   const form = useForm<CampaignFormData>();
-
-  const handleSave = async () => {
-    const data = form.getValues();
-    
-    // Validate required fields
-    if (!data.group_id) {
-      toast({
-        title: "Error",
-        description: "Please select a contact group",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!data.from_number) {
-      toast({
-        title: "Error",
-        description: "Please select a phone number to send from",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!data.name) {
-      toast({
-        title: "Error",
-        description: "Please enter a campaign name",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!data.message) {
-      toast({
-        title: "Error",
-        description: "Please enter a message",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSaved(true);
-    toast({
-      title: "Changes saved",
-      description: "Your campaign is ready to be created.",
-    });
-  };
 
   const onSubmit = async (data: CampaignFormData) => {
     try {
       setIsLoading(true);
+
+      // Validate required fields
+      if (!data.group_id) {
+        toast({
+          title: "Error",
+          description: "Please select a contact group",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!data.from_number) {
+        toast({
+          title: "Error",
+          description: "Please select a phone number to send from",
+          variant: "destructive",
+        });
+        return;
+      }
 
       // Get the current user's ID
       const { data: { session } } = await supabase.auth.getSession();
@@ -125,7 +96,6 @@ export function CreateCampaignDialog() {
 
       setOpen(false);
       form.reset();
-      setIsSaved(false);
     } catch (error) {
       console.error("Error creating campaign:", error);
       toast({
@@ -165,27 +135,12 @@ export function CreateCampaignDialog() {
               >
                 Cancel
               </Button>
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                <Button 
-                  type="button"
-                  onClick={handleSave}
-                  className="w-full sm:w-auto"
-                  variant="secondary"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Changes
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={isLoading || !isSaved} 
-                  className="w-full sm:w-auto bg-green-500 hover:bg-green-600"
-                >
-                  {isLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Create Campaign
-                </Button>
-              </div>
+              <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+                {isLoading && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Save as Draft
+              </Button>
             </div>
           </form>
         </Form>
