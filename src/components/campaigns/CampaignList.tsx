@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { CreateCampaignButton } from "@/components/CreateCampaignButton";
 import { CampaignListItem } from "@/components/campaigns/CampaignListItem";
 import { Campaign } from "./types";
+import { MessageSquare } from "lucide-react";
 
 export function CampaignList() {
   const { data: campaigns, isLoading } = useQuery({

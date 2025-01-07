@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
-const CreateCampaignButton = () => {
+export const CreateCampaignButton = () => {
   const navigate = useNavigate();
 
   return (
@@ -15,5 +15,3 @@ const CreateCampaignButton = () => {
     </Button>
   );
 };
-
-export default CreateCampaignButton;
