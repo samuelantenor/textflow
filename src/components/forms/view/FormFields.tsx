@@ -31,8 +31,10 @@ export function FormFields({ fields, formData, onFieldChange, customization }: F
             <p className="text-sm text-muted-foreground">{field.description}</p>
           )}
           <FormFieldRenderer
-            field={field}
-            index={index}
+            field={{
+              ...field,
+              id: `field-${index}`,
+            }}
             value={formData[field.label]}
             onChange={(value) => onFieldChange(field.label, value)}
             customization={customization}
