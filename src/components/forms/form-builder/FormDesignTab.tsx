@@ -43,7 +43,12 @@ export function FormDesignTab({ form, handleLogoUpload }: FormDesignTabProps) {
               <Palette className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64">
+          <PopoverContent 
+            className="w-64" 
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            onPointerDownOutside={(e) => e.preventDefault()}
+            onInteractOutside={(e) => e.preventDefault()}
+          >
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-2">
                 {PRESET_COLORS.map((color) => (
@@ -53,7 +58,6 @@ export function FormDesignTab({ form, handleLogoUpload }: FormDesignTabProps) {
                     style={{ backgroundColor: color }}
                     onClick={(e) => {
                       e.preventDefault();
-                      e.stopPropagation();
                       onChange(color);
                     }}
                   />
