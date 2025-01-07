@@ -1,148 +1,63 @@
 import { useState } from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Send, Loader2 } from "lucide-react";
-import { Campaign } from "@/types/campaign";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { EditCampaignDialog } from "../campaign/EditCampaignDialog";
+import type { Campaign } from "@/types/campaign";
+import { Button } from "@/components/ui/button";
 
-interface CampaignCardProps {
-  campaign: Campaign;
-}
-
-export function CampaignCard({ campaign }: CampaignCardProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
+export function CampaignCard({ campaign }: { campaign: Campaign }) {
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const handleDelete = async () => {
     try {
-      const { error } = await supabase
+      setIsDeleting(true);
+
+      // First, delete associated message logs
+      const { error: logsError } = await supabase
+        .from('message_logs')
+        .delete()
+        .eq('campaign_id', campaign.id);
+
+      if (logsError) throw logsError;
+
+      // Then delete the campaign
+      const { error: campaignError } = await supabase
         .from('campaigns')
         .delete()
         .eq('id', campaign.id);
 
-      if (error) throw error;
+      if (campaignError) throw campaignError;
 
       toast({
-        title: "Success",
-        description: "Campaign deleted successfully",
+        title: "Campaign deleted",
+        description: "Campaign has been successfully deleted.",
       });
+
+      // Invalidate campaigns query to refresh the list
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
     } catch (error) {
       console.error('Error deleting campaign:', error);
       toast({
         title: "Error",
-        description: "Failed to delete campaign",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleSendCampaign = async () => {
-    try {
-      setIsLoading(true);
-      
-      const { data, error } = await supabase.functions.invoke('send-campaign', {
-        body: { campaignId: campaign.id }
-      });
-
-      if (error) throw error;
-
-      // Update campaign status to sent
-      await supabase
-        .from('campaigns')
-        .update({ status: 'sent' })
-        .eq('id', campaign.id);
-
-      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-      
-      toast({
-        title: "Success",
-        description: "Campaign sent successfully",
-      });
-    } catch (error) {
-      console.error('Error sending campaign:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send campaign",
+        description: "Failed to delete campaign. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsDeleting(false);
     }
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-xl">{campaign.name}</CardTitle>
-            <CardDescription className="mt-2">
-              Created on {new Date(campaign.created_at).toLocaleDateString()}
-            </CardDescription>
-          </div>
-          <Badge
-            variant="outline"
-            className={
-              campaign.status === "sent"
-                ? "bg-green-100 text-green-800 border-green-200"
-                : campaign.status === "draft"
-                ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-                : "bg-muted"
-            }
-          >
-            {campaign.status}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-          {campaign.message}
-        </p>
-        <div className="flex justify-end gap-2">
-          {campaign.status === 'draft' && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSendCampaign}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Send className="h-4 w-4 mr-2" />
-              )}
-              Send
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowEditDialog(true)}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDelete}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardContent>
-
-      <EditCampaignDialog
-        campaign={campaign}
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-      />
-    </Card>
+    <div className="border p-4 rounded-md">
+      <h3 className="text-lg font-semibold">{campaign.name}</h3>
+      <p>{campaign.message}</p>
+      <div className="flex justify-end">
+        <Button variant="outline" onClick={handleDelete} disabled={isDeleting}>
+          {isDeleting ? "Deleting..." : "Delete Campaign"}
+        </Button>
+      </div>
+    </div>
   );
 }
