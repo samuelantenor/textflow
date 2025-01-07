@@ -1,4 +1,5 @@
 export interface FormField {
+  id: string;  // Added this field
   type: string;
   label: string;
   placeholder?: string;
