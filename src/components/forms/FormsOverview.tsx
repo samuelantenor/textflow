@@ -1,15 +1,14 @@
 import { Card } from "@/components/ui/card";
 import { FormBuilder } from "./FormBuilder";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { ShareFormDialog } from "./ShareFormDialog";
 import { ViewSubmissionsDialog } from "./view/ViewSubmissionsDialog";
 import { EditFormDialog } from "./EditFormDialog";
 import { useToast } from "@/hooks/use-toast";
-import { FormsCard } from "./FormsCard";
-import { EmptyFormsState } from "./EmptyFormsState";
 import { CustomForm } from "./types";
+import { FormsList } from "./FormsList";
+import { useFormsData } from "@/hooks/forms/useFormsData";
+import { FileText } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { FileText } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const FormsOverview = () => {
   const [selectedForm, setSelectedForm] = useState<CustomForm | null>(null);
@@ -29,48 +28,7 @@ export const FormsOverview = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const { data: groups, isLoading: isLoadingGroups } = useQuery({
-    queryKey: ['campaign-groups'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('campaign_groups')
-        .select('*');
-      
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: forms, isLoading } = useQuery({
-    queryKey: ['custom-forms'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('custom_forms')
-        .select(`
-          id,
-          title,
-          description,
-          fields,
-          group_id,
-          background_color,
-          font_family,
-          logo_url,
-          primary_color,
-          campaign_groups (
-            name
-          )
-        `);
-      
-      if (error) throw error;
-      
-      return (data || []).map(form => ({
-        ...form,
-        fields: Array.isArray(form.fields) ? form.fields : []
-      })) as CustomForm[];
-    },
-  });
+  const { forms, groups, isLoadingForms, isLoadingGroups, queryClient } = useFormsData();
 
   // Subscribe to real-time changes
   useEffect(() => {
@@ -84,7 +42,6 @@ export const FormsOverview = () => {
           table: 'custom_forms'
         },
         () => {
-          // Invalidate and refetch forms when changes occur
           queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
         }
       )
@@ -119,7 +76,6 @@ export const FormsOverview = () => {
     if (!selectedForm) return;
 
     try {
-      // First delete all form submissions
       const { error: submissionsError } = await supabase
         .from('form_submissions')
         .delete()
@@ -127,7 +83,6 @@ export const FormsOverview = () => {
 
       if (submissionsError) throw submissionsError;
 
-      // Then delete the form
       const { error } = await supabase
         .from('custom_forms')
         .delete()
@@ -179,29 +134,14 @@ export const FormsOverview = () => {
         <FormBuilder groupId={groups[0].id} />
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {isLoading ? (
-          <Card className="p-6">
-            <div className="animate-pulse space-y-3">
-              <div className="h-4 bg-muted rounded w-3/4"></div>
-              <div className="h-4 bg-muted rounded w-1/2"></div>
-            </div>
-          </Card>
-        ) : forms?.length ? (
-          forms.map((form) => (
-            <FormsCard
-              key={form.id}
-              form={form}
-              onShare={handleShare}
-              onViewSubmissions={handleViewSubmissions}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))
-        ) : (
-          <EmptyFormsState />
-        )}
-      </div>
+      <FormsList
+        forms={forms}
+        isLoading={isLoadingForms}
+        onShare={handleShare}
+        onViewSubmissions={handleViewSubmissions}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
 
       <ShareFormDialog
         form={selectedForm}

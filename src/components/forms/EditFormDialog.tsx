@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormFieldsTab } from "./form-builder/FormFieldsTab";
 import { FormDesignTab } from "./form-builder/FormDesignTab";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface EditFormDialogProps {
   form: {
@@ -30,6 +31,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("fields");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const form = useForm({
     defaultValues: {
@@ -44,7 +46,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     },
   });
 
-  // Reset form values when initialForm changes or dialog opens
   useEffect(() => {
     if (open) {
       form.reset({
@@ -89,7 +90,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   const onSubmit = async (data: any) => {
     try {
       setIsLoading(true);
-      console.log("Submitting form data:", data); // Debug log
 
       const { error } = await supabase
         .from("custom_forms")
@@ -106,6 +106,8 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
         .eq('id', initialForm.id);
 
       if (error) throw error;
+
+      await queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
 
       toast({
         title: "Success",
