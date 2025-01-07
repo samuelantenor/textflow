@@ -11,6 +11,10 @@ interface FormResponse {
   user_id: string;
   group_id: string;
   is_active: boolean | null;
+  background_color: string | null;
+  font_family: string | null;
+  logo_url: string | null;
+  primary_color: string | null;
 }
 
 interface UseFormDataReturn {
@@ -56,7 +60,11 @@ export function useFormData(): UseFormDataReturn {
         fields: formResponse.fields as FormField[],
         user_id: formResponse.user_id,
         group_id: formResponse.group_id,
-        is_active: formResponse.is_active
+        is_active: formResponse.is_active,
+        background_color: formResponse.background_color,
+        font_family: formResponse.font_family,
+        logo_url: formResponse.logo_url,
+        primary_color: formResponse.primary_color
       };
 
       setForm(formData);
