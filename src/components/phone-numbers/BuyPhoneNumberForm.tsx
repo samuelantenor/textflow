@@ -147,14 +147,13 @@ export function BuyPhoneNumberForm() {
           </Select>
         </div>
 
-        <div className="mt-6 p-4 bg-muted rounded-lg">
-          <div className="flex justify-between items-center mb-4">
-            <span className="font-medium">Monthly Fee</span>
-            <span className="text-lg font-semibold">$5.00</span>
+        <div className="flex items-center justify-between py-4 border-t">
+          <div>
+            <span className="text-lg font-semibold">$5.00/month</span>
+            <p className="text-sm text-muted-foreground">
+              Includes unlimited incoming messages
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground mb-4">
-            This includes unlimited incoming messages and competitive rates for outgoing messages.
-          </p>
           <div onClick={handleBeforePayment}>
             <stripe-buy-button
               buy-button-id="buy_btn_1QeVcgB4RWKZ2dNza9CFKIwx"
