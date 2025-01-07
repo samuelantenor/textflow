@@ -5,8 +5,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
 import {
   Select,
   SelectContent,
@@ -47,25 +45,6 @@ export function FormPreview({ title, description, fields, customization }: FormP
     };
 
     switch (field.type) {
-      case 'phone':
-        return (
-          <PhoneInput
-            country={'us'}
-            inputStyle={{
-              width: '100%',
-              height: '40px',
-              borderColor: customization?.primaryColor,
-              borderRadius: '0.375rem',
-            }}
-            buttonStyle={{
-              borderColor: customization?.primaryColor,
-              borderRadius: '0.375rem 0 0 0.375rem',
-            }}
-            containerStyle={{
-              width: '100%',
-            }}
-          />
-        );
       case 'textarea':
         return <Textarea {...commonProps} />;
       case 'checkbox':

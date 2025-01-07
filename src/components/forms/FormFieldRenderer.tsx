@@ -4,8 +4,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
 import { cn } from "@/lib/utils";
 
 interface FormFieldRendererProps {
@@ -32,27 +30,6 @@ export function FormFieldRenderer({ field, index, value, onChange, customization
   };
 
   switch (field.type) {
-    case 'phone':
-      return (
-        <PhoneInput
-          country={'us'}
-          value={value}
-          onChange={onChange}
-          inputStyle={{
-            width: '100%',
-            height: '40px',
-            borderColor: customization?.primaryColor,
-            borderRadius: '0.375rem',
-          }}
-          buttonStyle={{
-            borderColor: customization?.primaryColor,
-            borderRadius: '0.375rem 0 0 0.375rem',
-          }}
-          containerStyle={{
-            width: '100%',
-          }}
-        />
-      );
     case 'textarea':
       return (
         <Textarea
