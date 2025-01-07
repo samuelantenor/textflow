@@ -36,10 +36,12 @@ export function PhoneNumberField({ form }: PhoneNumberFieldProps) {
             <FormControl>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a number to send from">
-                  <div className="flex items-center">
-                    <Phone className="w-4 h-4 mr-2" />
-                    <span>{field.value}</span>
-                  </div>
+                  {field.value && (
+                    <div className="flex items-center">
+                      <Phone className="w-4 h-4 mr-2" />
+                      <span>{field.value}</span>
+                    </div>
+                  )}
                 </SelectValue>
               </SelectTrigger>
             </FormControl>
