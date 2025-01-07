@@ -19,11 +19,10 @@ import type { CampaignFormData } from "@/types/campaign";
 export function CreateCampaignDialog() {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
   const form = useForm<CampaignFormData>();
 
-  const onSubmit = async (data: CampaignFormData, sendImmediately = false) => {
+  const onSubmit = async (data: CampaignFormData) => {
     try {
       setIsLoading(true);
 
@@ -58,7 +57,7 @@ export function CreateCampaignDialog() {
         scheduledFor.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
       }
 
-      const { data: campaign, error } = await supabase.from("campaigns").insert({
+      const { error } = await supabase.from("campaigns").insert({
         user_id: session.user.id,
         name: data.name,
         message: data.message,
@@ -66,29 +65,15 @@ export function CreateCampaignDialog() {
         scheduled_for: scheduledFor?.toISOString(),
         group_id: data.group_id,
         from_number: data.from_number,
-        status: sendImmediately ? "sending" : "draft",
-      }).select().single();
+        status: "draft",
+      });
 
       if (error) throw error;
 
-      if (sendImmediately && campaign) {
-        setIsSending(true);
-        const { error: sendError } = await supabase.functions.invoke('send-campaign', {
-          body: { campaignId: campaign.id }
-        });
-
-        if (sendError) throw sendError;
-
-        toast({
-          title: "Campaign sent",
-          description: "Your campaign is being sent to all contacts in the group.",
-        });
-      } else {
-        toast({
-          title: "Campaign created",
-          description: "Your campaign has been saved as a draft.",
-        });
-      }
+      toast({
+        title: "Campaign created",
+        description: "Your campaign has been saved as a draft.",
+      });
 
       setOpen(false);
       form.reset();
@@ -101,7 +86,6 @@ export function CreateCampaignDialog() {
       });
     } finally {
       setIsLoading(false);
-      setIsSending(false);
     }
   };
 
@@ -121,7 +105,7 @@ export function CreateCampaignDialog() {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <CampaignFormFields form={form} />
             <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-4">
               <Button
@@ -132,18 +116,7 @@ export function CreateCampaignDialog() {
               >
                 Cancel
               </Button>
-              <Button 
-                type="button" 
-                onClick={form.handleSubmit((data) => onSubmit(data, true))}
-                disabled={isLoading || isSending}
-                className="w-full sm:w-auto"
-              >
-                {isSending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Send Now
-              </Button>
-              <Button type="submit" disabled={isLoading || isSending} className="w-full sm:w-auto">
+              <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
                 {isLoading && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
