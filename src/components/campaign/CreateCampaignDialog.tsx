@@ -1,32 +1,21 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Plus, Loader2 } from "lucide-react";
-import { CampaignFormFields } from "./CampaignFormFields";
-import type { CampaignFormData } from "@/types/campaign";
-
 export function CreateCampaignDialog() {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const form = useForm<CampaignFormData>();
+  const form = useForm<CampaignFormData>({
+    defaultValues: {
+      name: '',
+      message: '',
+      group_id: '',
+      scheduled_for: undefined,
+      scheduled_time: '',
+    },
+  });
 
   const onSubmit = async (data: CampaignFormData) => {
     try {
       setIsLoading(true);
 
-      // Get the current user's ID
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
         throw new Error("User not authenticated");
@@ -49,7 +38,6 @@ export function CreateCampaignDialog() {
         mediaUrl = publicUrl;
       }
 
-      // Combine date and time if both are provided
       let scheduledFor = data.scheduled_for;
       if (scheduledFor && data.scheduled_time) {
         const [hours, minutes] = data.scheduled_time.split(':');
