@@ -11,7 +11,7 @@ import { CampaignAnalytics } from "@/components/analytics/CampaignAnalytics";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { FormsOverview } from "@/components/forms/FormsOverview";
-import { BuyPhoneNumberForm } from "@/components/phone-numbers/BuyPhoneNumberForm";
+import { PhoneNumbersList } from "@/components/phone-numbers/PhoneNumbersList";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -129,14 +129,7 @@ const Dashboard = () => {
             </TabsContent>
 
             <TabsContent value="phone-numbers">
-              <div className="space-y-8">
-                <h2 className="text-2xl font-bold">Buy a New Phone Number</h2>
-                <p className="text-muted-foreground">
-                  Fill out the form below to request a new phone number. We'll review your request
-                  and get back to you with the details shortly.
-                </p>
-                <BuyPhoneNumberForm />
-              </div>
+              <PhoneNumbersList />
             </TabsContent>
           </Tabs>
         </div>
