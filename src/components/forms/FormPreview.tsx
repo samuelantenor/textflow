@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface FormPreviewProps {
   title: string;
@@ -51,11 +52,12 @@ export function FormPreview({ title, description, fields, customization }: FormP
           <div className="flex items-center space-x-2">
             <Checkbox 
               id={`field-${index}`}
+              className={cn(
+                "border-2",
+                "data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+              )}
               style={{ 
                 borderColor: customization?.primaryColor,
-                '&:checked': {
-                  backgroundColor: customization?.primaryColor,
-                }
               }}
             />
             <label htmlFor={`field-${index}`} className="text-sm">
@@ -71,11 +73,12 @@ export function FormPreview({ title, description, fields, customization }: FormP
                 <RadioGroupItem 
                   value={option} 
                   id={`${index}-${optionIndex}`}
+                  className={cn(
+                    "border-2",
+                    "data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  )}
                   style={{ 
                     borderColor: customization?.primaryColor,
-                    '&:checked': {
-                      backgroundColor: customization?.primaryColor,
-                    }
                   }}
                 />
                 <Label htmlFor={`${index}-${optionIndex}`}>{option}</Label>
