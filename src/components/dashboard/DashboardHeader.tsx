@@ -19,45 +19,47 @@ export const DashboardHeader = () => {
   const handleSignOut = async () => {
     try {
       // First check if we have a session
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      // If no session, just redirect to login
+      if (sessionError) {
+        console.error('Error checking session:', sessionError);
+        navigate("/login");
+        toast({
+          title: "Session error",
+          description: "There was a problem with your session. Please log in again.",
+        });
+        return;
+      }
+
+      // If no active session, redirect to login
       if (!session) {
         navigate("/login");
         toast({
-          title: "Session expired",
-          description: "Your session has expired. Please log in again.",
+          title: "No active session",
+          description: "Please log in to continue.",
         });
         return;
       }
 
       // Attempt to sign out
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        // If we get a session_not_found error, handle it gracefully
-        if (error.message.includes('session_not_found')) {
-          navigate("/login");
-          toast({
-            title: "Session expired",
-            description: "Your session has expired. Please log in again.",
-          });
-          return;
-        }
-        throw error;
-      }
+      await supabase.auth.signOut({
+        scope: 'local'  // Only clear local session first
+      });
       
       navigate("/login");
       toast({
         title: "Signed out successfully",
         description: "You have been logged out of your account.",
       });
+      
     } catch (error) {
       console.error('Error signing out:', error);
+      // Always redirect to login on error, but with an error message
+      navigate("/login");
       toast({
         variant: "destructive",
         title: "Error signing out",
-        description: "There was a problem signing you out. Please try again.",
+        description: "There was a problem signing you out, but you've been redirected to the login page.",
       });
     }
   };
