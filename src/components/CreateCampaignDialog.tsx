@@ -165,25 +165,27 @@ export function CreateCampaignDialog() {
               >
                 Cancel
               </Button>
-              <Button 
-                type="button"
-                onClick={handleSave}
-                className="w-full sm:w-auto"
-                variant="secondary"
-              >
-                <Save className="w-4 h-4 mr-2" />
-                Save Changes
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isLoading || !isSaved} 
-                className="w-full sm:w-auto"
-              >
-                {isLoading && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Create Campaign
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                <Button 
+                  type="button"
+                  onClick={handleSave}
+                  className="w-full sm:w-auto"
+                  variant="secondary"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Changes
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={isLoading || !isSaved} 
+                  className="w-full sm:w-auto bg-green-500 hover:bg-green-600"
+                >
+                  {isLoading && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Create Campaign
+                </Button>
+              </div>
             </div>
           </form>
         </Form>
