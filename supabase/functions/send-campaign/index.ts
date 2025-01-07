@@ -34,7 +34,7 @@ serve(async (req) => {
         )
       `)
       .eq('id', campaignId)
-      .single()
+      .maybeSingle()
 
     if (campaignError) {
       console.error('Error fetching campaign:', campaignError)
