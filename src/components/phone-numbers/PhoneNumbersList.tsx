@@ -13,15 +13,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, Phone } from "lucide-react";
 
 export function PhoneNumbersList() {
   const [isAddingNumber, setIsAddingNumber] = useState(false);
   const [newNumber, setNewNumber] = useState("");
+  const [twilioSid, setTwilioSid] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const { data: phoneNumbers, isLoading } = useQuery({
+  const { data: phoneNumbers, isLoading, refetch } = useQuery({
     queryKey: ['phone-numbers'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -45,19 +46,22 @@ export function PhoneNumbersList() {
       const { error } = await supabase.from('phone_numbers').insert({
         user_id: session.user.id,
         phone_number: newNumber,
-        twilio_sid: 'manual-entry', // This is a placeholder, you might want to validate this is a real Twilio number
-        monthly_cost: 0,
+        twilio_sid: twilioSid,
+        monthly_cost: 0, // This would typically come from Twilio
+        status: 'active',
       });
 
       if (error) throw error;
 
       toast({
         title: "Phone number added",
-        description: "Your phone number has been added successfully.",
+        description: "Your Twilio phone number has been added successfully.",
       });
 
       setIsAddingNumber(false);
       setNewNumber("");
+      setTwilioSid("");
+      refetch();
     } catch (error) {
       console.error("Error adding phone number:", error);
       toast({
@@ -87,9 +91,9 @@ export function PhoneNumbersList() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Phone Number</DialogTitle>
+              <DialogTitle>Add Twilio Phone Number</DialogTitle>
               <DialogDescription>
-                Add a phone number you've received from Twilio.
+                Add a phone number you've received from Twilio to use for sending messages.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleAddNumber} className="space-y-4">
@@ -100,6 +104,16 @@ export function PhoneNumbersList() {
                   placeholder="+1234567890"
                   value={newNumber}
                   onChange={(e) => setNewNumber(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="twilio_sid">Twilio SID</Label>
+                <Input
+                  id="twilio_sid"
+                  placeholder="Enter the Twilio SID for this number"
+                  value={twilioSid}
+                  onChange={(e) => setTwilioSid(e.target.value)}
                   required
                 />
               </div>
@@ -129,11 +143,14 @@ export function PhoneNumbersList() {
             key={number.id}
             className="p-4 border rounded-lg flex justify-between items-center"
           >
-            <div>
-              <p className="font-medium">{number.phone_number}</p>
-              <p className="text-sm text-muted-foreground">
-                Added on {new Date(number.created_at).toLocaleDateString()}
-              </p>
+            <div className="flex items-center space-x-3">
+              <Phone className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="font-medium">{number.phone_number}</p>
+                <p className="text-sm text-muted-foreground">
+                  Added on {new Date(number.created_at).toLocaleDateString()}
+                </p>
+              </div>
             </div>
             <div className="flex items-center space-x-2">
               <Button variant="outline" size="sm">
