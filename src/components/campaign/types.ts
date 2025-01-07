@@ -5,4 +5,5 @@ export type CampaignFormData = {
   scheduled_for?: Date;
   scheduled_time?: string;
   group_id: string;
+  from_number?: string;
 };

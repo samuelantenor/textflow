@@ -64,6 +64,7 @@ export function CreateCampaignDialog() {
         media_url: mediaUrl,
         scheduled_for: scheduledFor?.toISOString(),
         group_id: data.group_id,
+        from_number: data.from_number,
         status: "draft",
       });
 
@@ -91,12 +92,12 @@ export function CreateCampaignDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button className="w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" />
           New Campaign
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Create New Campaign</DialogTitle>
           <DialogDescription>
@@ -104,17 +105,18 @@ export function CreateCampaignDialog() {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <CampaignFormFields form={form} />
-            <div className="flex justify-end space-x-4 pt-4">
+            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
+                className="w-full sm:w-auto"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
                 {isLoading && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}

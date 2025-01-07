@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CreateCampaignDialog } from "@/components/campaigns/CreateCampaignDialog";
+import { CampaignList } from "@/components/campaigns/CampaignList";
 import { GroupList } from "@/components/groups/GroupList";
 import { useQuery } from "@tanstack/react-query";
 import { CampaignAnalytics } from "@/components/analytics/CampaignAnalytics";
@@ -87,6 +89,7 @@ const Dashboard = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList className="flex flex-wrap gap-2 h-auto">
               <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
               <TabsTrigger value="groups">Groups</TabsTrigger>
               <TabsTrigger value="forms">Forms</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -95,6 +98,14 @@ const Dashboard = () => {
 
             <TabsContent value="overview">
               <DashboardOverview setActiveTab={setActiveTab} />
+            </TabsContent>
+
+            <TabsContent value="campaigns" className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">Campaigns</h2>
+                <CreateCampaignDialog />
+              </div>
+              <CampaignList />
             </TabsContent>
 
             <TabsContent value="groups">

@@ -7,8 +7,8 @@ const CreateCampaignButton = () => {
 
   return (
     <Button 
-      className="bg-success hover:bg-success/90 text-white"
-      onClick={() => navigate("/campaign/new")}
+      className="bg-primary hover:bg-primary/90 text-white"
+      onClick={() => navigate("/campaigns/new")}
     >
       <Plus className="w-4 h-4 mr-2" />
       New Campaign

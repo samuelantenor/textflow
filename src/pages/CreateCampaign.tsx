@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -8,11 +7,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { CampaignFormFields } from "@/components/campaign/CampaignFormFields";
 import type { CampaignFormData } from "@/types/campaign";
-import { Card } from "@/components/ui/card";
+import { useState } from "react";
 
-export default function CampaignBuilder() {
-  const [isLoading, setIsLoading] = useState(false);
+const CreateCampaign = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const form = useForm<CampaignFormData>();
 
@@ -27,15 +26,6 @@ export default function CampaignBuilder() {
 
       let mediaUrl = null;
       if (data.media) {
-        if (data.media.size > 10 * 1024 * 1024) {
-          toast({
-            title: "Error",
-            description: "Image size must be less than 10MB",
-            variant: "destructive",
-          });
-          return;
-        }
-
         const fileExt = data.media.name.split(".").pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
         const { error: uploadError } = await supabase.storage
@@ -64,22 +54,23 @@ export default function CampaignBuilder() {
         message: data.message,
         media_url: mediaUrl,
         scheduled_for: scheduledFor?.toISOString(),
+        group_id: data.group_id,
         status: "draft",
       });
 
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Campaign created successfully",
+        title: "Campaign created",
+        description: "Your campaign has been saved as a draft.",
       });
 
-      navigate("/dashboard");
+      navigate("/dashboard?tab=campaigns");
     } catch (error) {
       console.error("Error creating campaign:", error);
       toast({
         title: "Error",
-        description: "Failed to create campaign",
+        description: "Failed to create campaign. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -88,44 +79,49 @@ export default function CampaignBuilder() {
   };
 
   return (
-    <div className="container max-w-4xl py-8">
-      <Button
-        variant="ghost"
-        className="mb-6"
-        onClick={() => navigate("/dashboard")}
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Dashboard
-      </Button>
+    <div className="min-h-screen bg-background">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Button
+          variant="ghost"
+          className="mb-6"
+          onClick={() => navigate("/dashboard?tab=campaigns")}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Campaigns
+        </Button>
+        
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold">Create New Campaign</h1>
+            <p className="text-muted-foreground">
+              Create a new campaign to send to your contacts.
+            </p>
+          </div>
 
-      <Card className="p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Create New Campaign</h1>
-          <p className="text-muted-foreground">
-            Create a new campaign to send to your contacts
-          </p>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <CampaignFormFields form={form} />
+              <div className="flex justify-end space-x-4 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate("/dashboard?tab=campaigns")}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Save as Draft
+                </Button>
+              </div>
+            </form>
+          </Form>
         </div>
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <CampaignFormFields form={form} />
-            
-            <div className="flex justify-end gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/dashboard")}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Create Campaign
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </Card>
+      </div>
     </div>
   );
-}
+};
+
+export default CreateCampaign;
