@@ -12,14 +12,9 @@ import { Edit, Trash2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
-import { EditCampaignDialog } from "./campaign/EditCampaignDialog";
-import { Campaign } from "@/types/campaign";
 
 const CampaignTable = () => {
   const { toast } = useToast();
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const { data: campaigns, refetch } = useQuery({
     queryKey: ['campaigns'],
@@ -30,7 +25,7 @@ const CampaignTable = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as Campaign[];
+      return data;
     },
   });
 
@@ -54,11 +49,6 @@ const CampaignTable = () => {
       description: "Campaign deleted successfully",
     });
     refetch();
-  };
-
-  const handleEdit = (campaign: Campaign) => {
-    setSelectedCampaign(campaign);
-    setEditDialogOpen(true);
   };
 
   return (
@@ -104,7 +94,13 @@ const CampaignTable = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleEdit(campaign)}
+                    onClick={() => {
+                      // TODO: Implement edit functionality
+                      toast({
+                        title: "Coming soon",
+                        description: "Edit functionality will be available soon",
+                      });
+                    }}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -121,14 +117,6 @@ const CampaignTable = () => {
           ))}
         </TableBody>
       </Table>
-
-      {selectedCampaign && (
-        <EditCampaignDialog
-          campaign={selectedCampaign}
-          open={editDialogOpen}
-          onOpenChange={setEditDialogOpen}
-        />
-      )}
     </div>
   );
 };
