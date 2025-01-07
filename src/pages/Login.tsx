@@ -23,16 +23,22 @@ const Login = () => {
       }
       
       if (session) {
-        navigate("/dashboard", { replace: true });
+        navigate("/");
       }
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event, session); // Debug log
-      
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        navigate("/dashboard", { replace: true });
+        navigate("/");
+      } else if (event === 'SIGNED_OUT') {
+        navigate("/login");
+      } else if (event === 'TOKEN_REFRESHED') {
+        // Handle successful token refresh
+        console.log('Token refreshed successfully');
+      } else if (event === 'USER_UPDATED') {
+        // Handle user data update
+        console.log('User data updated');
       }
     });
 
@@ -45,7 +51,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold">Welcome to FlowText</h1>
+          <h1 className="text-3xl font-bold">Welcome to SMS Campaigns</h1>
           <p className="text-muted-foreground mt-2">Sign in to manage your campaigns</p>
         </div>
         <div className="bg-card p-6 rounded-lg shadow-lg border">
