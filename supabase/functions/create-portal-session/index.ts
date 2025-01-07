@@ -36,18 +36,29 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     });
 
-    // Get customer by email
+    // Get or create customer
+    let customer;
     const customers = await stripe.customers.list({
       email: email,
       limit: 1,
     });
 
-    if (customers.data.length === 0) {
-      throw new Error('No customer found');
+    if (customers.data.length > 0) {
+      customer = customers.data[0];
+    } else {
+      // Create a new customer if none exists
+      customer = await stripe.customers.create({
+        email: email,
+        metadata: {
+          supabaseUUID: user.id,
+        },
+      });
+      console.log('Created new customer:', customer.id);
     }
 
+    // Create billing portal session
     const session = await stripe.billingPortal.sessions.create({
-      customer: customers.data[0].id,
+      customer: customer.id,
       return_url: `${req.headers.get('origin')}/billing`,
     });
 
