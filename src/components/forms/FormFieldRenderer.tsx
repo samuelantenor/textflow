@@ -5,8 +5,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
 
 interface FormFieldRendererProps {
   field: {
@@ -32,23 +30,6 @@ export function FormFieldRenderer({ field, index, value, onChange, customization
   };
 
   switch (field.type) {
-    case 'phone':
-      return (
-        <PhoneInput
-          country={'us'}
-          value={value || ''}
-          onChange={onChange}
-          inputStyle={{
-            width: '100%',
-            height: '40px',
-            fontSize: '16px',
-            borderColor: customization?.primaryColor,
-          }}
-          containerStyle={{
-            width: '100%',
-          }}
-        />
-      );
     case 'textarea':
       return (
         <Textarea
