@@ -63,6 +63,11 @@ serve(async (req) => {
       throw new Error('Twilio credentials not configured')
     }
 
+    // Construct the webhook URL using the Supabase project URL
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const webhookUrl = `${supabaseUrl}/functions/v1/twilio-webhook`
+    console.log('Using webhook URL:', webhookUrl)
+
     // Send messages to all contacts
     const messagePromises = contacts.map(async (contact) => {
       try {
@@ -72,6 +77,7 @@ serve(async (req) => {
           To: contact.phone_number,
           From: campaign.from_number || '+15146125967', // Using default number if not specified
           Body: campaign.message,
+          StatusCallback: webhookUrl,
           ...(campaign.media_url ? { MediaUrl: campaign.media_url } : {}),
         })
 
