@@ -11,11 +11,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Phone } from "lucide-react";
 import { BuyPhoneNumberForm } from "./BuyPhoneNumberForm";
-import { useSearchParams } from "react-router-dom";
+import { usePaymentSuccess } from "@/hooks/usePaymentSuccess";
 
 export function PhoneNumbersList() {
   const [isAddingNumber, setIsAddingNumber] = useState(false);
@@ -23,17 +23,9 @@ export function PhoneNumbersList() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [buyDialogOpen, setBuyDialogOpen] = useState(false);
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
 
-  useEffect(() => {
-    const sessionId = searchParams.get("session_id");
-    if (sessionId) {
-      toast({
-        title: "Payment Successful!",
-        description: "Your new phone number is on its way. We'll notify you once it's ready.",
-      });
-    }
-  }, [searchParams, toast]);
+  // Use the payment success hook
+  usePaymentSuccess();
 
   const { data: phoneNumbers, isLoading, refetch } = useQuery({
     queryKey: ['phone-numbers'],
