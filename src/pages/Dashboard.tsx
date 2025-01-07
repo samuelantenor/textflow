@@ -17,8 +17,15 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const sessionId = searchParams.get("session_id");
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Set initial tab from URL parameter
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   // Check authentication
   useEffect(() => {
@@ -40,18 +47,6 @@ const Dashboard = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
-
-  // Show welcome message if coming from successful payment
-  useEffect(() => {
-    if (sessionId) {
-      toast({
-        title: "Welcome to FlowText!",
-        description: "Your subscription has been activated successfully.",
-      });
-      // Clean up the URL
-      window.history.replaceState({}, document.title, "/dashboard");
-    }
-  }, [sessionId, toast]);
 
   // Fetch subscription status
   const { data: subscription, isLoading } = useQuery({
