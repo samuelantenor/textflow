@@ -98,9 +98,10 @@ export const BuyPhoneNumberForm = () => {
           }}
           onChange={(value) => setCountry(value)}
           containerClass="!w-full"
-          inputClass="!w-full !h-10 !text-base"
+          inputClass="!w-full !h-10 !text-base !text-black"
           buttonClass="!h-10"
-          searchClass="!w-full"
+          searchClass="!w-full !text-black"
+          dropdownClass="!text-black"
         />
       </div>
 
