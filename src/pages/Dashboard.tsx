@@ -4,8 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GroupList } from "@/components/groups/GroupList";
-import { useQuery } from "@tanstack/react-query";
-import { CampaignAnalytics } from "@/components/analytics/CampaignAnalytics";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { FormsOverview } from "@/components/forms/FormsOverview";
@@ -91,7 +89,6 @@ const Dashboard = () => {
               <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
               <TabsTrigger value="groups">Groups</TabsTrigger>
               <TabsTrigger value="forms">Forms</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="phone-numbers">Phone Numbers</TabsTrigger>
             </TabsList>
 
@@ -112,13 +109,6 @@ const Dashboard = () => {
 
             <TabsContent value="forms">
               <FormsOverview />
-            </TabsContent>
-
-            <TabsContent value="analytics">
-              <div className="space-y-8">
-                <h2 className="text-2xl font-bold">Campaign Analytics</h2>
-                <CampaignAnalytics />
-              </div>
             </TabsContent>
 
             <TabsContent value="phone-numbers">

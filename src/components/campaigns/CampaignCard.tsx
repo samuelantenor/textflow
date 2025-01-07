@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { EditCampaignDialog } from "../campaign/EditCampaignDialog";
-import { useNavigate } from "react-router-dom";
+import { CampaignAnalyticsDialog } from "./CampaignAnalyticsDialog";
 
 interface CampaignCardProps {
   campaign: Campaign;
@@ -18,9 +18,9 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   const handleDelete = async () => {
     try {
@@ -95,10 +95,6 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
     }
   };
 
-  const handleViewAnalytics = () => {
-    navigate("/dashboard?tab=analytics");
-  };
-
   return (
     <Card className="w-full">
       <CardHeader>
@@ -147,7 +143,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleViewAnalytics}
+              onClick={() => setShowAnalyticsDialog(true)}
             >
               <BarChart className="h-4 w-4 mr-2" />
               Analytics
@@ -175,6 +171,12 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
         campaign={campaign}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+      />
+
+      <CampaignAnalyticsDialog
+        campaign={campaign}
+        open={showAnalyticsDialog}
+        onOpenChange={setShowAnalyticsDialog}
       />
     </Card>
   );
