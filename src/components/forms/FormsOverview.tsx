@@ -76,6 +76,26 @@ export const FormsOverview = () => {
     if (!selectedForm) return;
 
     try {
+      // First check if the form still exists
+      const { data: existingForm, error: checkError } = await supabase
+        .from('custom_forms')
+        .select('id')
+        .eq('id', selectedForm.id)
+        .maybeSingle();
+
+      if (checkError) throw checkError;
+      
+      if (!existingForm) {
+        toast({
+          title: "Error",
+          description: "This form no longer exists.",
+          variant: "destructive",
+        });
+        setDeleteDialogOpen(false);
+        queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
+        return;
+      }
+
       const { error } = await supabase
         .from('custom_forms')
         .delete()
