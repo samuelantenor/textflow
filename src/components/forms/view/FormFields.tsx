@@ -14,7 +14,7 @@ interface FormFieldsProps {
 export function FormFields({ fields, formData, onFieldChange, customization }: FormFieldsProps) {
   return (
     <div className="space-y-6">
-      {fields.map((field: FormField, index: number) => (
+      {fields.map((field: FormField & { id: string }, index: number) => (
         <div key={index} className="space-y-2">
           {field.type !== 'checkbox' && (
             <Label 
@@ -31,8 +31,7 @@ export function FormFields({ fields, formData, onFieldChange, customization }: F
             <p className="text-sm text-muted-foreground">{field.description}</p>
           )}
           <FormFieldRenderer
-            field={field}
-            index={index}
+            field={{ ...field, id: `field-${index}` }}
             value={formData[field.label]}
             onChange={(value) => onFieldChange(field.label, value)}
             customization={customization}
