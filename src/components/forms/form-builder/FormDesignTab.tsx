@@ -51,7 +51,11 @@ export function FormDesignTab({ form, handleLogoUpload }: FormDesignTabProps) {
                     key={color}
                     className="w-12 h-12 rounded border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
                     style={{ backgroundColor: color }}
-                    onClick={() => onChange(color)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onChange(color);
+                    }}
                   />
                 ))}
               </div>
