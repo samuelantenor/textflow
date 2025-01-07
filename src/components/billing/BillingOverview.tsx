@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export const BillingOverview = ({ subscription }: { subscription: any }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const { toast } = useToast();
 
   const handleSubscribe = async () => {
@@ -34,6 +35,38 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
     }
   };
 
+  const handleUnsubscribe = async () => {
+    if (!window.confirm('Are you sure you want to cancel your subscription? This will take effect at the end of your current billing period.')) {
+      return;
+    }
+
+    try {
+      setIsCancelling(true);
+      const { error } = await supabase.functions.invoke(
+        'cancel-subscription',
+        {
+          method: 'POST',
+        }
+      );
+
+      if (error) throw error;
+
+      toast({
+        title: "Subscription Cancelled",
+        description: "Your subscription will end at the end of the current billing period.",
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to cancel subscription",
+      });
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   return (
     <div className="bg-card rounded-lg p-6">
       <h2 className="text-lg font-semibold mb-6">Subscription Overview</h2>
@@ -45,13 +78,24 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
               {subscription?.status === 'active' ? 'Premium Plan' : 'Free Plan'}
             </p>
           </div>
-          <Button 
-            onClick={handleSubscribe}
-            disabled={subscription?.status === 'active' || isLoading}
-          >
-            <CreditCard className="mr-2 h-4 w-4" />
-            {subscription?.status === 'active' ? 'Subscribed' : 'Subscribe Now'}
-          </Button>
+          {subscription?.status === 'active' ? (
+            <Button 
+              variant="destructive"
+              onClick={handleUnsubscribe}
+              disabled={isCancelling}
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              {isCancelling ? 'Cancelling...' : 'Cancel Subscription'}
+            </Button>
+          ) : (
+            <Button 
+              onClick={handleSubscribe}
+              disabled={isLoading}
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              Subscribe Now
+            </Button>
+          )}
         </div>
         <div>
           <p className="font-medium">Status</p>
