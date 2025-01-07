@@ -3,45 +3,25 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CreditCard, Receipt } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { BillingOverview } from "@/components/billing/BillingOverview";
 import { UsageStats } from "@/components/billing/UsageStats";
 import { PaymentHistory } from "@/components/billing/PaymentHistory";
-import { useToast } from "@/hooks/use-toast";
 
 const Billing = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
 
-  // Check authentication and handle session changes
+  // Check authentication
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Authentication Error",
-          description: error.message,
-        });
-        navigate("/login");
-        return;
-      }
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate("/login");
       }
     };
-    
     checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT') {
-        navigate("/login");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate, toast]);
+  }, [navigate]);
 
   // Fetch subscription status
   const { data: subscription } = useQuery({
