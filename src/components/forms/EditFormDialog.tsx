@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
@@ -31,7 +31,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   const [activeTab, setActiveTab] = useState("fields");
   const { toast } = useToast();
   
-  // Reset form when initialForm changes
   const form = useForm({
     defaultValues: {
       title: initialForm.title,
@@ -45,8 +44,8 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     },
   });
 
-  // Reset form values when initialForm changes
-  useState(() => {
+  // Reset form values when initialForm changes or dialog opens
+  useEffect(() => {
     if (open) {
       form.reset({
         title: initialForm.title,
@@ -59,7 +58,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
         primary_color: initialForm.primary_color || "#ea384c",
       });
     }
-  }, [initialForm, open]);
+  }, [initialForm, open, form]);
 
   const handleLogoUpload = async (file: File) => {
     try {
