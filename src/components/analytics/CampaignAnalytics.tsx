@@ -13,39 +13,60 @@ export const CampaignAnalytics = () => {
   const { data: analytics } = useQuery({
     queryKey: ['campaign-analytics'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('campaign_analytics')
-        .select('*');
+      const { data: messageData, error: messageError } = await supabase
+        .from('message_logs')
+        .select('status, campaign_id');
 
-      if (error) throw error;
-      
-      // Calculate totals
-      const totals = data.reduce((acc, curr) => {
-        acc.total_messages++;
-        // Ensure numeric values for calculations
-        acc.delivered += Number(curr.delivery_rate) || 0;
-        acc.failed += Number(100 - curr.delivery_rate) || 0;
-        acc.response_rate += Number(curr.open_rate) || 0;
+      if (messageError) throw messageError;
+
+      // Group messages by campaign and calculate stats
+      const campaignStats = messageData.reduce((acc, msg) => {
+        if (!acc[msg.campaign_id]) {
+          acc[msg.campaign_id] = {
+            total: 0,
+            delivered: 0,
+            failed: 0,
+            pending: 0
+          };
+        }
+        
+        acc[msg.campaign_id].total++;
+        switch (msg.status) {
+          case 'delivered':
+            acc[msg.campaign_id].delivered++;
+            break;
+          case 'failed':
+            acc[msg.campaign_id].failed++;
+            break;
+          default:
+            acc[msg.campaign_id].pending++;
+        }
+        
         return acc;
-      }, {
-        total_messages: 0,
-        delivered: 0,
-        failed: 0,
-        response_rate: 0,
-        queued: 0
-      });
+      }, {});
 
-      // Calculate averages
-      const count = data.length || 1;
+      // Calculate overall stats
+      const totalStats = Object.values(campaignStats).reduce((acc: any, curr: any) => {
+        acc.total_messages += curr.total;
+        acc.delivered += curr.delivered;
+        acc.failed += curr.failed;
+        acc.pending += curr.pending;
+        return acc;
+      }, { total_messages: 0, delivered: 0, failed: 0, pending: 0 });
+
       return {
-        total_messages: totals.total_messages,
-        delivery_rate: (totals.delivered / count).toFixed(1),
-        failed_messages: Math.round(totals.failed / 100),
-        response_rate: (totals.response_rate / count).toFixed(1),
+        total_messages: totalStats.total_messages,
+        delivery_rate: totalStats.total_messages > 0 
+          ? ((totalStats.delivered / totalStats.total_messages) * 100).toFixed(1)
+          : 0,
+        failed_messages: totalStats.failed,
+        response_rate: totalStats.total_messages > 0
+          ? ((totalStats.delivered / totalStats.total_messages) * 100).toFixed(1)
+          : 0,
         delivery_status: {
-          delivered: Math.round(totals.delivered / count),
-          failed: Math.round(totals.failed / count),
-          queued: totals.queued
+          delivered: totalStats.delivered,
+          failed: totalStats.failed,
+          queued: totalStats.pending
         }
       };
     },
@@ -107,14 +128,14 @@ export const CampaignAnalytics = () => {
               <XCircle className="w-4 h-4 text-red-500" />
               <span>Failed</span>
             </div>
-            <span>{analytics?.delivery_status?.failed || 0} ({(100 - Number(analytics?.delivery_rate || 0))}%)</span>
+            <span>{analytics?.delivery_status?.failed || 0} ({analytics?.failed_messages || 0})</span>
           </div>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-yellow-500" />
               <span>Queued</span>
             </div>
-            <span>{analytics?.delivery_status?.queued || 0} (0%)</span>
+            <span>{analytics?.delivery_status?.queued || 0}</span>
           </div>
         </div>
       </Card>
