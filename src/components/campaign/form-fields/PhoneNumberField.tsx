@@ -32,7 +32,7 @@ export function PhoneNumberField({ form }: PhoneNumberFieldProps) {
       render={({ field }) => (
         <FormItem>
           <FormLabel>From Number</FormLabel>
-          <Select onValueChange={field.onChange} value={field.value}>
+          <Select onValueChange={field.onChange} value={field.value || ""}>
             <FormControl>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a number to send from">
@@ -47,15 +47,17 @@ export function PhoneNumberField({ form }: PhoneNumberFieldProps) {
             </FormControl>
             <SelectContent>
               {phoneNumbers?.map((number) => (
-                <SelectItem key={number.id} value={number.phone_number}>
-                  <div className="flex items-center">
-                    <Phone className="w-4 h-4 mr-2" />
-                    <span>{number.phone_number}</span>
-                  </div>
-                </SelectItem>
+                number.phone_number && (
+                  <SelectItem key={number.id} value={number.phone_number}>
+                    <div className="flex items-center">
+                      <Phone className="w-4 h-4 mr-2" />
+                      <span>{number.phone_number}</span>
+                    </div>
+                  </SelectItem>
+                )
               ))}
               {(!phoneNumbers || phoneNumbers.length === 0) && (
-                <SelectItem value="" disabled>
+                <SelectItem value="no-numbers" disabled>
                   No phone numbers available
                 </SelectItem>
               )}
