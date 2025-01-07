@@ -26,6 +26,25 @@ export function CreateCampaignDialog() {
     try {
       setIsLoading(true);
 
+      // Validate required fields
+      if (!data.group_id) {
+        toast({
+          title: "Error",
+          description: "Please select a contact group",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!data.from_number) {
+        toast({
+          title: "Error",
+          description: "Please select a phone number to send from",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Get the current user's ID
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
