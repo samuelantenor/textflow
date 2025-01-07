@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { CampaignFormFields } from "@/components/campaign/CampaignFormFields";
 import type { CampaignFormData } from "@/types/campaign";
-import { useState } from "react";
 
 const CreateCampaign = () => {
   const navigate = useNavigate();
@@ -26,6 +26,15 @@ const CreateCampaign = () => {
 
       let mediaUrl = null;
       if (data.media) {
+        if (data.media.size > 10 * 1024 * 1024) {
+          toast({
+            title: "Error",
+            description: "Image size must be less than 10MB",
+            variant: "destructive",
+          });
+          return;
+        }
+
         const fileExt = data.media.name.split(".").pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
         const { error: uploadError } = await supabase.storage
@@ -41,6 +50,7 @@ const CreateCampaign = () => {
         mediaUrl = publicUrl;
       }
 
+      // Combine date and time if both are provided
       let scheduledFor = data.scheduled_for;
       if (scheduledFor && data.scheduled_time) {
         const [hours, minutes] = data.scheduled_time.split(':');
@@ -54,15 +64,14 @@ const CreateCampaign = () => {
         message: data.message,
         media_url: mediaUrl,
         scheduled_for: scheduledFor?.toISOString(),
-        group_id: data.group_id,
         status: "draft",
       });
 
       if (error) throw error;
 
       toast({
-        title: "Campaign created",
-        description: "Your campaign has been saved as a draft.",
+        title: "Success",
+        description: "Campaign created successfully",
       });
 
       navigate("/dashboard?tab=campaigns");
@@ -70,7 +79,7 @@ const CreateCampaign = () => {
       console.error("Error creating campaign:", error);
       toast({
         title: "Error",
-        description: "Failed to create campaign. Please try again.",
+        description: "Failed to create campaign",
         variant: "destructive",
       });
     } finally {
@@ -80,7 +89,7 @@ const CreateCampaign = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Button
           variant="ghost"
           className="mb-6"
@@ -113,7 +122,7 @@ const CreateCampaign = () => {
                   {isLoading && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  Save as Draft
+                  Create Campaign
                 </Button>
               </div>
             </form>
