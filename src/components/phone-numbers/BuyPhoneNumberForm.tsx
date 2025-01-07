@@ -88,7 +88,7 @@ export const BuyPhoneNumberForm = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
-        <Label>Choose Region Number</Label>
+        <Label className="text-black">Choose Region Number</Label>
         <PhoneInput
           country={"us"}
           enableSearch
