@@ -25,11 +25,21 @@ serve(async (req) => {
       throw new Error('No authorization header');
     }
 
+    // Extract the token from the Bearer format
+    const token = authHeader.replace('Bearer ', '');
+    console.log('Attempting to authenticate with token');
+
     // Get the user from the auth header
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(authHeader);
-    if (userError || !user) {
-      throw new Error('Authentication required');
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    if (userError) {
+      console.error('User authentication error:', userError);
+      throw new Error('Authentication failed');
     }
+    if (!user) {
+      throw new Error('No user found');
+    }
+
+    console.log('User authenticated successfully:', user.id);
 
     // Get the user's active subscription
     const { data: subscriptions, error: subError } = await supabaseClient
@@ -39,10 +49,15 @@ serve(async (req) => {
       .eq('status', 'active')
       .maybeSingle();
 
-    if (subError) throw subError;
+    if (subError) {
+      console.error('Subscription fetch error:', subError);
+      throw subError;
+    }
     if (!subscriptions?.stripe_subscription_id) {
       throw new Error('No active subscription found');
     }
+
+    console.log('Found subscription:', subscriptions.stripe_subscription_id);
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
@@ -53,6 +68,8 @@ serve(async (req) => {
     await stripe.subscriptions.update(subscriptions.stripe_subscription_id, {
       cancel_at_period_end: true,
     });
+
+    console.log('Subscription cancelled successfully');
 
     return new Response(
       JSON.stringify({ message: 'Subscription cancelled successfully' }),

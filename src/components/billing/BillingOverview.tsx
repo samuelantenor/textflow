@@ -44,7 +44,8 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
       setIsCancelling(true);
       
       // Get the current session
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
       if (!session) {
         throw new Error('No active session found');
       }
