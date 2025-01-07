@@ -5,50 +5,93 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FormPreview } from "../FormPreview";
 import { FONT_OPTIONS } from "./constants";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { EyeDropper } from "lucide-react";
 
 interface FormDesignTabProps {
   form: UseFormReturn<any>;
   handleLogoUpload: (file: File) => Promise<void>;
 }
 
+const PRESET_COLORS = [
+  "#FFFFFF", // White
+  "#000000", // Black
+  "#ea384c", // Red (Primary)
+  "#9b87f5", // Purple
+  "#0EA5E9", // Blue
+  "#22C55E", // Green
+  "#F97316", // Orange
+  "#A855F7", // Purple
+  "#EC4899", // Pink
+];
+
 export function FormDesignTab({ form, handleLogoUpload }: FormDesignTabProps) {
   const formData = form.watch();
+
+  const ColorPicker = ({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) => (
+    <div className="space-y-4">
+      <Label>{label}</Label>
+      <div className="flex gap-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-12 h-12 p-1"
+              style={{ backgroundColor: value }}
+            >
+              <EyeDropper className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64">
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-2">
+                {PRESET_COLORS.map((color) => (
+                  <button
+                    key={color}
+                    className="w-12 h-12 rounded border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
+                    style={{ backgroundColor: color }}
+                    onClick={() => onChange(color)}
+                  />
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  type="color"
+                  className="w-12 h-12 p-1"
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                />
+                <Input
+                  type="text"
+                  className="flex-1"
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                  placeholder="#000000"
+                />
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+    </div>
+  );
 
   return (
     <div className="grid grid-cols-2 gap-8 h-full">
       <ScrollArea className="h-[calc(90vh-220px)]">
         <div className="space-y-6 pr-4">
-          <div className="space-y-4">
-            <Label>Background Color</Label>
-            <div className="flex gap-2">
-              <Input
-                type="color"
-                className="w-12 h-12 p-1"
-                {...form.register("background_color")}
-              />
-              <Input
-                type="text"
-                className="flex-1"
-                {...form.register("background_color")}
-              />
-            </div>
-          </div>
+          <ColorPicker
+            label="Background Color"
+            value={form.watch("background_color")}
+            onChange={(value) => form.setValue("background_color", value)}
+          />
 
-          <div className="space-y-4">
-            <Label>Primary Color</Label>
-            <div className="flex gap-2">
-              <Input
-                type="color"
-                className="w-12 h-12 p-1"
-                {...form.register("primary_color")}
-              />
-              <Input
-                type="text"
-                className="flex-1"
-                {...form.register("primary_color")}
-              />
-            </div>
-          </div>
+          <ColorPicker
+            label="Primary Color"
+            value={form.watch("primary_color")}
+            onChange={(value) => form.setValue("primary_color", value)}
+          />
 
           <div className="space-y-4">
             <Label>Font Family</Label>
