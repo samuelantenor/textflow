@@ -76,15 +76,28 @@ export const FormsOverview = () => {
     if (!selectedForm) return;
 
     try {
-      // First, delete all form submissions for this form
-      const { error: submissionsError } = await supabase
+      // First, check if there are any submissions
+      const { data: submissions, error: checkError } = await supabase
         .from('form_submissions')
-        .delete()
+        .select('id')
         .eq('form_id', selectedForm.id);
 
-      if (submissionsError) {
-        console.error('Error deleting form submissions:', submissionsError);
-        throw submissionsError;
+      if (checkError) {
+        console.error('Error checking form submissions:', checkError);
+        throw checkError;
+      }
+
+      // If there are submissions, delete them first
+      if (submissions && submissions.length > 0) {
+        const { error: submissionsError } = await supabase
+          .from('form_submissions')
+          .delete()
+          .eq('form_id', selectedForm.id);
+
+        if (submissionsError) {
+          console.error('Error deleting form submissions:', submissionsError);
+          throw submissionsError;
+        }
       }
 
       // Then, delete the form itself
@@ -93,7 +106,10 @@ export const FormsOverview = () => {
         .delete()
         .eq('id', selectedForm.id);
 
-      if (formError) throw formError;
+      if (formError) {
+        console.error('Error deleting form:', formError);
+        throw formError;
+      }
 
       toast({
         title: "Success",
@@ -102,7 +118,7 @@ export const FormsOverview = () => {
 
       queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
     } catch (error) {
-      console.error('Error deleting form:', error);
+      console.error('Error during deletion process:', error);
       toast({
         title: "Error",
         description: "Failed to delete form. Please try again.",
