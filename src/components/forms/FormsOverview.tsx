@@ -9,16 +9,8 @@ import { CustomForm } from "./types";
 import { FormsList } from "./FormsList";
 import { useFormsData } from "@/hooks/forms/useFormsData";
 import { FileText } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { DeleteFormDialog } from "./DeleteFormDialog";
+import { deleteFormAndSubmissions } from "@/utils/formUtils";
 import { supabase } from "@/integrations/supabase/client";
 
 export const FormsOverview = () => {
@@ -30,7 +22,6 @@ export const FormsOverview = () => {
   const { toast } = useToast();
   const { forms, groups, isLoadingForms, isLoadingGroups, queryClient } = useFormsData();
 
-  // Subscribe to real-time changes
   useEffect(() => {
     const channel = supabase
       .channel('custom_forms_changes')
@@ -76,41 +67,8 @@ export const FormsOverview = () => {
     if (!selectedForm) return;
 
     try {
-      // First, check if there are any submissions
-      const { data: submissions, error: checkError } = await supabase
-        .from('form_submissions')
-        .select('id')
-        .eq('form_id', selectedForm.id);
-
-      if (checkError) {
-        console.error('Error checking form submissions:', checkError);
-        throw checkError;
-      }
-
-      // If there are submissions, delete them first
-      if (submissions && submissions.length > 0) {
-        const { error: submissionsError } = await supabase
-          .from('form_submissions')
-          .delete()
-          .eq('form_id', selectedForm.id);
-
-        if (submissionsError) {
-          console.error('Error deleting form submissions:', submissionsError);
-          throw submissionsError;
-        }
-      }
-
-      // Then, delete the form itself
-      const { error: formError } = await supabase
-        .from('custom_forms')
-        .delete()
-        .eq('id', selectedForm.id);
-
-      if (formError) {
-        console.error('Error deleting form:', formError);
-        throw formError;
-      }
-
+      await deleteFormAndSubmissions(selectedForm.id);
+      
       toast({
         title: "Success",
         description: "Form and its submissions deleted successfully.",
@@ -124,8 +82,6 @@ export const FormsOverview = () => {
         description: "Failed to delete form. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setDeleteDialogOpen(false);
     }
   };
 
@@ -184,23 +140,11 @@ export const FormsOverview = () => {
             onOpenChange={setEditDialogOpen}
           />
 
-          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the form
-                  and all its submissions.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <DeleteFormDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            onConfirm={confirmDelete}
+          />
         </>
       )}
     </div>
