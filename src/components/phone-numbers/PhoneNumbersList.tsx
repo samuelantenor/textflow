@@ -14,11 +14,13 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Phone } from "lucide-react";
+import { BuyPhoneNumberForm } from "./BuyPhoneNumberForm";
 
 export function PhoneNumbersList() {
   const [isAddingNumber, setIsAddingNumber] = useState(false);
   const [newNumber, setNewNumber] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [buyDialogOpen, setBuyDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const { data: phoneNumbers, isLoading, refetch } = useQuery({
@@ -80,49 +82,69 @@ export function PhoneNumbersList() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">My Phone Numbers</h2>
-        <Dialog open={isAddingNumber} onOpenChange={setIsAddingNumber}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Number
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Phone Number</DialogTitle>
-              <DialogDescription>
-                Add a phone number you've received from Twilio to use for sending messages.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleAddNumber} className="space-y-4">
-              <div>
-                <Label htmlFor="phone_number">Phone Number</Label>
-                <Input
-                  id="phone_number"
-                  placeholder="+1234567890"
-                  value={newNumber}
-                  onChange={(e) => setNewNumber(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsAddingNumber(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Add Number
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <div className="space-x-2">
+          <Dialog open={isAddingNumber} onOpenChange={setIsAddingNumber}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Number
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add Phone Number</DialogTitle>
+                <DialogDescription>
+                  Add a phone number you've received from Twilio to use for sending messages.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleAddNumber} className="space-y-4">
+                <div>
+                  <Label htmlFor="phone_number">Phone Number</Label>
+                  <Input
+                    id="phone_number"
+                    placeholder="+1234567890"
+                    value={newNumber}
+                    onChange={(e) => setNewNumber(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsAddingNumber(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Add Number
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={buyDialogOpen} onOpenChange={setBuyDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Phone className="w-4 h-4 mr-2" />
+                Buy New Number
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Request a New Phone Number</DialogTitle>
+                <DialogDescription>
+                  Fill out this form to request a new phone number. We'll get back to you with the details.
+                </DialogDescription>
+              </DialogHeader>
+              <BuyPhoneNumberForm />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="grid gap-4">
