@@ -1,11 +1,11 @@
 export interface FormField {
-  id: string;  // Added this field
+  id: string;
   type: string;
   label: string;
   placeholder?: string;
   required?: boolean;
   description?: string;
-  options?: string[];
+  options?: { label: string; value: string; }[];
 }
 
 export interface FormData {
