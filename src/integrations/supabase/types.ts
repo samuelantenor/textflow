@@ -234,6 +234,7 @@ export type Database = {
       }
       landing_pages: {
         Row: {
+          background_color: string | null
           created_at: string
           description: string | null
           font_family: string
@@ -248,6 +249,7 @@ export type Database = {
           welcome_message: string | null
         }
         Insert: {
+          background_color?: string | null
           created_at?: string
           description?: string | null
           font_family?: string
@@ -262,6 +264,7 @@ export type Database = {
           welcome_message?: string | null
         }
         Update: {
+          background_color?: string | null
           created_at?: string
           description?: string | null
           font_family?: string
