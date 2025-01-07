@@ -38,7 +38,15 @@ export function CampaignListItem({ campaign }: CampaignListItemProps) {
 
       if (logsError) throw logsError;
 
-      // Then delete the campaign
+      // Then delete campaign analytics if they exist
+      const { error: analyticsError } = await supabase
+        .from('campaign_analytics')
+        .delete()
+        .eq('campaign_id', campaign.id);
+
+      if (analyticsError) throw analyticsError;
+
+      // Finally delete the campaign
       const { error: campaignError } = await supabase
         .from('campaigns')
         .delete()
