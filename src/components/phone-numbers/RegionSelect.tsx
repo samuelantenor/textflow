@@ -43,6 +43,9 @@ export function RegionSelect({ value, onChange, regions }: RegionSelectProps) {
     }
   };
 
+  // Only show regions if there's a search query
+  const regionsToShow = searchQuery.length > 0 ? filteredRegions : [];
+
   return (
     <div className="space-y-2">
       <Label>Select Region</Label>
@@ -53,7 +56,7 @@ export function RegionSelect({ value, onChange, regions }: RegionSelectProps) {
         onOpenChange={handleOpenChange}
       >
         <SelectTrigger className="w-full">
-          <SelectValue placeholder="Choose a region" />
+          <SelectValue placeholder="Search for a region" />
         </SelectTrigger>
         <SelectContent className="h-[300px]">
           <div className="sticky top-0 p-2 bg-popover border-b">
@@ -61,7 +64,7 @@ export function RegionSelect({ value, onChange, regions }: RegionSelectProps) {
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 ref={inputRef}
-                placeholder="Search countries..."
+                placeholder="Type to search countries..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-8"
@@ -71,15 +74,25 @@ export function RegionSelect({ value, onChange, regions }: RegionSelectProps) {
           </div>
           <ScrollArea className="h-[calc(300px-56px)]" type="always">
             <div className="p-2">
-              {filteredRegions.map((region) => (
-                <SelectItem 
-                  key={region.value} 
-                  value={region.value}
-                  className="rounded-md cursor-pointer"
-                >
-                  {region.label}
-                </SelectItem>
-              ))}
+              {searchQuery.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Type to search for regions
+                </p>
+              ) : regionsToShow.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No regions found
+                </p>
+              ) : (
+                regionsToShow.map((region) => (
+                  <SelectItem 
+                    key={region.value} 
+                    value={region.value}
+                    className="rounded-md cursor-pointer"
+                  >
+                    {region.label}
+                  </SelectItem>
+                ))
+              )}
             </div>
           </ScrollArea>
         </SelectContent>
