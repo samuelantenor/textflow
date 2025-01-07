@@ -64,7 +64,6 @@ export function CreateCampaignDialog() {
         media_url: mediaUrl,
         scheduled_for: scheduledFor?.toISOString(),
         group_id: data.group_id,
-        from_number: data.from_number,
         status: "draft",
       });
 
@@ -105,7 +104,7 @@ export function CreateCampaignDialog() {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <CampaignFormFields form={form} />
             <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-4">
               <Button

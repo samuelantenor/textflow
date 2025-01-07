@@ -10,7 +10,6 @@ import Billing from "@/pages/Billing";
 import Index from "@/pages/Index";
 import Profile from "@/pages/Profile";
 import ViewForm from "@/pages/ViewForm";
-import CreateCampaign from "@/pages/CreateCampaign";
 
 const queryClient = new QueryClient();
 
@@ -27,7 +26,6 @@ function App() {
             <Route path="/billing" element={<Billing />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/forms/:id" element={<ViewForm />} />
-            <Route path="/campaigns/new" element={<CreateCampaign />} />
           </Routes>
           <Toaster />
         </ThemeProvider>

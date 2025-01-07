@@ -5,7 +5,6 @@ export type CampaignFormData = {
   scheduled_for?: Date;
   scheduled_time?: string;
   group_id: string;
-  from_number?: string;
 };
 
 export type CampaignStatus = 'draft' | 'sent';
@@ -21,5 +20,4 @@ export interface Campaign {
   created_at: string;
   updated_at: string;
   group_id?: string;
-  from_number?: string;
 }
