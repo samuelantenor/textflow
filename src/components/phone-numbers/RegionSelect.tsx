@@ -48,14 +48,14 @@ export function RegionSelect({ value, onChange, regions }: RegionSelectProps) {
 
   return (
     <div className="space-y-2">
-      <Label>Select Region</Label>
+      <Label className="text-black">Select Region</Label>
       <Select 
         value={value} 
         onValueChange={onChange}
         open={isOpen}
         onOpenChange={handleOpenChange}
       >
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="w-full text-black">
           <SelectValue placeholder="Search for a region" />
         </SelectTrigger>
         <SelectContent className="h-[300px]">
@@ -87,7 +87,7 @@ export function RegionSelect({ value, onChange, regions }: RegionSelectProps) {
                   <SelectItem 
                     key={region.value} 
                     value={region.value}
-                    className="rounded-md cursor-pointer"
+                    className="rounded-md cursor-pointer text-black"
                   >
                     {region.label}
                   </SelectItem>
