@@ -4,6 +4,12 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+const PLAN_NAMES: { [key: string]: string } = {
+  "price_1OvKVEHVlLhqxuDVQYrOVHwz": "Basic Plan",
+  "price_1OvKVfHVlLhqxuDVJnY5EZyx": "Premium Plan",
+  "price_1OvKW3HVlLhqxuDVIvqHJGz9": "Enterprise Plan"
+};
+
 export const BillingOverview = ({ subscription }: { subscription: any }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -34,6 +40,11 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
     }
   };
 
+  const getPlanName = () => {
+    if (!subscription?.price_id) return 'Free Plan';
+    return PLAN_NAMES[subscription.price_id] || 'Custom Plan';
+  };
+
   return (
     <div className="bg-card rounded-lg p-6">
       <h2 className="text-lg font-semibold mb-6">Subscription Overview</h2>
@@ -42,7 +53,7 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
           <div>
             <p className="font-medium">Current Plan</p>
             <p className="text-muted-foreground">
-              {subscription?.status === 'active' ? 'Premium Plan' : 'Free Plan'}
+              {subscription?.status === 'active' ? getPlanName() : 'Free Plan'}
             </p>
           </div>
           <Button 
