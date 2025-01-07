@@ -76,13 +76,6 @@ export const FormsOverview = () => {
     if (!selectedForm) return;
 
     try {
-      const { error: submissionsError } = await supabase
-        .from('form_submissions')
-        .delete()
-        .eq('form_id', selectedForm.id);
-
-      if (submissionsError) throw submissionsError;
-
       const { error } = await supabase
         .from('custom_forms')
         .delete()
