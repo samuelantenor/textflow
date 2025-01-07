@@ -9,8 +9,16 @@ import { CustomForm } from "./types";
 import { FormsList } from "./FormsList";
 import { useFormsData } from "@/hooks/forms/useFormsData";
 import { FileText } from "lucide-react";
-import { DeleteFormDialog } from "./DeleteFormDialog";
-import { deleteFormAndSubmissions } from "@/utils/formUtils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 
 export const FormsOverview = () => {
@@ -22,6 +30,7 @@ export const FormsOverview = () => {
   const { toast } = useToast();
   const { forms, groups, isLoadingForms, isLoadingGroups, queryClient } = useFormsData();
 
+  // Subscribe to real-time changes
   useEffect(() => {
     const channel = supabase
       .channel('custom_forms_changes')
@@ -67,21 +76,35 @@ export const FormsOverview = () => {
     if (!selectedForm) return;
 
     try {
-      await deleteFormAndSubmissions(selectedForm.id);
-      
+      const { error: submissionsError } = await supabase
+        .from('form_submissions')
+        .delete()
+        .eq('form_id', selectedForm.id);
+
+      if (submissionsError) throw submissionsError;
+
+      const { error } = await supabase
+        .from('custom_forms')
+        .delete()
+        .eq('id', selectedForm.id);
+
+      if (error) throw error;
+
       toast({
         title: "Success",
-        description: "Form and its submissions deleted successfully.",
+        description: "Form deleted successfully.",
       });
 
       queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
     } catch (error) {
-      console.error('Error during deletion process:', error);
+      console.error('Error deleting form:', error);
       toast({
         title: "Error",
         description: "Failed to delete form. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setDeleteDialogOpen(false);
     }
   };
 
@@ -140,11 +163,23 @@ export const FormsOverview = () => {
             onOpenChange={setEditDialogOpen}
           />
 
-          <DeleteFormDialog
-            open={deleteDialogOpen}
-            onOpenChange={setDeleteDialogOpen}
-            onConfirm={confirmDelete}
-          />
+          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the form
+                  and all its submissions.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </>
       )}
     </div>

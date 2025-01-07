@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Send } from "lucide-react";
+import { MoreVertical, Trash, Edit, Send, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Campaign } from "./types";
 import { EditCampaignDialog } from "./EditCampaignDialog";
-import { CampaignStatusBadge } from "./CampaignStatusBadge";
-import { CampaignActionsMenu } from "./CampaignActionsMenu";
-import { CampaignScheduleBadge } from "./CampaignScheduleBadge";
 
 interface CampaignListItemProps {
   campaign: Campaign;
@@ -70,6 +74,17 @@ export function CampaignListItem({ campaign }: CampaignListItemProps) {
     }
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'sent':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'draft':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   return (
     <div className="campaign-card rounded-lg border p-4 space-y-4">
       <div className="flex items-start justify-between">
@@ -79,16 +94,34 @@ export function CampaignListItem({ campaign }: CampaignListItemProps) {
             {campaign.message}
           </p>
         </div>
-        <CampaignActionsMenu 
-          onEdit={() => setShowEditDialog(true)}
-          onDelete={handleDelete}
-        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+              <Trash className="h-4 w-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <CampaignStatusBadge status={campaign.status} />
+        <Badge variant="outline" className={getStatusColor(campaign.status)}>
+          {campaign.status}
+        </Badge>
         {campaign.scheduled_for && (
-          <CampaignScheduleBadge scheduledFor={campaign.scheduled_for} />
+          <Badge variant="outline" className="flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            {format(new Date(campaign.scheduled_for), "MMM d, yyyy")}
+          </Badge>
         )}
       </div>
 
