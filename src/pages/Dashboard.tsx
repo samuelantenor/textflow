@@ -11,7 +11,8 @@ import { CampaignAnalytics } from "@/components/analytics/CampaignAnalytics";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { FormsOverview } from "@/components/forms/FormsOverview";
-import { PhoneNumberList } from "@/components/phone/PhoneNumberList";
+import { BuyPhoneNumberDialog } from "@/components/phone/BuyPhoneNumberDialog";
+import { PhoneNumber } from "@/components/phone/types";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -20,7 +21,25 @@ const Dashboard = () => {
   const sessionId = searchParams.get("session_id");
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Check authentication
+  // Fetch phone numbers
+  const { data: phoneNumbers = [], isLoading: isLoadingPhoneNumbers } = useQuery({
+    queryKey: ['phone-numbers'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('phone_numbers')
+        .select('*');
+      
+      if (error) throw error;
+      
+      return data.map((number): PhoneNumber => ({
+        phoneNumber: number.phone_number,
+        friendlyName: number.friendly_name || number.phone_number,
+        capabilities: number.capabilities || [],
+        monthlyCost: number.monthly_cost,
+      }));
+    },
+  });
+
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -129,7 +148,18 @@ const Dashboard = () => {
             </TabsContent>
 
             <TabsContent value="phone">
-              <PhoneNumberList />
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold">Phone Numbers</h2>
+                  <BuyPhoneNumberDialog />
+                </div>
+                <PhoneNumberList
+                  numbers={phoneNumbers}
+                  onSelect={() => {}}
+                  onPurchase={async () => {}}
+                  isPurchasing={false}
+                />
+              </div>
             </TabsContent>
           </Tabs>
         </div>
