@@ -14,11 +14,11 @@ interface FormFieldsProps {
 export function FormFields({ fields, formData, onFieldChange, customization }: FormFieldsProps) {
   return (
     <div className="space-y-6">
-      {fields.map((field: FormField) => (
-        <div key={field.id} className="space-y-2">
+      {fields.map((field: FormField, index: number) => (
+        <div key={index} className="space-y-2">
           {field.type !== 'checkbox' && (
             <Label 
-              htmlFor={field.id}
+              htmlFor={`field-${index}`}
               style={{ color: customization?.primaryColor }}
             >
               {field.label}
@@ -32,6 +32,7 @@ export function FormFields({ fields, formData, onFieldChange, customization }: F
           )}
           <FormFieldRenderer
             field={field}
+            index={index}
             value={formData[field.label]}
             onChange={(value) => onFieldChange(field.label, value)}
             customization={customization}

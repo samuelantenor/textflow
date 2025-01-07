@@ -5,8 +5,9 @@ export type CampaignFormData = {
   scheduled_for?: Date;
   scheduled_time?: string;
   group_id: string;
-  phone_number_id?: string;
 };
+
+export type CampaignStatus = 'draft' | 'sent';
 
 export interface Campaign {
   id: string;
@@ -15,9 +16,8 @@ export interface Campaign {
   message: string;
   media_url?: string;
   scheduled_for?: string;
-  status: 'draft' | 'sent';
+  status: CampaignStatus;
   created_at: string;
   updated_at: string;
   group_id?: string;
-  phone_number_id?: string;
 }

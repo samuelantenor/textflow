@@ -1,12 +1,12 @@
 import { UseFormReturn } from "react-hook-form";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { CampaignFormData } from "@/types/campaign";
-import { PhoneNumberSelectField } from "./form-fields/PhoneNumberSelectField";
+import { CampaignNameField } from "./form-fields/CampaignNameField";
 import { GroupSelectField } from "./form-fields/GroupSelectField";
-import { MediaUploadField } from "./form-fields/MediaUploadField";
-import { ScheduleFields } from "./form-fields/ScheduleFields";
+import { MessageField } from "./form-fields/MessageField";
+import { MediaField } from "./form-fields/MediaField";
+import { ScheduleField } from "./form-fields/ScheduleField";
+import { TabsContent } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
 
 interface CampaignFormFieldsProps {
   form: UseFormReturn<CampaignFormData>;
@@ -15,43 +15,29 @@ interface CampaignFormFieldsProps {
 export function CampaignFormFields({ form }: CampaignFormFieldsProps) {
   return (
     <div className="space-y-4">
-      <PhoneNumberSelectField form={form} />
-      <GroupSelectField form={form} />
-
-      <FormField
-        control={form.control}
-        name="name"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Campaign Name</FormLabel>
-            <FormControl>
-              <Input placeholder="Enter campaign name" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="message"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Message Content</FormLabel>
-            <FormControl>
-              <Textarea 
-                placeholder="Type your message here..."
-                maxLength={160}
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <MediaUploadField form={form} />
-      <ScheduleFields form={form} />
+      <TabsContent value="details" className="m-0">
+        <Card className="p-6">
+          <div className="grid gap-6">
+            <CampaignNameField form={form} />
+            <GroupSelectField form={form} />
+          </div>
+        </Card>
+      </TabsContent>
+      
+      <TabsContent value="message" className="m-0">
+        <Card className="p-6">
+          <div className="grid gap-6">
+            <MessageField form={form} />
+            <MediaField form={form} />
+          </div>
+        </Card>
+      </TabsContent>
+      
+      <TabsContent value="schedule" className="m-0">
+        <Card className="p-6">
+          <ScheduleField form={form} />
+        </Card>
+      </TabsContent>
     </div>
   );
 }
