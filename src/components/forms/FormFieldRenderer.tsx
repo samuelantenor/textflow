@@ -1,7 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -10,25 +9,25 @@ import "react-phone-input-2/lib/style.css";
 
 interface FormFieldRendererProps {
   field: {
+    id: string;
     type: string;
     label: string;
-    required?: boolean;
     placeholder?: string;
-    options?: string[];
-    description?: string;
+    required?: boolean;
+    options?: { label: string; value: string }[];
   };
-  index: number;
   value: any;
   onChange: (value: any) => void;
   customization?: {
     primaryColor?: string;
+    fontFamily?: string;
   };
 }
 
-export function FormFieldRenderer({ field, index, value, onChange, customization }: FormFieldRendererProps) {
+export const FormFieldRenderer = ({ field, value, onChange, customization }: FormFieldRendererProps) => {
   const commonInputStyles = {
+    fontFamily: customization?.fontFamily || 'Inter',
     borderColor: customization?.primaryColor,
-    borderRadius: '0.375rem',
   };
 
   switch (field.type) {
@@ -42,12 +41,27 @@ export function FormFieldRenderer({ field, index, value, onChange, customization
             ...commonInputStyles,
             width: '100%',
             height: '40px',
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            border: '1px solid #333333',
           }}
           buttonStyle={{
-            borderColor: customization?.primaryColor,
+            backgroundColor: '#000000',
+            borderColor: '#333333',
+            borderRight: '1px solid #333333',
           }}
           containerStyle={{
             width: '100%',
+          }}
+          dropdownStyle={{
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            border: '1px solid #333333',
+          }}
+          searchStyle={{
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            border: '1px solid #333333',
           }}
           inputProps={{
             required: field.required,
@@ -58,10 +72,9 @@ export function FormFieldRenderer({ field, index, value, onChange, customization
     case 'textarea':
       return (
         <Textarea
-          id={`field-${index}`}
-          placeholder={field.placeholder}
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
+          placeholder={field.placeholder}
           required={field.required}
           style={commonInputStyles}
         />
@@ -70,71 +83,23 @@ export function FormFieldRenderer({ field, index, value, onChange, customization
       return (
         <div className="flex items-center space-x-2">
           <Checkbox
-            id={`field-${index}`}
+            id={field.id}
             checked={value || false}
             onCheckedChange={onChange}
-            required={field.required}
-            className={cn(
-              "border-2",
-              "data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-            )}
-            style={{ 
-              borderColor: customization?.primaryColor,
-            }}
           />
-          <label 
-            htmlFor={`field-${index}`}
-            className="text-sm"
-            style={{ color: customization?.primaryColor }}
-          >
-            {field.label}
-          </label>
+          <Label htmlFor={field.id}>{field.label}</Label>
         </div>
-      );
-    case 'radio':
-      return (
-        <RadioGroup
-          value={value || ''}
-          onValueChange={onChange}
-          required={field.required}
-        >
-          {field.options?.map((option, optionIndex) => (
-            <div key={optionIndex} className="flex items-center space-x-2">
-              <RadioGroupItem
-                value={option}
-                id={`${index}-${optionIndex}`}
-                className={cn(
-                  "border-2",
-                  "data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                )}
-                style={{ 
-                  borderColor: customization?.primaryColor,
-                }}
-              />
-              <Label 
-                htmlFor={`${index}-${optionIndex}`}
-                style={{ color: customization?.primaryColor }}
-              >
-                {option}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
       );
     case 'select':
       return (
-        <Select
-          value={value || ''}
-          onValueChange={onChange}
-          required={field.required}
-        >
+        <Select value={value || ''} onValueChange={onChange}>
           <SelectTrigger style={commonInputStyles}>
-            <SelectValue placeholder={field.placeholder || "Select an option"} />
+            <SelectValue placeholder={field.placeholder} />
           </SelectTrigger>
           <SelectContent>
-            {field.options?.map((option, optionIndex) => (
-              <SelectItem key={optionIndex} value={option}>
-                {option}
+            {field.options?.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
               </SelectItem>
             ))}
           </SelectContent>
@@ -143,14 +108,13 @@ export function FormFieldRenderer({ field, index, value, onChange, customization
     default:
       return (
         <Input
-          id={`field-${index}`}
-          type={field.type === 'number' || field.type === 'date' ? field.type : 'text'}
-          placeholder={field.placeholder}
+          type={field.type}
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
+          placeholder={field.placeholder}
           required={field.required}
           style={commonInputStyles}
         />
       );
   }
-}
+};
