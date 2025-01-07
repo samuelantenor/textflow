@@ -13,7 +13,7 @@ import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Loader2 } from "lucide-react";
-import { CampaignFormFields } from "./CampaignFormFields";
+import { CampaignFormFields } from "./campaign/CampaignFormFields";
 import type { CampaignFormData } from "@/types/campaign";
 
 export function CreateCampaignDialog() {
@@ -22,11 +22,11 @@ export function CreateCampaignDialog() {
   const { toast } = useToast();
   const form = useForm<CampaignFormData>({
     defaultValues: {
-      name: '',
-      message: '',
-      group_id: '',
-      from_number: '',
-    },
+      name: "",
+      message: "",
+      group_id: "",
+      from_number: "",
+    }
   });
 
   const onSubmit = async (data: CampaignFormData) => {
@@ -70,8 +70,8 @@ export function CreateCampaignDialog() {
         message: data.message,
         media_url: mediaUrl,
         scheduled_for: scheduledFor?.toISOString(),
-        group_id: data.group_id,
-        from_number: data.from_number,
+        group_id: data.group_id || null,
+        from_number: data.from_number || null,
         status: "draft",
       });
 
