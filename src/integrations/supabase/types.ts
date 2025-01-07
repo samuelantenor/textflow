@@ -379,6 +379,51 @@ export type Database = {
         }
         Relationships: []
       }
+      phone_numbers: {
+        Row: {
+          capabilities: Json
+          created_at: string
+          friendly_name: string | null
+          id: string
+          monthly_cost: number
+          phone_number: string
+          sms_url: string | null
+          status: string
+          twilio_sid: string
+          updated_at: string
+          user_id: string
+          voice_url: string | null
+        }
+        Insert: {
+          capabilities?: Json
+          created_at?: string
+          friendly_name?: string | null
+          id?: string
+          monthly_cost: number
+          phone_number: string
+          sms_url?: string | null
+          status?: string
+          twilio_sid: string
+          updated_at?: string
+          user_id: string
+          voice_url?: string | null
+        }
+        Update: {
+          capabilities?: Json
+          created_at?: string
+          friendly_name?: string | null
+          id?: string
+          monthly_cost?: number
+          phone_number?: string
+          sms_url?: string | null
+          status?: string
+          twilio_sid?: string
+          updated_at?: string
+          user_id?: string
+          voice_url?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           email: string
