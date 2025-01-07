@@ -33,6 +33,7 @@ export function CreateCampaignDialog() {
           description: "Please select a contact group",
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
       }
 
@@ -42,6 +43,7 @@ export function CreateCampaignDialog() {
           description: "Please select a phone number to send from",
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
       }
 
