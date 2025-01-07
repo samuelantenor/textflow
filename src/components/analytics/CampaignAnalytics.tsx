@@ -9,8 +9,38 @@ import {
   BarChart
 } from "lucide-react";
 
+interface MessageStats {
+  total: number;
+  delivered: number;
+  failed: number;
+  pending: number;
+}
+
+interface CampaignStats {
+  [key: string]: MessageStats;
+}
+
+interface TotalStats {
+  total_messages: number;
+  delivered: number;
+  failed: number;
+  pending: number;
+}
+
+interface AnalyticsData {
+  total_messages: number;
+  delivery_rate: string;
+  failed_messages: number;
+  response_rate: string;
+  delivery_status: {
+    delivered: number;
+    failed: number;
+    queued: number;
+  };
+}
+
 export const CampaignAnalytics = () => {
-  const { data: analytics } = useQuery({
+  const { data: analytics } = useQuery<AnalyticsData>({
     queryKey: ['campaign-analytics'],
     queryFn: async () => {
       const { data: messageData, error: messageError } = await supabase
@@ -20,7 +50,7 @@ export const CampaignAnalytics = () => {
       if (messageError) throw messageError;
 
       // Group messages by campaign and calculate stats
-      const campaignStats = messageData.reduce((acc, msg) => {
+      const campaignStats = messageData.reduce<CampaignStats>((acc, msg) => {
         if (!acc[msg.campaign_id]) {
           acc[msg.campaign_id] = {
             total: 0,
@@ -46,7 +76,7 @@ export const CampaignAnalytics = () => {
       }, {});
 
       // Calculate overall stats
-      const totalStats = Object.values(campaignStats).reduce((acc: any, curr: any) => {
+      const totalStats = Object.values(campaignStats).reduce<TotalStats>((acc, curr) => {
         acc.total_messages += curr.total;
         acc.delivered += curr.delivered;
         acc.failed += curr.failed;
@@ -58,11 +88,11 @@ export const CampaignAnalytics = () => {
         total_messages: totalStats.total_messages,
         delivery_rate: totalStats.total_messages > 0 
           ? ((totalStats.delivered / totalStats.total_messages) * 100).toFixed(1)
-          : 0,
+          : '0',
         failed_messages: totalStats.failed,
         response_rate: totalStats.total_messages > 0
           ? ((totalStats.delivered / totalStats.total_messages) * 100).toFixed(1)
-          : 0,
+          : '0',
         delivery_status: {
           delivered: totalStats.delivered,
           failed: totalStats.failed,
