@@ -113,6 +113,8 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       });
 
       onOpenChange(false);
+      // Add page refresh after successful save
+      window.location.reload();
     } catch (error) {
       console.error("Error updating form:", error);
       toast({
