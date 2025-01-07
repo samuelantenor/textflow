@@ -7,14 +7,18 @@ import { cn } from "@/lib/utils";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
-interface FormFieldRendererProps {
+export interface FormFieldRendererProps {
   field: {
     id: string;
     type: string;
     label: string;
     placeholder?: string;
     required?: boolean;
-    options?: { label: string; value: string }[];
+    description?: string;
+    options?: Array<{
+      label: string;
+      value: string;
+    }>;
   };
   value: any;
   onChange: (value: any) => void;
