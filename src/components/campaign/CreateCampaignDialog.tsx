@@ -1,19 +1,12 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Loader2 } from "lucide-react";
-import { CampaignFormFields } from "./CampaignFormFields";
+import { Loader2, Plus } from "lucide-react";
+import { CampaignFormFields } from "@/components/campaign/CampaignFormFields";
 import type { CampaignFormData } from "@/types/campaign";
 
 export function CreateCampaignDialog() {
@@ -22,12 +15,7 @@ export function CreateCampaignDialog() {
   const { toast } = useToast();
   const form = useForm<CampaignFormData>({
     defaultValues: {
-      name: '',
-      message: '',
-      group_id: '',
-      from_number: '',
-      scheduled_for: undefined,
-      scheduled_time: '',
+      name: "",
     },
   });
 
@@ -40,38 +28,9 @@ export function CreateCampaignDialog() {
         throw new Error("User not authenticated");
       }
 
-      let mediaUrl = null;
-      if (data.media) {
-        const fileExt = data.media.name.split(".").pop();
-        const fileName = `${crypto.randomUUID()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
-          .from("campaign_media")
-          .upload(fileName, data.media);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from("campaign_media")
-          .getPublicUrl(fileName);
-        
-        mediaUrl = publicUrl;
-      }
-
-      let scheduledFor = data.scheduled_for;
-      if (scheduledFor && data.scheduled_time) {
-        const [hours, minutes] = data.scheduled_time.split(':');
-        scheduledFor = new Date(scheduledFor);
-        scheduledFor.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-      }
-
       const { error } = await supabase.from("campaigns").insert({
         user_id: session.user.id,
         name: data.name,
-        message: data.message,
-        media_url: mediaUrl,
-        scheduled_for: scheduledFor?.toISOString(),
-        group_id: data.group_id || null,
-        from_number: data.from_number || null,
         status: "draft",
       });
 
@@ -106,10 +65,7 @@ export function CreateCampaignDialog() {
       </DialogTrigger>
       <DialogContent className="w-full md:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Campaign</DialogTitle>
-          <DialogDescription>
-            Create a new campaign to send to your contacts.
-          </DialogDescription>
+          <DialogTitle>Name Your Campaign</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -126,7 +82,7 @@ export function CreateCampaignDialog() {
                 {isLoading && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Save as Draft
+                Create Campaign
               </Button>
             </div>
           </form>
