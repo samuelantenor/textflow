@@ -13,12 +13,16 @@ const COUNTRIES = [
   { code: "AU", name: "Australia", flag: "🇦🇺" },
   { code: "FR", name: "France", flag: "🇫🇷" },
   { code: "DE", name: "Germany", flag: "🇩🇪" },
-  // Add more countries as needed
 ];
 
 export function BuyPhoneNumberForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    company: '',
+    region: '',
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -39,8 +43,46 @@ export function BuyPhoneNumberForm() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('payment') === 'success') {
       setShowThankYou(true);
+      // Send form data to Formspree
+      const savedFormData = localStorage.getItem('phoneNumberFormData');
+      if (savedFormData) {
+        const data = JSON.parse(savedFormData);
+        submitToFormspree(data);
+        localStorage.removeItem('phoneNumberFormData'); // Clean up stored data
+      }
     }
   }, []);
+
+  const submitToFormspree = async (data: typeof formData) => {
+    try {
+      await fetch('https://formspree.io/f/mnnnowqq', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: data.email,
+          company: data.company,
+          region: data.region,
+          message: `New phone number request:
+            Email: ${data.email}
+            Company: ${data.company}
+            Region: ${data.region}`,
+        }),
+      });
+    } catch (error) {
+      console.error('Error sending form to Formspree:', error);
+    }
+  };
+
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleBeforePayment = () => {
+    // Store form data in localStorage before redirecting to Stripe
+    localStorage.setItem('phoneNumberFormData', JSON.stringify(formData));
+  };
 
   if (showThankYou) {
     return (
@@ -64,6 +106,8 @@ export function BuyPhoneNumberForm() {
             type="email"
             required
             placeholder="your@email.com"
+            value={formData.email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
           />
         </div>
 
@@ -75,12 +119,18 @@ export function BuyPhoneNumberForm() {
             type="text"
             required
             placeholder="Your Company Name"
+            value={formData.company}
+            onChange={(e) => handleInputChange('company', e.target.value)}
           />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="region">Region</Label>
-          <Select name="region">
+          <Select 
+            name="region" 
+            value={formData.region}
+            onValueChange={(value) => handleInputChange('region', value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select a region" />
             </SelectTrigger>
@@ -105,11 +155,13 @@ export function BuyPhoneNumberForm() {
           <p className="text-sm text-muted-foreground mb-4">
             This includes unlimited incoming messages and competitive rates for outgoing messages.
           </p>
-          <stripe-buy-button
-            buy-button-id="buy_btn_1QeVcgB4RWKZ2dNza9CFKIwx"
-            publishable-key="pk_test_51QL67PB4RWKZ2dNzsxovpn7D6fAiFm6cj7aH3TDwv1HmrQgAh4CJUpBZJdKqLWPj9uNHsj3j4IgLrynaKEqbp95n00KL67n19K"
-          >
-          </stripe-buy-button>
+          <div onClick={handleBeforePayment}>
+            <stripe-buy-button
+              buy-button-id="buy_btn_1QeVcgB4RWKZ2dNza9CFKIwx"
+              publishable-key="pk_test_51QL67PB4RWKZ2dNzsxovpn7D6fAiFm6cj7aH3TDwv1HmrQgAh4CJUpBZJdKqLWPj9uNHsj3j4IgLrynaKEqbp95n00KL67n19K"
+            >
+            </stripe-buy-button>
+          </div>
         </div>
       </form>
     </Card>
