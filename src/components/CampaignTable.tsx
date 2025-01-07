@@ -30,7 +30,12 @@ const CampaignTable = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      
+      // Ensure the data matches the Campaign type
+      return (data as any[]).map(campaign => ({
+        ...campaign,
+        status: campaign.status as Campaign['status'] // This ensures status is typed correctly
+      })) as Campaign[];
     },
   });
 
