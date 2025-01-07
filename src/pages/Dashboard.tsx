@@ -9,6 +9,7 @@ import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { FormsOverview } from "@/components/forms/FormsOverview";
 import { PhoneNumbersList } from "@/components/phone-numbers/PhoneNumbersList";
 import { CampaignList } from "@/components/campaigns/CampaignList";
+import { useQuery } from "@tanstack/react-query";
 
 const Dashboard = () => {
   const navigate = useNavigate();
