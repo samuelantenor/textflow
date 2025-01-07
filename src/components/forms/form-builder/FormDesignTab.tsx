@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FormPreview } from "../FormPreview";
 import { FONT_OPTIONS } from "./constants";
+import { Palette } from "lucide-react";
 
 interface FormDesignTabProps {
   form: UseFormReturn<any>;
@@ -13,6 +14,10 @@ interface FormDesignTabProps {
 
 export function FormDesignTab({ form, handleLogoUpload }: FormDesignTabProps) {
   const formData = form.watch();
+
+  const handleColorChange = (field: string, value: string) => {
+    form.setValue(field, value, { shouldDirty: true });
+  };
 
   return (
     <div className="grid grid-cols-2 gap-8 h-full">
@@ -23,13 +28,15 @@ export function FormDesignTab({ form, handleLogoUpload }: FormDesignTabProps) {
             <div className="flex gap-2">
               <Input
                 type="color"
-                className="w-12 h-12 p-1"
-                {...form.register("background_color")}
+                className="w-12 h-12 p-1 cursor-pointer"
+                value={formData.background_color}
+                onChange={(e) => handleColorChange("background_color", e.target.value)}
               />
               <Input
                 type="text"
                 className="flex-1"
-                {...form.register("background_color")}
+                value={formData.background_color}
+                onChange={(e) => handleColorChange("background_color", e.target.value)}
               />
             </div>
           </div>
@@ -39,13 +46,15 @@ export function FormDesignTab({ form, handleLogoUpload }: FormDesignTabProps) {
             <div className="flex gap-2">
               <Input
                 type="color"
-                className="w-12 h-12 p-1"
-                {...form.register("primary_color")}
+                className="w-12 h-12 p-1 cursor-pointer"
+                value={formData.primary_color}
+                onChange={(e) => handleColorChange("primary_color", e.target.value)}
               />
               <Input
                 type="text"
                 className="flex-1"
-                {...form.register("primary_color")}
+                value={formData.primary_color}
+                onChange={(e) => handleColorChange("primary_color", e.target.value)}
               />
             </div>
           </div>
@@ -53,7 +62,7 @@ export function FormDesignTab({ form, handleLogoUpload }: FormDesignTabProps) {
           <div className="space-y-4">
             <Label>Font Family</Label>
             <Select
-              value={form.watch("font_family")}
+              value={formData.font_family}
               onValueChange={(value) => form.setValue("font_family", value)}
             >
               <SelectTrigger>
