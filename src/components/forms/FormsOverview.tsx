@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { FileText } from "lucide-react";
+import { FileText, Pencil, Trash2 } from "lucide-react";
 import { FormBuilder } from "./FormBuilder";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +7,18 @@ import { Button } from "../ui/button";
 import { ShareFormDialog } from "./ShareFormDialog";
 import { ViewSubmissionsDialog } from "./view/ViewSubmissionsDialog";
 import { useState } from "react";
+import { EditFormDialog } from "./EditFormDialog";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type CustomForm = {
   id: string;
@@ -16,14 +28,22 @@ type CustomForm = {
   campaign_groups: {
     name: string;
   } | null;
+  group_id: string;
+  background_color?: string;
+  font_family?: string;
+  logo_url?: string;
+  primary_color?: string;
 };
 
 export const FormsOverview = () => {
   const [selectedForm, setSelectedForm] = useState<CustomForm | null>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [submissionsDialogOpen, setSubmissionsDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const { toast } = useToast();
 
-  const { data: groups } = useQuery({
+  const { data: groups, isLoading: isLoadingGroups } = useQuery({
     queryKey: ['campaign-groups'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -35,7 +55,7 @@ export const FormsOverview = () => {
     },
   });
 
-  const { data: forms, isLoading } = useQuery({
+  const { data: forms, isLoading, refetch } = useQuery({
     queryKey: ['custom-forms'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -45,6 +65,11 @@ export const FormsOverview = () => {
           title,
           description,
           fields,
+          group_id,
+          background_color,
+          font_family,
+          logo_url,
+          primary_color,
           campaign_groups (
             name
           )
@@ -67,6 +92,45 @@ export const FormsOverview = () => {
   const handleViewSubmissions = (form: CustomForm) => {
     setSelectedForm(form);
     setSubmissionsDialogOpen(true);
+  };
+
+  const handleEdit = (form: CustomForm) => {
+    setSelectedForm(form);
+    setEditDialogOpen(true);
+  };
+
+  const handleDelete = (form: CustomForm) => {
+    setSelectedForm(form);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedForm) return;
+
+    try {
+      const { error } = await supabase
+        .from('custom_forms')
+        .delete()
+        .eq('id', selectedForm.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Form deleted successfully.",
+      });
+
+      refetch();
+    } catch (error) {
+      console.error('Error deleting form:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete form. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+    }
   };
 
   if (!groups?.length) {
@@ -118,7 +182,7 @@ export const FormsOverview = () => {
               <div className="text-sm text-muted-foreground">
                 Fields: {form.fields.length}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Button 
                   variant="outline" 
                   size="sm"
@@ -132,6 +196,22 @@ export const FormsOverview = () => {
                   onClick={() => handleShare(form)}
                 >
                   Share Form
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleEdit(form)}
+                >
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleDelete(form)}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
                 </Button>
               </div>
             </Card>
@@ -156,11 +236,37 @@ export const FormsOverview = () => {
       />
 
       {selectedForm && (
-        <ViewSubmissionsDialog
-          formId={selectedForm.id}
-          open={submissionsDialogOpen}
-          onOpenChange={setSubmissionsDialogOpen}
-        />
+        <>
+          <ViewSubmissionsDialog
+            formId={selectedForm.id}
+            open={submissionsDialogOpen}
+            onOpenChange={setSubmissionsDialogOpen}
+          />
+
+          <EditFormDialog
+            form={selectedForm}
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+          />
+
+          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the form
+                  and all its submissions.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
       )}
     </div>
   );
