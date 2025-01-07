@@ -42,10 +42,20 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
 
     try {
       setIsCancelling(true);
+      
+      // Get the current session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No active session found');
+      }
+
       const { error } = await supabase.functions.invoke(
         'cancel-subscription',
         {
           method: 'POST',
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
         }
       );
 
