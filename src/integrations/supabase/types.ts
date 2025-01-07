@@ -161,34 +161,46 @@ export type Database = {
       }
       custom_forms: {
         Row: {
+          background_color: string | null
           created_at: string
           description: string | null
           fields: Json
+          font_family: string | null
           group_id: string
           id: string
           is_active: boolean | null
+          logo_url: string | null
+          primary_color: string | null
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          background_color?: string | null
           created_at?: string
           description?: string | null
           fields?: Json
+          font_family?: string | null
           group_id: string
           id?: string
           is_active?: boolean | null
+          logo_url?: string | null
+          primary_color?: string | null
           title: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          background_color?: string | null
           created_at?: string
           description?: string | null
           fields?: Json
+          font_family?: string | null
           group_id?: string
           id?: string
           is_active?: boolean | null
+          logo_url?: string | null
+          primary_color?: string | null
           title?: string
           updated_at?: string
           user_id?: string

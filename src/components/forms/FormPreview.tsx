@@ -24,14 +24,24 @@ interface FormPreviewProps {
     options?: string[];
     description?: string;
   }>;
+  customization?: {
+    backgroundColor?: string;
+    fontFamily?: string;
+    logoUrl?: string;
+    primaryColor?: string;
+  };
 }
 
-export function FormPreview({ title, description, fields }: FormPreviewProps) {
+export function FormPreview({ title, description, fields, customization }: FormPreviewProps) {
   const renderField = (field: FormPreviewProps['fields'][0], index: number) => {
     const commonProps = {
       id: `field-${index}`,
       placeholder: field.placeholder,
       className: "bg-background",
+      style: {
+        borderColor: customization?.primaryColor,
+        borderRadius: '0.375rem',
+      },
     };
 
     switch (field.type) {
@@ -88,10 +98,30 @@ export function FormPreview({ title, description, fields }: FormPreviewProps) {
         <Eye className="w-4 h-4" />
         <span className="text-sm font-medium">Form Preview</span>
       </div>
-      <Card className="p-6 bg-card/50 backdrop-blur-sm h-[calc(100%-2rem)] overflow-y-auto">
+      <Card 
+        className="p-6 bg-card/50 backdrop-blur-sm h-[calc(100%-2rem)] overflow-y-auto"
+        style={{
+          backgroundColor: customization?.backgroundColor || '#FFFFFF',
+          fontFamily: customization?.fontFamily || 'Inter',
+        }}
+      >
         <div className="space-y-6">
+          {customization?.logoUrl && (
+            <div className="flex justify-center mb-6">
+              <img 
+                src={customization.logoUrl} 
+                alt="Form logo" 
+                className="max-h-20 object-contain"
+              />
+            </div>
+          )}
           <div>
-            <h2 className="text-2xl font-bold mb-2">{title || "Untitled Form"}</h2>
+            <h2 
+              className="text-2xl font-bold mb-2"
+              style={{ color: customization?.primaryColor }}
+            >
+              {title || "Untitled Form"}
+            </h2>
             {description && (
               <p className="text-muted-foreground">{description}</p>
             )}
@@ -100,7 +130,9 @@ export function FormPreview({ title, description, fields }: FormPreviewProps) {
             {fields.map((field, index) => (
               <div key={index} className="space-y-2">
                 {field.type !== 'checkbox' && (
-                  <Label>
+                  <Label
+                    style={{ color: customization?.primaryColor }}
+                  >
                     {field.label}
                     {field.required && (
                       <span className="text-destructive ml-1">*</span>
