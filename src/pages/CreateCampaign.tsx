@@ -80,43 +80,47 @@ const CreateCampaign = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Button
-          variant="ghost"
-          className="mb-6"
-          onClick={() => navigate("/dashboard?tab=campaigns")}
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Campaigns
-        </Button>
-        
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-2xl font-bold">Create New Campaign</h1>
-            <p className="text-muted-foreground">
-              Create a new campaign to send to your contacts.
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/dashboard?tab=campaigns")}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Campaigns
+            </Button>
+          </div>
+        </div>
+
+        <div className="max-w-[1200px] mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold">Create New Campaign</h1>
+            <p className="text-muted-foreground mt-2">
+              Set up your campaign details and schedule your message.
             </p>
           </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <div className="bg-card rounded-lg p-6 shadow-sm">
                 <CampaignFormFields form={form} />
-              </div>
-              <div className="flex justify-end space-x-4 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate("/dashboard?tab=campaigns")}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Save as Draft
-                </Button>
+                
+                <div className="flex justify-end space-x-4 mt-8 pt-6 border-t">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate("/dashboard?tab=campaigns")}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Save as Draft
+                  </Button>
+                </div>
               </div>
             </form>
           </Form>
