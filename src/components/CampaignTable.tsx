@@ -21,9 +21,18 @@ const CampaignTable = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('campaigns')
-        .select('*')
+        .select(`
+          *,
+          campaign_groups (
+            name
+          ),
+          phone_numbers (
+            phone_number,
+            friendly_name
+          )
+        `)
         .order('created_at', { ascending: false });
-
+      
       if (error) throw error;
       return data;
     },
@@ -57,6 +66,8 @@ const CampaignTable = () => {
         <TableHeader>
           <TableRow>
             <TableHead>Campaign Name</TableHead>
+            <TableHead>Group</TableHead>
+            <TableHead>From Number</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Scheduled For</TableHead>
             <TableHead>Created At</TableHead>
@@ -67,6 +78,12 @@ const CampaignTable = () => {
           {campaigns?.map((campaign) => (
             <TableRow key={campaign.id}>
               <TableCell className="font-medium">{campaign.name}</TableCell>
+              <TableCell>
+                {campaign.campaign_groups?.name || "No group assigned"}
+              </TableCell>
+              <TableCell>
+                {campaign.phone_numbers?.friendly_name || campaign.phone_numbers?.phone_number || "No number assigned"}
+              </TableCell>
               <TableCell>
                 <Badge
                   variant="outline"
