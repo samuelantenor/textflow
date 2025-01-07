@@ -95,7 +95,7 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <CampaignFormFields form={form} />
+            <CampaignFormFields form={form} showAllFields={true} />
             <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-4">
               <Button
                 type="button"
