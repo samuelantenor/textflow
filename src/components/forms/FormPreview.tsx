@@ -38,11 +38,6 @@ export function FormPreview({ title, description, fields, customization }: FormP
     const commonProps = {
       id: `field-${index}`,
       placeholder: field.placeholder,
-      className: cn(
-        "transition-all duration-200",
-        "focus:ring-2 focus:ring-offset-2",
-        "hover:border-primary/50"
-      ),
       style: {
         borderColor: customization?.primaryColor,
         borderRadius: '0.375rem',
@@ -51,16 +46,15 @@ export function FormPreview({ title, description, fields, customization }: FormP
 
     switch (field.type) {
       case 'textarea':
-        return <Textarea {...commonProps} className={cn(commonProps.className, "min-h-[100px] resize-y")} />;
+        return <Textarea {...commonProps} />;
       case 'checkbox':
         return (
-          <div className="flex items-center space-x-2 animate-in">
+          <div className="flex items-center space-x-2">
             <Checkbox 
               id={`field-${index}`}
               className={cn(
-                "border-2 transition-all duration-200",
-                "data-[state=checked]:bg-primary data-[state=checked]:border-primary",
-                "hover:border-primary/50"
+                "border-2",
+                "data-[state=checked]:bg-primary data-[state=checked]:border-primary"
               )}
               style={{ 
                 borderColor: customization?.primaryColor,
@@ -73,16 +67,15 @@ export function FormPreview({ title, description, fields, customization }: FormP
         );
       case 'radio':
         return (
-          <RadioGroup className="space-y-2 animate-in">
+          <RadioGroup>
             {field.options?.map((option, optionIndex) => (
               <div key={optionIndex} className="flex items-center space-x-2">
                 <RadioGroupItem 
                   value={option} 
                   id={`${index}-${optionIndex}`}
                   className={cn(
-                    "border-2 transition-all duration-200",
-                    "data-[state=checked]:bg-primary data-[state=checked]:border-primary",
-                    "hover:border-primary/50"
+                    "border-2",
+                    "data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                   )}
                   style={{ 
                     borderColor: customization?.primaryColor,
@@ -96,22 +89,12 @@ export function FormPreview({ title, description, fields, customization }: FormP
       case 'select':
         return (
           <Select>
-            <SelectTrigger 
-              className={cn(
-                "transition-all duration-200",
-                "hover:border-primary/50"
-              )}
-              style={{ borderColor: customization?.primaryColor }}
-            >
+            <SelectTrigger style={{ borderColor: customization?.primaryColor }}>
               <SelectValue placeholder={field.placeholder || "Select an option"} />
             </SelectTrigger>
             <SelectContent>
               {field.options?.map((option, optionIndex) => (
-                <SelectItem 
-                  key={optionIndex} 
-                  value={option}
-                  className="hover:bg-primary/10"
-                >
+                <SelectItem key={optionIndex} value={option}>
                   {option}
                 </SelectItem>
               ))}
@@ -123,7 +106,6 @@ export function FormPreview({ title, description, fields, customization }: FormP
           <Input
             {...commonProps}
             type={field.type === 'number' || field.type === 'date' ? field.type : 'text'}
-            className={cn(commonProps.className, "animate-in")}
           />
         );
     }
@@ -136,10 +118,7 @@ export function FormPreview({ title, description, fields, customization }: FormP
         <span className="text-sm font-medium">Form Preview</span>
       </div>
       <Card 
-        className={cn(
-          "form-preview-card p-6 bg-card/50",
-          "transition-all duration-300"
-        )}
+        className="p-6 bg-card/50 backdrop-blur-sm h-[calc(100%-2rem)] overflow-y-auto"
         style={{
           backgroundColor: customization?.backgroundColor || '#FFFFFF',
           fontFamily: customization?.fontFamily || 'Inter',
@@ -147,20 +126,17 @@ export function FormPreview({ title, description, fields, customization }: FormP
       >
         <div className="space-y-6">
           {customization?.logoUrl && (
-            <div className="flex justify-center mb-6 animate-in">
+            <div className="flex justify-center mb-6">
               <img 
                 src={customization.logoUrl} 
                 alt="Form logo" 
-                className="max-h-20 object-contain hover-lift"
+                className="max-h-20 object-contain"
               />
             </div>
           )}
-          <div className="animate-in">
+          <div>
             <h2 
-              className={cn(
-                "text-2xl font-bold mb-2",
-                "transition-colors duration-200"
-              )}
+              className="text-2xl font-bold mb-2"
               style={{ color: customization?.primaryColor }}
             >
               {title || "Untitled Form"}
@@ -171,10 +147,9 @@ export function FormPreview({ title, description, fields, customization }: FormP
           </div>
           <div className="space-y-8">
             {fields.map((field, index) => (
-              <div key={index} className="space-y-2 animate-in">
+              <div key={index} className="space-y-2">
                 {field.type !== 'checkbox' && (
                   <Label
-                    className="transition-colors duration-200"
                     style={{ color: customization?.primaryColor }}
                   >
                     {field.label}
