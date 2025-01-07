@@ -44,7 +44,7 @@ export function useFormData(): UseFormDataReturn {
         .from('custom_forms')
         .select('*')
         .eq('id', formId)
-        .single();
+        .maybeSingle();
 
       if (formError) throw formError;
       if (!formResponse) throw new Error('Form not found');
