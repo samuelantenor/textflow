@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Pencil, Share2, Trash2 } from "lucide-react";
+import { FileText, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CustomForm } from "./types";
 
@@ -13,7 +13,7 @@ interface FormsCardProps {
 
 export const FormsCard = ({ 
   form, 
-  onShare,
+  onShare, 
   onViewSubmissions, 
   onEdit, 
   onDelete 
@@ -36,17 +36,16 @@ export const FormsCard = ({
         <Button 
           variant="outline" 
           size="sm"
-          onClick={() => onShare(form)}
+          onClick={() => onViewSubmissions(form)}
         >
-          <Share2 className="w-4 h-4 mr-2" />
-          Share
+          View Submissions
         </Button>
         <Button 
           variant="outline" 
           size="sm"
-          onClick={() => onViewSubmissions(form)}
+          onClick={() => onShare(form)}
         >
-          View Submissions
+          Share Form
         </Button>
         <Button 
           variant="outline" 
@@ -67,4 +66,4 @@ export const FormsCard = ({
       </div>
     </Card>
   );
-}
+};

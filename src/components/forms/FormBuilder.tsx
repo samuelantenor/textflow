@@ -13,15 +13,26 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FormFieldBuilder } from "./FormFieldBuilder";
-import { FormFieldList } from "./FormFieldList";
-import { FormDesignTab } from "./form-builder/FormDesignTab";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FormData, isJsonFields } from "@/types/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { useQuery } from "@tanstack/react-query";
+import { FormTabs } from "./form-builder/FormTabs";
+import { FormActions } from "./form-builder/FormActions";
+
+interface FormData {
+  title: string;
+  description?: string;
+  group_id: string;
+  background_color?: string;
+  font_family?: string;
+  logo_url?: string;
+  primary_color?: string;
+  fields: Array<{
+    type: 'text' | 'email' | 'phone' | 'checkbox' | 'textarea' | 'number' | 'date' | 'radio' | 'select';
+    label: string;
+    required: boolean;
+    placeholder?: string;
+    options?: string[];
+    description?: string;
+  }>;
+}
 
 interface FormBuilderProps {
   groupId?: string;
@@ -31,6 +42,7 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("fields");
+  const [formId, setFormId] = useState<string | undefined>();
   const { toast } = useToast();
   
   const form = useForm<FormData>({
@@ -40,19 +52,6 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
       background_color: "#FFFFFF",
       font_family: "Inter",
       primary_color: "#ea384c",
-    },
-  });
-
-  const { data: groups } = useQuery({
-    queryKey: ['campaign-groups'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('campaign_groups')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data;
     },
   });
 
@@ -91,32 +90,30 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
         throw new Error("User not authenticated");
       }
 
-      // Validate fields are in correct Json format
-      if (!isJsonFields(data.fields)) {
-        throw new Error("Invalid form fields format");
-      }
-
-      const { error } = await supabase.from("custom_forms").insert({
+      const { data: formData, error } = await supabase.from("custom_forms").insert({
         user_id: session.user.id,
         group_id: data.group_id,
         title: data.title,
         description: data.description,
-        fields: data.fields as any, // Type assertion needed here since we validated above
+        fields: data.fields,
         background_color: data.background_color,
         font_family: data.font_family,
         logo_url: data.logo_url,
         primary_color: data.primary_color,
-      });
+      }).select().single();
 
       if (error) throw error;
 
+      setFormId(formData.id);
+
       toast({
-        title: "Success",
-        description: "Form created successfully.",
+        title: "Form created",
+        description: "Your custom form has been created successfully.",
       });
 
-      setOpen(false);
-      form.reset();
+      if (activeTab === "fields") {
+        setActiveTab("design");
+      }
     } catch (error) {
       console.error("Error creating form:", error);
       toast({
@@ -146,61 +143,17 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList>
-                <TabsTrigger value="fields">Form Fields</TabsTrigger>
-                <TabsTrigger value="design">Design</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="fields" className="flex-1 overflow-auto">
-                <div className="space-y-4">
-                  <div className="space-y-4 bg-muted/50 rounded-lg p-4">
-                    <Input
-                      placeholder="Enter form title"
-                      className="text-xl font-semibold bg-background"
-                      {...form.register("title", { required: true })}
-                    />
-                    <Textarea
-                      placeholder="Describe your form (optional)"
-                      className="bg-background"
-                      {...form.register("description")}
-                    />
-                    <div className="space-y-2">
-                      <Label>Select Contact Group</Label>
-                      <select
-                        {...form.register("group_id", { required: true })}
-                        className="w-full p-2 border rounded"
-                      >
-                        {groups?.map((group) => (
-                          <option key={group.id} value={group.id}>
-                            {group.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                  <FormFieldBuilder form={form} />
-                  <FormFieldList form={form} />
-                </div>
-              </TabsContent>
-
-              <TabsContent value="design" className="flex-1 overflow-auto">
-                <FormDesignTab form={form} handleLogoUpload={handleLogoUpload} />
-              </TabsContent>
-            </Tabs>
-
-            <div className="flex justify-end space-x-4 pt-4 sticky bottom-0 bg-background p-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create Form"}
-              </Button>
-            </div>
+            <FormTabs
+              form={form}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              formId={formId}
+              handleLogoUpload={handleLogoUpload}
+            />
+            <FormActions
+              isLoading={isLoading}
+              onCancel={() => setOpen(false)}
+            />
           </form>
         </Form>
       </DialogContent>

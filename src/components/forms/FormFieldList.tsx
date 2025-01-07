@@ -26,7 +26,7 @@ export function FormFieldList({ form }: FormFieldListProps) {
     <div className="space-y-3">
       {fields.map((field: any, index: number) => (
         <div
-          key={field.id}
+          key={index}
           className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
         >
           <div className="space-y-1">

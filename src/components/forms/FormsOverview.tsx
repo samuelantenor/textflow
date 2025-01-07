@@ -30,6 +30,7 @@ export const FormsOverview = () => {
   const { toast } = useToast();
   const { forms, groups, isLoadingForms, isLoadingGroups, queryClient } = useFormsData();
 
+  // Subscribe to real-time changes
   useEffect(() => {
     const channel = supabase
       .channel('custom_forms_changes')
@@ -75,25 +76,12 @@ export const FormsOverview = () => {
     if (!selectedForm) return;
 
     try {
-      // First check if the form still exists
-      const { data: existingForm, error: checkError } = await supabase
-        .from('custom_forms')
-        .select('id')
-        .eq('id', selectedForm.id)
-        .maybeSingle();
+      const { error: submissionsError } = await supabase
+        .from('form_submissions')
+        .delete()
+        .eq('form_id', selectedForm.id);
 
-      if (checkError) throw checkError;
-      
-      if (!existingForm) {
-        toast({
-          title: "Error",
-          description: "This form no longer exists.",
-          variant: "destructive",
-        });
-        setDeleteDialogOpen(false);
-        queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
-        return;
-      }
+      if (submissionsError) throw submissionsError;
 
       const { error } = await supabase
         .from('custom_forms')

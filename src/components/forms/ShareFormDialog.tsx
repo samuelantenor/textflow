@@ -1,44 +1,40 @@
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CustomForm } from "./types";
-import { Copy } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { Copy, Check } from "lucide-react";
 
 interface ShareFormDialogProps {
-  form: CustomForm | null;
+  form: {
+    id: string;
+    title: string;
+  } | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export function ShareFormDialog({ form, open, onOpenChange }: ShareFormDialogProps) {
-  const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
 
   if (!form) return null;
 
   const formUrl = `${window.location.origin}/forms/${form.id}`;
 
-  const copyToClipboard = async () => {
+  const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(formUrl);
       setCopied(true);
       toast({
-        title: "Success",
-        description: "Form URL copied to clipboard",
+        title: "Copied!",
+        description: "Form URL has been copied to clipboard",
       });
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
+    } catch (err) {
       toast({
         title: "Error",
-        description: "Failed to copy URL",
+        description: "Failed to copy URL to clipboard",
         variant: "destructive",
       });
     }
@@ -46,24 +42,33 @@ export function ShareFormDialog({ form, open, onOpenChange }: ShareFormDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Share Form</DialogTitle>
-          <DialogDescription>
-            Share this link with your contacts to collect their information
-          </DialogDescription>
+          <DialogTitle>Share Form: {form.title}</DialogTitle>
         </DialogHeader>
         <div className="flex items-center space-x-2">
-          <Input value={formUrl} readOnly />
+          <div className="grid flex-1 gap-2">
+            <Input
+              readOnly
+              value={formUrl}
+              className="w-full"
+            />
+          </div>
           <Button
-            variant="outline"
             size="icon"
-            onClick={copyToClipboard}
-            className={copied ? "text-green-500" : ""}
+            onClick={handleCopy}
+            className="px-3"
           >
-            <Copy className="h-4 w-4" />
+            {copied ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
           </Button>
         </div>
+        <p className="text-sm text-muted-foreground mt-2">
+          Share this link with others to allow them to fill out your form.
+        </p>
       </DialogContent>
     </Dialog>
   );
