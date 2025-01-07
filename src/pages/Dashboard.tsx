@@ -10,6 +10,7 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { FormsOverview } from "@/components/forms/FormsOverview";
 import { PhoneNumbersList } from "@/components/phone-numbers/PhoneNumbersList";
+import { CampaignList } from "@/components/campaigns/CampaignList";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -87,6 +88,7 @@ const Dashboard = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList className="flex flex-wrap gap-2 h-auto">
               <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
               <TabsTrigger value="groups">Groups</TabsTrigger>
               <TabsTrigger value="forms">Forms</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -95,6 +97,13 @@ const Dashboard = () => {
 
             <TabsContent value="overview">
               <DashboardOverview setActiveTab={setActiveTab} />
+            </TabsContent>
+
+            <TabsContent value="campaigns">
+              <div className="space-y-8">
+                <h2 className="text-2xl font-bold">Campaigns</h2>
+                <CampaignList />
+              </div>
             </TabsContent>
 
             <TabsContent value="groups">

@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { CampaignListItem } from "./CampaignListItem";
-import { SendTestMessageDialog } from "../campaign/SendTestMessageDialog";
-import type { Campaign } from "@/types/campaign";
+import { Card } from "@/components/ui/card";
+import { CreateCampaignButton } from "@/components/CreateCampaignButton";
+import { CampaignListItem } from "@/components/campaigns/CampaignListItem";
+import { Campaign } from "./types";
 
 export function CampaignList() {
   const { data: campaigns, isLoading } = useQuery({
@@ -12,14 +13,9 @@ export function CampaignList() {
         .from('campaigns')
         .select('*')
         .order('created_at', { ascending: false });
-
-      if (error) throw error;
       
-      // Ensure the status is either 'draft' or 'sent'
-      return (data as any[]).map(campaign => ({
-        ...campaign,
-        status: campaign.status as Campaign['status']
-      })) as Campaign[];
+      if (error) throw error;
+      return data as Campaign[];
     },
   });
 
@@ -27,14 +23,16 @@ export function CampaignList() {
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <div className="h-8 w-32 bg-gray-200 animate-pulse rounded" />
-          <SendTestMessageDialog />
+          <div className="h-8 w-32 bg-muted animate-pulse rounded" />
+          <CreateCampaignButton />
         </div>
         {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="h-32 bg-gray-200 animate-pulse rounded-lg"
-          />
+          <Card key={i} className="p-6">
+            <div className="space-y-4">
+              <div className="h-6 w-48 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-full bg-muted animate-pulse rounded" />
+            </div>
+          </Card>
         ))}
       </div>
     );
@@ -42,23 +40,37 @@ export function CampaignList() {
 
   if (!campaigns?.length) {
     return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">No campaigns found.</p>
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Campaigns</h2>
+          <CreateCampaignButton />
+        </div>
+        <Card className="p-12 text-center space-y-4">
+          <div className="mx-auto w-16 h-16 bg-primary/10 flex items-center justify-center rounded-full">
+            <MessageSquare className="w-8 h-8 text-primary" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">No campaigns yet</h3>
+            <p className="text-muted-foreground">
+              Create your first campaign to start sending messages to your contacts.
+            </p>
+          </div>
+        </Card>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Your Campaigns</h2>
-        <div className="space-x-2">
-          <SendTestMessageDialog />
-        </div>
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Campaigns ({campaigns.length})</h2>
+        <CreateCampaignButton />
       </div>
-      {campaigns.map((campaign) => (
-        <CampaignListItem key={campaign.id} campaign={campaign} />
-      ))}
+      <div className="grid gap-4">
+        {campaigns.map((campaign) => (
+          <CampaignListItem key={campaign.id} campaign={campaign} />
+        ))}
+      </div>
     </div>
   );
 }
