@@ -52,79 +52,43 @@ serve(async (req) => {
           throw new Error('No client_reference_id found in session');
         }
 
-        // Handle regular subscription
-        if (session.mode === 'subscription' && !session.metadata?.isPhoneNumber) {
+        // Handle subscription
+        if (session.mode === 'subscription') {
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
           console.log('Subscription data:', subscription);
 
-          // Fetch the product details to get the name
-          const product = await stripe.products.retrieve('prod_RWkBT7Yqvn0DkE');
-          console.log('Product data:', product);
-
-          const { error } = await supabaseClient
+          // Update subscription in database
+          const { error: updateError } = await supabaseClient
             .from('subscriptions')
-            .insert({
+            .upsert({
               user_id: session.client_reference_id,
               stripe_subscription_id: subscription.id,
               status: subscription.status,
-              plan_name: product.name
+              plan_type: 'paid',
+              monthly_message_limit: 1000,
+              campaign_limit: 999999,
+              has_been_paid: true
             });
 
-          if (error) {
-            console.error('Error inserting subscription:', error);
-            throw error;
-          }
-          
-          console.log('Successfully recorded subscription in database');
-        }
-        
-        // Handle phone number request
-        if (session.mode === 'subscription' && session.metadata?.isPhoneNumber) {
-          console.log('Processing phone number request');
-          
-          // Get the phone number request details
-          const { data: requestData, error: requestError } = await supabaseClient
-            .from('phone_number_requests')
-            .select('*')
-            .eq('user_id', session.client_reference_id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
-
-          if (requestError) {
-            console.error('Error fetching phone number request:', requestError);
-            throw requestError;
-          }
-
-          // Send data to Formspree
-          const formspreeResponse = await fetch('https://formspree.io/f/mnnnowqq', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: requestData.email,
-              region: requestData.region,
-              message: `New phone number request:\nEmail: ${requestData.email}\nRegion: ${requestData.region}`,
-            }),
-          });
-
-          if (!formspreeResponse.ok) {
-            console.error('Error sending to Formspree:', await formspreeResponse.text());
-            throw new Error('Failed to send notification');
-          }
-
-          console.log('Successfully sent notification to Formspree');
-          
-          // Update request status
-          const { error: updateError } = await supabaseClient
-            .from('phone_number_requests')
-            .update({ status: 'paid' })
-            .eq('id', requestData.id);
-
           if (updateError) {
-            console.error('Error updating request status:', updateError);
+            console.error('Error updating subscription:', updateError);
             throw updateError;
+          }
+
+          // Add payment history record
+          const { error: paymentError } = await supabaseClient
+            .from('payment_history')
+            .insert({
+              user_id: session.client_reference_id,
+              amount: session.amount_total ? session.amount_total / 100 : 0,
+              currency: session.currency?.toUpperCase() || 'USD',
+              status: 'completed',
+              payment_method: session.payment_method_types?.[0] || null
+            });
+
+          if (paymentError) {
+            console.error('Error recording payment:', paymentError);
+            throw paymentError;
           }
         }
         break;
@@ -135,23 +99,34 @@ serve(async (req) => {
         const subscription = event.data.object;
         console.log('Updating subscription status:', subscription.id, subscription.status);
         
-        // Fetch the product details to get the name for updates
-        const product = await stripe.products.retrieve('prod_RWkBT7Yqvn0DkE');
-        
-        const { error } = await supabaseClient
+        // Find the user_id from the subscription
+        const { data: subscriptionData, error: findError } = await supabaseClient
+          .from('subscriptions')
+          .select('user_id')
+          .eq('stripe_subscription_id', subscription.id)
+          .single();
+
+        if (findError || !subscriptionData) {
+          console.error('Error finding subscription:', findError);
+          throw findError || new Error('Subscription not found');
+        }
+
+        // Update subscription status
+        const { error: updateError } = await supabaseClient
           .from('subscriptions')
           .update({ 
             status: subscription.status,
-            plan_name: product.name 
+            plan_type: subscription.status === 'active' ? 'paid' : 'free',
+            monthly_message_limit: subscription.status === 'active' ? 1000 : 20,
+            campaign_limit: subscription.status === 'active' ? 999999 : 3,
+            has_been_paid: subscription.status === 'active'
           })
           .eq('stripe_subscription_id', subscription.id);
 
-        if (error) {
-          console.error('Error updating subscription:', error);
-          throw error;
+        if (updateError) {
+          console.error('Error updating subscription:', updateError);
+          throw updateError;
         }
-        
-        console.log('Successfully updated subscription status in database');
         break;
       }
     }
