@@ -519,7 +519,6 @@ export type Database = {
         Row: {
           campaign_limit: number
           created_at: string
-          has_been_paid: boolean | null
           id: string
           monthly_message_limit: number
           plan_type: string
@@ -531,7 +530,6 @@ export type Database = {
         Insert: {
           campaign_limit?: number
           created_at?: string
-          has_been_paid?: boolean | null
           id?: string
           monthly_message_limit?: number
           plan_type?: string
@@ -543,7 +541,6 @@ export type Database = {
         Update: {
           campaign_limit?: number
           created_at?: string
-          has_been_paid?: boolean | null
           id?: string
           monthly_message_limit?: number
           plan_type?: string
