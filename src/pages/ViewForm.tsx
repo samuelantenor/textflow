@@ -5,35 +5,48 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { FormFields } from "@/components/forms/view/FormFields";
+import { FormLoader } from "@/components/forms/view/FormLoader";
+import { FormError } from "@/components/forms/view/FormError";
 
 export default function ViewForm() {
   const { id } = useParams();
   const { toast } = useToast();
   const [form, setForm] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
 
   useEffect(() => {
     const fetchForm = async () => {
       try {
+        console.log('Fetching form with ID:', id);
         const { data, error } = await supabase
           .from('custom_forms')
-          .select('*')
+          .select('*, campaign_groups(name)')
           .eq('id', id)
           .maybeSingle();
 
-        if (error) throw error;
-        if (!data) throw new Error('Form not found');
+        if (error) {
+          console.error('Error fetching form:', error);
+          throw error;
+        }
+        
+        if (!data) {
+          setError('Form not found');
+          return;
+        }
 
+        if (!data.is_active) {
+          setError('This form is no longer active');
+          return;
+        }
+
+        console.log('Form data:', data);
         setForm(data);
       } catch (error) {
         console.error('Error fetching form:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load form",
-          variant: "destructive",
-        });
+        setError('Failed to load form');
       } finally {
         setLoading(false);
       }
@@ -49,6 +62,7 @@ export default function ViewForm() {
     
     try {
       setSubmitting(true);
+      console.log('Submitting form data:', formData);
 
       // Create the form submission
       const { error: submissionError } = await supabase
@@ -98,22 +112,11 @@ export default function ViewForm() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <FormLoader />;
   }
 
-  if (!form) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Form not found</h1>
-          <p className="text-muted-foreground">The form you're looking for doesn't exist.</p>
-        </div>
-      </div>
-    );
+  if (error || !form) {
+    return <FormError message={error || 'Form not found'} />;
   }
 
   return (
