@@ -1,29 +1,24 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
-import { CampaignFormFields } from "./CampaignFormFields";
-import { Campaign, CampaignFormData } from "@/types/campaign";
+import { Loader2, Plus } from "lucide-react";
+import { CampaignFormFields } from "@/components/campaign/CampaignFormFields";
+import type { CampaignFormData } from "@/types/campaign";
 
-interface EditCampaignDialogProps {
-  campaign: Campaign;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaignDialogProps) {
+export function CreateCampaignDialog() {
+  const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const form = useForm<CampaignFormData>({
     defaultValues: {
-      name: campaign.name,
-      message: campaign.message,
-      group_id: campaign.group_id || '',
-      scheduled_for: campaign.scheduled_for ? new Date(campaign.scheduled_for) : undefined,
+      name: "",
+      message: "",
+      group_id: "",
+      from_number: "",
     },
   });
 
@@ -31,7 +26,13 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
     try {
       setIsLoading(true);
 
-      let mediaUrl = campaign.media_url;
+      // Get the current user's ID
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        throw new Error("User not authenticated");
+      }
+
+      let mediaUrl = null;
       if (data.media) {
         const fileExt = data.media.name.split(".").pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
@@ -56,30 +57,31 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
         scheduledFor.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
       }
 
-      const { error } = await supabase
-        .from("campaigns")
-        .update({
-          name: data.name,
-          message: data.message,
-          media_url: mediaUrl,
-          scheduled_for: scheduledFor?.toISOString(),
-          group_id: data.group_id,
-        })
-        .eq('id', campaign.id);
+      const { error } = await supabase.from("campaigns").insert({
+        user_id: session.user.id,
+        name: data.name,
+        message: data.message,
+        media_url: mediaUrl,
+        scheduled_for: scheduledFor?.toISOString(),
+        group_id: data.group_id || null,
+        from_number: data.from_number || null,
+        status: "draft",
+      });
 
       if (error) throw error;
 
       toast({
-        title: "Campaign updated",
-        description: "Your campaign has been updated successfully.",
+        title: "Campaign created",
+        description: "Your campaign has been saved as a draft.",
       });
 
-      onOpenChange(false);
+      setOpen(false);
+      form.reset();
     } catch (error) {
-      console.error("Error updating campaign:", error);
+      console.error("Error creating campaign:", error);
       toast({
         title: "Error",
-        description: "Failed to update campaign. Please try again.",
+        description: "Failed to create campaign. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -88,10 +90,16 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button>
+          <Plus className="w-4 h-4 mr-2" />
+          New Campaign
+        </Button>
+      </DialogTrigger>
       <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle>Edit Campaign</DialogTitle>
+          <DialogTitle>Create New Campaign</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -100,7 +108,7 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
+                onClick={() => setOpen(false)}
                 className="w-full sm:w-auto"
               >
                 Cancel
@@ -109,7 +117,7 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
                 {isLoading && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Save Changes
+                Save as Draft
               </Button>
             </div>
           </form>
