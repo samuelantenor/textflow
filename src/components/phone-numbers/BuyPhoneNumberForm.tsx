@@ -131,8 +131,8 @@ export const BuyPhoneNumberForm = () => {
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Choose a region" />
           </SelectTrigger>
-          <SelectContent>
-            <ScrollArea className="h-[300px]">
+          <SelectContent className="h-[300px]">
+            <ScrollArea className="h-full" type="always">
               {regions.map((region) => (
                 <SelectItem key={region.value} value={region.value}>
                   {region.label}
