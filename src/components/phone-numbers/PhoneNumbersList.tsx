@@ -18,7 +18,6 @@ import { Loader2, Plus, Phone } from "lucide-react";
 export function PhoneNumbersList() {
   const [isAddingNumber, setIsAddingNumber] = useState(false);
   const [newNumber, setNewNumber] = useState("");
-  const [twilioSid, setTwilioSid] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -46,7 +45,7 @@ export function PhoneNumbersList() {
       const { error } = await supabase.from('phone_numbers').insert({
         user_id: session.user.id,
         phone_number: newNumber,
-        twilio_sid: twilioSid,
+        twilio_sid: 'private', // This is now a placeholder as SID is managed privately
         monthly_cost: 0, // This would typically come from Twilio
         status: 'active',
       });
@@ -55,12 +54,11 @@ export function PhoneNumbersList() {
 
       toast({
         title: "Phone number added",
-        description: "Your Twilio phone number has been added successfully.",
+        description: "Your phone number has been added successfully.",
       });
 
       setIsAddingNumber(false);
       setNewNumber("");
-      setTwilioSid("");
       refetch();
     } catch (error) {
       console.error("Error adding phone number:", error);
@@ -91,7 +89,7 @@ export function PhoneNumbersList() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Twilio Phone Number</DialogTitle>
+              <DialogTitle>Add Phone Number</DialogTitle>
               <DialogDescription>
                 Add a phone number you've received from Twilio to use for sending messages.
               </DialogDescription>
@@ -104,16 +102,6 @@ export function PhoneNumbersList() {
                   placeholder="+1234567890"
                   value={newNumber}
                   onChange={(e) => setNewNumber(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="twilio_sid">Twilio SID</Label>
-                <Input
-                  id="twilio_sid"
-                  placeholder="Enter the Twilio SID for this number"
-                  value={twilioSid}
-                  onChange={(e) => setTwilioSid(e.target.value)}
                   required
                 />
               </div>
