@@ -6,8 +6,13 @@ import { CampaignCard } from "@/components/campaigns/CampaignCard";
 import { Campaign } from "@/types/campaign";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dispatch, SetStateAction } from "react";
 
-export const DashboardOverview = () => {
+interface DashboardOverviewProps {
+  setActiveTab: Dispatch<SetStateAction<string>>;
+}
+
+export const DashboardOverview = ({ setActiveTab }: DashboardOverviewProps) => {
   // Fetch recent campaigns
   const { data: recentCampaigns, isLoading: isLoadingCampaigns } = useQuery({
     queryKey: ['recent-campaigns'],
