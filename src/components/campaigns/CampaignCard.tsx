@@ -15,18 +15,30 @@ interface CampaignCardProps {
 
 export function CampaignCard({ campaign }: CampaignCardProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const handleDelete = async () => {
     try {
-      const { error } = await supabase
+      setIsDeleting(true);
+      
+      // First delete associated message logs
+      const { error: logsError } = await supabase
+        .from('message_logs')
+        .delete()
+        .eq('campaign_id', campaign.id);
+
+      if (logsError) throw logsError;
+
+      // Then delete the campaign
+      const { error: campaignError } = await supabase
         .from('campaigns')
         .delete()
         .eq('id', campaign.id);
 
-      if (error) throw error;
+      if (campaignError) throw campaignError;
 
       toast({
         title: "Success",
@@ -40,6 +52,8 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
         description: "Failed to delete campaign",
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -52,12 +66,6 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
       });
 
       if (error) throw error;
-
-      // Update campaign status to sent
-      await supabase
-        .from('campaigns')
-        .update({ status: 'sent' })
-        .eq('id', campaign.id);
 
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
       
@@ -132,6 +140,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
             variant="ghost"
             size="sm"
             onClick={handleDelete}
+            disabled={isDeleting}
           >
             <Trash2 className="h-4 w-4" />
           </Button>

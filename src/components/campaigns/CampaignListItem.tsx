@@ -22,29 +22,45 @@ interface CampaignListItemProps {
 export function CampaignListItem({ campaign }: CampaignListItemProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const handleDelete = async () => {
-    const { error } = await supabase
-      .from('campaigns')
-      .delete()
-      .eq('id', campaign.id);
+    try {
+      setIsDeleting(true);
+      
+      // First delete associated message logs
+      const { error: logsError } = await supabase
+        .from('message_logs')
+        .delete()
+        .eq('campaign_id', campaign.id);
 
-    if (error) {
+      if (logsError) throw logsError;
+
+      // Then delete the campaign
+      const { error: campaignError } = await supabase
+        .from('campaigns')
+        .delete()
+        .eq('id', campaign.id);
+
+      if (campaignError) throw campaignError;
+
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+      toast({
+        title: "Success",
+        description: "Campaign deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting campaign:', error);
       toast({
         title: "Error",
         description: "Failed to delete campaign",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsDeleting(false);
     }
-
-    queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-    toast({
-      title: "Success",
-      description: "Campaign deleted successfully",
-    });
   };
 
   const handleSend = async () => {
@@ -105,9 +121,13 @@ export function CampaignListItem({ campaign }: CampaignListItemProps) {
               <Edit className="h-4 w-4 mr-2" />
               Edit
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+            <DropdownMenuItem 
+              onClick={handleDelete} 
+              className="text-red-600"
+              disabled={isDeleting}
+            >
               <Trash className="h-4 w-4 mr-2" />
-              Delete
+              {isDeleting ? 'Deleting...' : 'Delete'}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
