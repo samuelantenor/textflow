@@ -1,11 +1,10 @@
 import { Card } from "@/components/ui/card";
-import { FileText, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CustomForm } from "./types";
 
 interface FormsCardProps {
   form: CustomForm;
-  onShare: (form: CustomForm) => void;
   onViewSubmissions: (form: CustomForm) => void;
   onEdit: (form: CustomForm) => void;
   onDelete: (form: CustomForm) => void;
@@ -13,7 +12,6 @@ interface FormsCardProps {
 
 export const FormsCard = ({ 
   form, 
-  onShare, 
   onViewSubmissions, 
   onEdit, 
   onDelete 
@@ -39,13 +37,6 @@ export const FormsCard = ({
           onClick={() => onViewSubmissions(form)}
         >
           View Submissions
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onShare(form)}
-        >
-          Share Form
         </Button>
         <Button 
           variant="outline" 
