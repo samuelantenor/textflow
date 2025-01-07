@@ -2,56 +2,69 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import { supabase } from "@/integrations/supabase/client";
 
 export function BuyPhoneNumberForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [country, setCountry] = useState('us');
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
+  const handlePayment = async () => {
+    setIsLoading(true);
     try {
-      const formData = new FormData(e.currentTarget);
-      const response = await fetch("https://formspree.io/f/mnnnowqq", {
-        method: "POST",
-        body: formData,
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to purchase a phone number.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await fetch('/functions/create-phone-number-checkout', {
+        method: 'POST',
         headers: {
-          Accept: "application/json",
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ country }),
       });
 
-      if (response.ok) {
-        toast({
-          title: "Request sent successfully",
-          description: "We'll get back to you shortly with your phone number details.",
-        });
-        e.currentTarget.reset();
-      } else {
-        throw new Error("Failed to send request");
-      }
+      const { url, error } = await response.json();
+      
+      if (error) throw new Error(error);
+      if (url) window.location.href = url;
+      
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to send request. Please try again.",
+        description: "Failed to initiate payment. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <Card className="p-6">
-      <form onSubmit={handleSubmit} className="space-y-6">
+    <Card className="p-6 max-w-md mx-auto">
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-lg font-semibold mb-2">Request a New Phone Number</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Choose your preferred region to get a local phone number.
+          </p>
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="email">Your Email</Label>
           <Input
             id="email"
-            name="email"
             type="email"
             required
             placeholder="your@email.com"
@@ -62,7 +75,6 @@ export function BuyPhoneNumberForm() {
           <Label htmlFor="company">Company Name</Label>
           <Input
             id="company"
-            name="company"
             type="text"
             required
             placeholder="Your Company Name"
@@ -70,30 +82,39 @@ export function BuyPhoneNumberForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone_type">Phone Number Type</Label>
-          <Input
-            id="phone_type"
-            name="phone_type"
-            type="text"
-            required
-            placeholder="e.g., Toll-Free, Local"
+          <Label>Choose Region</Label>
+          <PhoneInput
+            country={country}
+            onChange={(value) => setCountry(value)}
+            enableSearch
+            inputClass="!w-full"
+            containerClass="!w-full"
+            searchClass="!w-full"
+            dropdownClass="!w-full"
+            disableSearchIcon
+            inputProps={{
+              required: true,
+              className: "w-full"
+            }}
+            disabled
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="requirements">Additional Requirements</Label>
-          <Textarea
-            id="requirements"
-            name="requirements"
-            placeholder="Please specify any additional requirements (area code preferences, features needed, etc.)"
-            className="min-h-[100px]"
-          />
+        <div className="border-t pt-4">
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-sm font-medium">Monthly fee</span>
+            <span className="text-lg font-semibold">$5.00/month</span>
+          </div>
+          
+          <Button 
+            onClick={handlePayment}
+            className="w-full"
+            disabled={isLoading}
+          >
+            {isLoading ? "Processing..." : "Pay Now"}
+          </Button>
         </div>
-
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Sending Request..." : "Request Phone Number"}
-        </Button>
-      </form>
+      </div>
     </Card>
   );
 }
