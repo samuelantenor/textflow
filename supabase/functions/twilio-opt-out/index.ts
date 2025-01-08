@@ -54,7 +54,7 @@ serve(async (req) => {
     // Find all groups containing this contact
     const { data: contacts, error: contactsError } = await supabaseClient
       .from('contacts')
-      .select('id, group_id')
+      .select('id, group_id, campaign_groups(name)')
       .eq('phone_number', fromNumber);
 
     if (contactsError) {
@@ -75,14 +75,21 @@ serve(async (req) => {
         console.error('Error deleting contact:', deleteError);
         throw deleteError;
       }
+
+      console.log(`Successfully removed ${fromNumber} from group ${contact.campaign_groups?.name || 'Unknown'}`);
     }
 
-    console.log(`Successfully removed ${fromNumber} from ${contacts.length} groups`);
+    // Log the successful opt-out
+    const logMessage = `Successfully removed ${fromNumber} from ${contacts.length} groups: ${contacts
+      .map(c => c.campaign_groups?.name || 'Unknown')
+      .join(', ')}`;
+    console.log(logMessage);
 
     return new Response(JSON.stringify({ 
       success: true, 
       message: 'Contact successfully opted out',
-      removedFromGroups: contacts.length 
+      removedFromGroups: contacts.length,
+      details: logMessage
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
