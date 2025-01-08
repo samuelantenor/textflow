@@ -20,7 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 const CampaignChart = () => {
   const { toast } = useToast();
 
-  // Set up realtime subscription
+  // Set up realtime subscription with proper error handling
   useEffect(() => {
     const channel = supabase
       .channel('campaign_analytics_changes')
@@ -35,21 +35,27 @@ const CampaignChart = () => {
           console.log('Change received!', payload);
         }
       )
-      .subscribe((status) => {
+      .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           console.log('Successfully subscribed to campaign analytics changes');
         }
         if (status === 'CHANNEL_ERROR') {
+          console.error('Realtime subscription error:', status);
           toast({
             title: "Connection Error",
             description: "Failed to connect to real-time updates. Will retry automatically.",
             variant: "destructive",
           });
         }
+        if (status === 'TIMED_OUT') {
+          console.error('Connection timed out. Retrying...');
+          // Channel will automatically attempt to reconnect
+        }
       });
 
+    // Proper cleanup
     return () => {
-      supabase.removeChannel(channel);
+      channel.unsubscribe();
     };
   }, [toast]);
 
