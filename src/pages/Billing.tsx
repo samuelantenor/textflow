@@ -16,7 +16,6 @@ const Billing = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Check authentication and session
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
@@ -108,16 +107,14 @@ const Billing = () => {
               </Button>
               <h1 className="text-2xl font-bold">Billing & Subscription</h1>
             </div>
-            {subscription?.status === 'active' && (
-              <Button 
-                onClick={handleManageSubscription}
-                disabled={isLoading}
-                variant="outline"
-              >
-                <Settings className="mr-2 h-4 w-4" />
-                Manage Subscription
-              </Button>
-            )}
+            <Button 
+              onClick={handleManageSubscription}
+              disabled={isLoading}
+              variant="outline"
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              Manage Subscription
+            </Button>
           </div>
 
           <div className="space-y-6">
