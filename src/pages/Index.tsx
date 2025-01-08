@@ -2,6 +2,10 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { CreateCampaignButton } from "@/components/CreateCampaignButton";
+import StatsDisplay from "@/components/StatsDisplay";
+import CampaignTable from "@/components/CampaignTable";
+import SubscribeButton from "@/components/SubscribeButton";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -67,16 +71,28 @@ const Index = () => {
     );
   }
 
-  // If user has a subscription, redirect to dashboard
+  // Redirect to dashboard if user is already subscribed
   if (subscription) {
-    console.log('User subscription type:', subscription.plan_type);
     navigate("/dashboard");
     return null;
   }
 
-  // If no subscription, redirect to pricing page
-  navigate("/pricing");
-  return null;
+  return (
+    <div className="min-h-screen p-8">
+      <div className="absolute top-4 right-4">
+        <UserMenu onLogout={handleLogout} />
+      </div>
+      <div className="max-w-2xl mx-auto text-center space-y-8">
+        <h1 className="text-3xl font-bold">Subscribe to Access SMS Campaigns</h1>
+        <p className="text-muted-foreground">
+          To access the SMS campaign features, you need an active subscription.
+        </p>
+        <div className="flex justify-center">
+          <SubscribeButton />
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const UserMenu = ({ onLogout }: { onLogout: () => Promise<void> }) => {
