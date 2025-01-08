@@ -29,11 +29,14 @@ export const UsageStats = () => {
       const cycleStart = new Date(limits.billing_cycle_start).toISOString();
       const cycleEnd = new Date(limits.billing_cycle_end).toISOString();
 
-      // Get all message logs for the user within the billing cycle
+      // Get all message logs for the user's campaigns within the billing cycle
       const { data: messageLogs, error: messageLogsError } = await supabase
         .from('message_logs')
-        .select('*')
-        .eq('user_id', session.user.id)
+        .select(`
+          *,
+          campaigns!inner(user_id)
+        `)
+        .eq('campaigns.user_id', session.user.id)
         .gte('created_at', cycleStart)
         .lte('created_at', cycleEnd);
 
