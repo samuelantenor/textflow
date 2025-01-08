@@ -25,39 +25,33 @@ export const UsageStats = () => {
         billing_cycle_end: new Date()
       };
 
-      // Format dates as ISO strings for Supabase
-      const cycleStart = new Date(limits.billing_cycle_start).toISOString();
-      const cycleEnd = new Date(limits.billing_cycle_end).toISOString();
-
       // Get all message logs for the user within the billing cycle
       const { data: messageLogs, error: messageLogsError } = await supabase
         .from('message_logs')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .gte('created_at', cycleStart)
-        .lte('created_at', cycleEnd);
+        .select('status')
+        .eq('user_id', session.user.id);
 
       if (messageLogsError) {
         console.error('Error fetching message logs:', messageLogsError);
         throw messageLogsError;
       }
 
-      console.log('Message logs:', messageLogs);
-      console.log('Cycle start:', cycleStart);
-      console.log('Cycle end:', cycleEnd);
-      console.log('User ID:', session.user.id);
+      // Calculate metrics using the same logic as StatsDisplay
+      const totalMessages = messageLogs?.length || 0;
+      const statusCounts = messageLogs?.reduce((acc, log) => {
+        acc[log.status] = (acc[log.status] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>) || {};
 
       const stats = {
-        totalSent: messageLogs?.length || 0,
-        delivered: messageLogs?.filter(log => log.status === 'delivered').length || 0,
-        failed: messageLogs?.filter(log => log.status === 'failed').length || 0,
-        pending: messageLogs?.filter(log => log.status === 'pending').length || 0,
+        totalSent: totalMessages,
+        delivered: statusCounts.delivered || 0,
+        failed: statusCounts.failed || 0,
+        pending: statusCounts.pending || 0,
         monthlyLimit: limits.message_limit,
         billingCycleStart: limits.billing_cycle_start,
         billingCycleEnd: limits.billing_cycle_end
       };
-
-      console.log('Calculated stats:', stats);
 
       return stats;
     },
