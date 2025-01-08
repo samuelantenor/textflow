@@ -101,8 +101,6 @@ const Login = () => {
         setAuthError(null);
       } else if (event === 'PASSWORD_RECOVERY') {
         setAuthError(null);
-      } else if (event === 'USER_DELETED') {
-        setAuthError("Your account has been deleted.");
       } else if (event === 'INITIAL_SESSION') {
         // Handle initial session load
         if (session) {
