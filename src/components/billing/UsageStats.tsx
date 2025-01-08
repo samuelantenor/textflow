@@ -28,15 +28,18 @@ export const UsageStats = () => {
       // Get all message logs for the user within the billing cycle
       const { data: messageLogs, error: messageLogsError } = await supabase
         .from('message_logs')
-        .select('status')
-        .eq('user_id', session.user.id);
+        .select('status, created_at')
+        .eq('user_id', session.user.id)
+        .gte('created_at', limits.billing_cycle_start)
+        .lte('created_at', limits.billing_cycle_end)
+        .order('created_at', { ascending: false });
 
       if (messageLogsError) {
         console.error('Error fetching message logs:', messageLogsError);
         throw messageLogsError;
       }
 
-      // Calculate metrics using the same logic as StatsDisplay
+      // Calculate metrics
       const totalMessages = messageLogs?.length || 0;
       const statusCounts = messageLogs?.reduce((acc, log) => {
         acc[log.status] = (acc[log.status] || 0) + 1;
