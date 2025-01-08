@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function usePaymentSuccess() {
@@ -16,40 +15,36 @@ export function usePaymentSuccess() {
       
       if (sessionId) {
         try {
-          // Get current user
-          const { data: { session } } = await supabase.auth.getSession();
-          if (!session?.user) throw new Error('No user found');
-
-          // Update subscription status
-          const { error: updateError } = await supabase
-            .from('subscriptions')
-            .update({
-              status: 'active',
-              plan_type: 'paid',
-              monthly_message_limit: 1000,
-              campaign_limit: 999999,
-              has_been_paid: true
-            })
-            .eq('user_id', session.user.id);
-
-          if (updateError) throw updateError;
-
-          // Invalidate subscription query to trigger a refresh
-          queryClient.invalidateQueries({ queryKey: ['subscription'] });
-
+          // Show success message
           toast({
-            title: "Subscription Activated!",
-            description: "Your account has been upgraded to paid status. Enjoy the full features!",
+            title: "Payment Successful!",
+            description: "Your new phone number is on its way!",
           });
 
-          // Redirect to billing page to show updated status
-          navigate("/billing");
+          // Send notification via Formspree
+          await fetch("https://formspree.io/f/mnnnowqq", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              message: "New phone number purchase",
+              sessionId: sessionId,
+            }),
+          });
+
+          // Invalidate queries to refresh data
+          queryClient.invalidateQueries({ queryKey: ['phone-numbers'] });
+          queryClient.invalidateQueries({ queryKey: ['subscription'] });
+
+          // Redirect to phone numbers tab
+          navigate("/dashboard?tab=phone-numbers");
         } catch (error) {
-          console.error('Error updating subscription:', error);
+          console.error('Error in payment success handler:', error);
           toast({
             variant: "destructive",
             title: "Error",
-            description: "Failed to update subscription status. Please contact support.",
+            description: "There was a problem processing your request. Please contact support.",
           });
         }
       }
