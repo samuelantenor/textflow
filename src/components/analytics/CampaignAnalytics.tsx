@@ -20,13 +20,6 @@ interface CampaignStats {
   [key: string]: MessageStats;
 }
 
-interface TotalStats {
-  total_messages: number;
-  delivered: number;
-  failed: number;
-  pending: number;
-}
-
 interface AnalyticsData {
   total_messages: number;
   delivery_rate: string;
@@ -45,7 +38,16 @@ export const CampaignAnalytics = () => {
     queryFn: async () => {
       const { data: messageData, error: messageError } = await supabase
         .from('message_logs')
-        .select('status, campaign_id');
+        .select(`
+          status,
+          campaign_id,
+          created_at,
+          campaigns (
+            id,
+            name
+          )
+        `)
+        .order('created_at', { ascending: false });
 
       if (messageError) throw messageError;
 
@@ -76,7 +78,7 @@ export const CampaignAnalytics = () => {
       }, {});
 
       // Calculate overall stats
-      const totalStats = Object.values(campaignStats).reduce<TotalStats>((acc, curr) => {
+      const totalStats = Object.values(campaignStats).reduce((acc, curr) => {
         acc.total_messages += curr.total;
         acc.delivered += curr.delivered;
         acc.failed += curr.failed;
@@ -100,6 +102,7 @@ export const CampaignAnalytics = () => {
         }
       };
     },
+    refetchInterval: 5000, // Refresh every 5 seconds
   });
 
   const stats = [
