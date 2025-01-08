@@ -60,9 +60,8 @@ export const BillingOverview = ({ subscription }: BillingOverviewProps) => {
     }
   };
 
-  // Check if the user has a paid subscription based on monthly_message_limit
-  const isSubscribed = subscription?.status === 'active' && 
-    (subscription?.plan_type === 'paid' || subscription?.monthly_message_limit === 1000);
+  // Check if the user has a paid subscription based on status and plan_type
+  const isSubscribed = subscription?.status === 'active' && subscription?.plan_type === 'paid';
 
   return (
     <div className="bg-card rounded-lg p-6">
