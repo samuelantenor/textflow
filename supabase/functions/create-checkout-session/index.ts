@@ -20,11 +20,15 @@ serve(async (req) => {
 
   try {
     // Get the session or user object
-    const authHeader = req.headers.get('Authorization')!
-    const token = authHeader.replace('Bearer ', '')
-    
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      throw new Error('No authorization header')
+    }
+
     console.log('Authenticating user...');
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token)
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    )
     
     if (authError || !user) {
       console.error('Authentication error:', authError);
@@ -78,7 +82,7 @@ serve(async (req) => {
     console.log('Creating checkout session...');
     const session = await stripe.checkout.sessions.create({
       customer: customer_id,
-      client_reference_id: user.id, // Add this line to link the session to the user
+      client_reference_id: user.id,
       line_items: [
         {
           price: 'price_1QdghTB4RWKZ2dNzpWlSvqmr',
