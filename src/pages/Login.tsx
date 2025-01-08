@@ -92,12 +92,22 @@ const Login = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event);
+      
       if (event === 'SIGNED_IN' && session) {
         checkUserAndRedirect(session);
       } else if (event === 'SIGNED_OUT') {
         setAuthError(null);
       } else if (event === 'USER_UPDATED') {
         setAuthError(null);
+      } else if (event === 'PASSWORD_RECOVERY') {
+        setAuthError(null);
+      } else if (event === 'USER_DELETED') {
+        setAuthError("Your account has been deleted.");
+      } else if (event === 'INITIAL_SESSION') {
+        // Handle initial session load
+        if (session) {
+          checkUserAndRedirect(session);
+        }
       }
     });
 
