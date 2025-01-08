@@ -12,16 +12,28 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const checkSubscriptionAndRedirect = async (session) => {
+    const checkUserAndRedirect = async (session) => {
       if (!session) return;
       
       setIsLoading(true);
       try {
-        console.log("Starting subscription check for user:", session.user.id);
-        
-        // First, wait a short moment to allow the trigger to create the profile
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        console.log("Waited for profile creation, checking subscription...");
+        // First, verify the user still exists in the profiles table
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profileError || !profile) {
+          console.log("User profile not found, signing out...");
+          await supabase.auth.signOut();
+          toast({
+            variant: "destructive",
+            title: "Account not found",
+            description: "Your account no longer exists. Please create a new account.",
+          });
+          return;
+        }
 
         // Check subscription status
         const { data: subscription, error } = await supabase
@@ -32,18 +44,12 @@ const Login = () => {
           .limit(1)
           .maybeSingle();
 
-        console.log("Subscription data:", subscription);
-        console.log("Subscription status:", subscription?.status);
-        console.log("Plan type:", subscription?.plan_type);
-        
         if (error) {
           console.error("Subscription check error:", error);
           throw error;
         }
 
-        // If subscription exists and was previously paid but is now canceled
         if (subscription?.has_been_paid && subscription.status !== 'active') {
-          console.log("Found canceled paid subscription:", subscription);
           toast({
             title: "Subscription Status",
             description: "Your subscription has been cancelled. You have been moved to the free tier.",
@@ -53,13 +59,14 @@ const Login = () => {
 
         navigate("/dashboard", { replace: true });
       } catch (error) {
-        console.error("Error checking subscription:", error);
+        console.error("Error checking user status:", error);
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to verify subscription status. Please try refreshing the page.",
+          description: "Failed to verify account status. Please try again.",
           duration: 5000,
         });
+        await supabase.auth.signOut();
       } finally {
         setIsLoading(false);
       }
@@ -78,8 +85,8 @@ const Login = () => {
       }
       
       if (session) {
-        console.log("Found existing session, checking subscription...");
-        checkSubscriptionAndRedirect(session);
+        console.log("Found existing session, checking user status...");
+        checkUserAndRedirect(session);
       }
     });
 
@@ -87,7 +94,7 @@ const Login = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event);
       if (event === 'SIGNED_IN' && session) {
-        checkSubscriptionAndRedirect(session);
+        checkUserAndRedirect(session);
       }
     });
 
@@ -101,7 +108,7 @@ const Login = () => {
       <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
         <div className="w-full max-w-md space-y-8 text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-          <p className="text-muted-foreground">Verifying subscription status...</p>
+          <p className="text-muted-foreground">Verifying account status...</p>
         </div>
       </div>
     );
