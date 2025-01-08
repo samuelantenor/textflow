@@ -31,7 +31,6 @@ const Dashboard = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate("/login");
-        return;
       }
     };
     
@@ -45,38 +44,6 @@ const Dashboard = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
-
-  // Fetch subscription status
-  const { data: subscription, isLoading } = useQuery({
-    queryKey: ['subscription'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return null;
-
-      const { data: subscriptions, error } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('status', 'active')
-        .maybeSingle();
-
-      if (error) throw error;
-      return subscriptions;
-    },
-  });
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (!subscription) {
-    navigate("/");
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -98,10 +65,7 @@ const Dashboard = () => {
             </TabsContent>
 
             <TabsContent value="campaigns">
-              <div className="space-y-8">
-                <h2 className="text-2xl font-bold">Campaigns</h2>
-                <CampaignList />
-              </div>
+              <CampaignList />
             </TabsContent>
 
             <TabsContent value="groups">
