@@ -5,11 +5,14 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AuthError } from "@supabase/supabase-js";
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkUserAndRedirect = async (session) => {
@@ -76,11 +79,7 @@ const Login = () => {
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
         console.error("Error checking session:", error.message);
-        toast({
-          variant: "destructive",
-          title: "Session Error",
-          description: error.message,
-        });
+        setAuthError(error.message);
         return;
       }
       
@@ -95,6 +94,10 @@ const Login = () => {
       console.log("Auth state changed:", event);
       if (event === 'SIGNED_IN' && session) {
         checkUserAndRedirect(session);
+      } else if (event === 'SIGNED_OUT') {
+        setAuthError(null);
+      } else if (event === 'USER_UPDATED') {
+        setAuthError(null);
       }
     });
 
@@ -121,6 +124,11 @@ const Login = () => {
           <h1 className="text-3xl font-bold">Welcome to FlowText</h1>
           <p className="text-muted-foreground mt-2">Sign in to manage your campaigns</p>
         </div>
+        {authError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{authError}</AlertDescription>
+          </Alert>
+        )}
         <div className="bg-card p-6 rounded-lg shadow-lg border">
           <Auth
             supabaseClient={supabase}
