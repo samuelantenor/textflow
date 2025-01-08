@@ -57,16 +57,29 @@ export default function ViewForm() {
 
     setSubmitting(true);
     try {
+      console.log('Creating contact with:', {
+        group_id: form.group_id,
+        name,
+        phone_number: phoneNumber
+      });
+
       // First create the contact
-      const { error: contactError } = await supabase
+      const { data: contactData, error: contactError } = await supabase
         .from('contacts')
         .insert({
           group_id: form.group_id,
           name: name,
           phone_number: phoneNumber,
-        });
+        })
+        .select()
+        .single();
 
-      if (contactError) throw contactError;
+      if (contactError) {
+        console.error('Contact creation error:', contactError);
+        throw contactError;
+      }
+
+      console.log('Contact created successfully:', contactData);
 
       // Then create the form submission
       const { error: submissionError } = await supabase
@@ -76,7 +89,12 @@ export default function ViewForm() {
           data: formData,
         });
 
-      if (submissionError) throw submissionError;
+      if (submissionError) {
+        console.error('Form submission error:', submissionError);
+        throw submissionError;
+      }
+
+      console.log('Form submission created successfully');
 
       toast({
         title: "Success",
@@ -98,7 +116,7 @@ export default function ViewForm() {
       console.error('Error submitting form:', error);
       toast({
         title: "Error",
-        description: "Failed to submit form",
+        description: "Failed to submit form. Please try again.",
         variant: "destructive",
       });
     } finally {
