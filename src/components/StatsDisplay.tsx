@@ -14,13 +14,9 @@ const StatsDisplay = () => {
   const { data: analytics } = useQuery({
     queryKey: ['campaign-analytics-summary'],
     queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No session');
-
       const { data: messageLogs, error: messageLogsError } = await supabase
         .from('message_logs')
-        .select('status')
-        .eq('user_id', session.user.id);
+        .select('status');
 
       if (messageLogsError) throw messageLogsError;
       

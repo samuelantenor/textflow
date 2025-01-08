@@ -19,9 +19,6 @@ export function MessageLogs({ campaignId }: MessageLogsProps) {
   const { data: logs, isLoading } = useQuery({
     queryKey: ['message-logs', campaignId],
     queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No session');
-
       const { data, error } = await supabase
         .from('message_logs')
         .select(`
@@ -32,7 +29,6 @@ export function MessageLogs({ campaignId }: MessageLogsProps) {
           )
         `)
         .eq('campaign_id', campaignId)
-        .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

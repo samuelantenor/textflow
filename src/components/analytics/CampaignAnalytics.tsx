@@ -43,16 +43,9 @@ export const CampaignAnalytics = () => {
   const { data: analytics } = useQuery<AnalyticsData>({
     queryKey: ['campaign-analytics'],
     queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No session');
-
       const { data: messageData, error: messageError } = await supabase
         .from('message_logs')
-        .select(`
-          status,
-          campaign_id
-        `)
-        .eq('user_id', session.user.id);
+        .select('status, campaign_id');
 
       if (messageError) throw messageError;
 

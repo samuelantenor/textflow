@@ -343,7 +343,6 @@ export type Database = {
           status: string
           twilio_message_sid: string
           updated_at: string
-          user_id: string
         }
         Insert: {
           campaign_id: string
@@ -355,7 +354,6 @@ export type Database = {
           status?: string
           twilio_message_sid: string
           updated_at?: string
-          user_id: string
         }
         Update: {
           campaign_id?: string
@@ -367,7 +365,6 @@ export type Database = {
           status?: string
           twilio_message_sid?: string
           updated_at?: string
-          user_id?: string
         }
         Relationships: [
           {
