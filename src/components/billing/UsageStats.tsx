@@ -1,13 +1,8 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
-import { useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
 
 export const UsageStats = () => {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
   const { data: messageStats } = useQuery({
     queryKey: ['message_stats'],
     queryFn: async () => {
@@ -45,41 +40,6 @@ export const UsageStats = () => {
       };
     },
   });
-
-  // Check and update subscription status when monthly limit is reached
-  useEffect(() => {
-    const updateSubscriptionStatus = async () => {
-      if (messageStats?.monthlyLimit === 1000) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-
-        const { error } = await supabase
-          .from('subscriptions')
-          .update({ status: 'active' })
-          .eq('user_id', session.user.id);
-
-        if (error) {
-          console.error('Error updating subscription status:', error);
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to update subscription status",
-          });
-          return;
-        }
-
-        // Invalidate subscription query to trigger a refresh
-        queryClient.invalidateQueries({ queryKey: ['subscription'] });
-
-        toast({
-          title: "Subscription Updated",
-          description: "Your subscription has been activated",
-        });
-      }
-    };
-
-    updateSubscriptionStatus();
-  }, [messageStats?.monthlyLimit, queryClient, toast]);
 
   const monthlyLimit = messageStats?.monthlyLimit || 20;
   const usagePercentage = ((messageStats?.totalSent || 0) / monthlyLimit) * 100;
