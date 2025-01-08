@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PaymentHistory } from "@/components/billing/PaymentHistory";
 import { UsageStats } from "@/components/billing/UsageStats";
 import { CreditCard } from "lucide-react";
+import { Toaster } from "@/components/ui/toaster";
 
 const Billing = () => {
   const navigate = useNavigate();
@@ -31,23 +32,26 @@ const Billing = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Billing & Usage</h1>
-        <Button 
-          onClick={handleSubscribeClick}
-          className="bg-primary hover:bg-primary/90"
-        >
-          <CreditCard className="mr-2 h-4 w-4" />
-          Subscribe Now
-        </Button>
-      </div>
+    <>
+      <div className="container mx-auto py-8 space-y-8">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Billing & Usage</h1>
+          <Button 
+            onClick={handleSubscribeClick}
+            className="bg-primary hover:bg-primary/90"
+          >
+            <CreditCard className="mr-2 h-4 w-4" />
+            Subscribe Now
+          </Button>
+        </div>
 
-      <div className="grid gap-8">
-        <UsageStats />
-        <PaymentHistory />
+        <div className="grid gap-8">
+          <UsageStats />
+          <PaymentHistory />
+        </div>
       </div>
-    </div>
+      <Toaster />
+    </>
   );
 };
 
