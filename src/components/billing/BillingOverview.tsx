@@ -40,7 +40,7 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
     }
   };
 
-  const isSubscribed = subscription?.status === 'active';
+  const isSubscribed = subscription?.status === 'active' && subscription?.plan_type === 'paid';
 
   return (
     <div className="bg-card rounded-lg p-6">
