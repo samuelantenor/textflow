@@ -14,18 +14,20 @@ const StatsDisplay = () => {
   const { data: analytics } = useQuery({
     queryKey: ['campaign-analytics-summary'],
     queryFn: async () => {
+      // Get all message logs for the user, regardless of campaign status
       const { data: messageLogs, error: messageLogsError } = await supabase
         .from('message_logs')
-        .select('status');
+        .select('status, created_at')
+        .order('created_at', { ascending: false });
 
       if (messageLogsError) throw messageLogsError;
       
       // Calculate delivery metrics
-      const totalMessages = messageLogs.length;
-      const statusCounts = messageLogs.reduce((acc, log) => {
+      const totalMessages = messageLogs?.length || 0;
+      const statusCounts = messageLogs?.reduce((acc, log) => {
         acc[log.status] = (acc[log.status] || 0) + 1;
         return acc;
-      }, {} as Record<string, number>);
+      }, {} as Record<string, number>) || {};
 
       const deliveryRate = totalMessages > 0 
         ? ((statusCounts.delivered || 0) / totalMessages * 100).toFixed(1) 
@@ -41,9 +43,11 @@ const StatsDisplay = () => {
       return {
         delivery_rate: deliveryRate,
         chart_data: chartData,
-        total_messages: totalMessages
+        total_messages: totalMessages,
+        status_counts: statusCounts
       };
     },
+    refetchInterval: 5000, // Refresh every 5 seconds to keep counts up to date
   });
 
   return (
