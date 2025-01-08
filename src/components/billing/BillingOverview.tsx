@@ -1,37 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { CreditCard, Settings } from "lucide-react";
+import { CreditCard, Settings, ArrowUpCircle } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export const BillingOverview = ({ subscription }: { subscription: any }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleSubscribe = async () => {
-    try {
-      setIsLoading(true);
-      const { data: sessionData, error: sessionError } = await supabase.functions.invoke(
-        'create-checkout-session',
-        {
-          method: 'POST',
-        }
-      );
-
-      if (sessionError) throw sessionError;
-      if (!sessionData?.url) throw new Error('No checkout URL received');
-
-      window.location.href = sessionData.url;
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to start checkout process",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSubscribe = () => {
+    navigate('/pricing');
   };
 
   const handleManageSubscription = async () => {
@@ -77,6 +57,7 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
             <Button 
               onClick={handleManageSubscription}
               disabled={isLoading}
+              variant="outline"
             >
               <Settings className="mr-2 h-4 w-4" />
               Manage Subscription
@@ -103,9 +84,10 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
             <Button
               onClick={handleSubscribe}
               disabled={isLoading}
-              className="w-full bg-primary hover:bg-primary/90"
+              className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary"
+              size="lg"
             >
-              <CreditCard className="mr-2 h-4 w-4" />
+              <ArrowUpCircle className="mr-2 h-5 w-5" />
               Upgrade to Premium
             </Button>
           </div>
