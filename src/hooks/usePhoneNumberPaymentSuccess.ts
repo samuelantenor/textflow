@@ -4,6 +4,16 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+// Map of region codes to country names
+const regionToCountry: Record<string, string> = {
+  US: "United States",
+  CA: "Canada",
+  GB: "United Kingdom",
+  AU: "Australia",
+  NZ: "New Zealand",
+  // Add more countries as needed
+};
+
 export function usePhoneNumberPaymentSuccess() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
@@ -29,7 +39,8 @@ export function usePhoneNumberPaymentSuccess() {
             .limit(1);
 
           if (requestError) throw requestError;
-          const region = requests?.[0]?.region || 'Unknown region';
+          const regionCode = requests?.[0]?.region || 'Unknown region';
+          const countryName = regionToCountry[regionCode] || regionCode;
 
           // Send notification via Formspree
           await fetch("https://formspree.io/f/mnnnowqq", {
@@ -39,8 +50,9 @@ export function usePhoneNumberPaymentSuccess() {
             },
             body: JSON.stringify({
               email: session.user.email,
-              region: region,
-              message: `New phone number request:\nEmail: ${session.user.email}\nRegion: ${region}`,
+              region: regionCode,
+              country: countryName,
+              message: `New phone number request:\nEmail: ${session.user.email}\nRegion: ${regionCode}\nCountry: ${countryName}`,
             }),
           });
 
