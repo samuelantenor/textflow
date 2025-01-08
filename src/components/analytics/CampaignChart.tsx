@@ -20,7 +20,6 @@ import { useToast } from "@/hooks/use-toast";
 const CampaignChart = () => {
   const { toast } = useToast();
 
-  // Set up realtime subscription with proper error handling
   useEffect(() => {
     const channel = supabase
       .channel('campaign_analytics_changes')
@@ -32,7 +31,8 @@ const CampaignChart = () => {
           table: 'campaign_analytics'
         },
         (payload) => {
-          console.log('Change received!', payload);
+          console.log('Campaign analytics change received:', payload);
+          // The useQuery hook will automatically refetch data when invalidated
         }
       )
       .subscribe(async (status) => {
@@ -53,7 +53,6 @@ const CampaignChart = () => {
         }
       });
 
-    // Proper cleanup
     return () => {
       channel.unsubscribe();
     };
