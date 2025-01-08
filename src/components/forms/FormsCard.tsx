@@ -27,7 +27,7 @@ export const FormsCard = ({
         )}
       </div>
       <div className="text-sm text-muted-foreground">
-        Group: {form.campaign_groups?.name}
+        Group: {form.campaign_groups?.name || "No group selected"}
       </div>
       <div className="text-sm text-muted-foreground">
         Fields: {form.fields.length}
