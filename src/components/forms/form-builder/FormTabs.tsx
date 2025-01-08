@@ -3,7 +3,7 @@ import { UseFormReturn } from "react-hook-form";
 import { FormFieldsTab } from "./FormFieldsTab";
 import { FormDesignTab } from "./FormDesignTab";
 
-interface FormTabsProps {
+export interface FormTabsProps {
   form: UseFormReturn<any>;
   activeTab: string;
   onTabChange: (value: string) => void;

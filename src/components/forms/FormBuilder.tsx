@@ -65,6 +65,12 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
     try {
       setIsLoading(true);
 
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) throw new Error("No user found");
+
       const { error } = await supabase
         .from("custom_forms")
         .insert({
@@ -76,6 +82,7 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
           font_family: data.font_family,
           logo_url: data.logo_url,
           primary_color: data.primary_color,
+          user_id: user.id,
         });
 
       if (error) throw error;
@@ -117,7 +124,7 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
             <FormTabs
               form={form}
               activeTab={activeTab}
-              setActiveTab={setActiveTab}
+              onTabChange={setActiveTab}
               handleLogoUpload={handleLogoUpload}
               formId={formId}
             />
