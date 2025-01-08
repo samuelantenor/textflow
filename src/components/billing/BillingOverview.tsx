@@ -4,29 +4,11 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 
-export const BillingOverview = () => {
+export const BillingOverview = ({ subscription }: { subscription: any }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  const { data: subscription, isLoading: isSubscriptionLoading } = useQuery({
-    queryKey: ['subscription'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return null;
-
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    },
-  });
 
   const handleSubscribe = () => {
     navigate('/pricing');
@@ -57,17 +39,6 @@ export const BillingOverview = () => {
       setIsLoading(false);
     }
   };
-
-  if (isSubscriptionLoading) {
-    return (
-      <div className="bg-card rounded-lg p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-muted rounded w-1/4"></div>
-          <div className="h-8 bg-muted rounded w-1/2"></div>
-        </div>
-      </div>
-    );
-  }
 
   const isSubscribed = subscription?.status === 'active' && subscription?.plan_type === 'paid';
 
