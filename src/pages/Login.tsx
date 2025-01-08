@@ -17,8 +17,11 @@ const Login = () => {
       
       setIsLoading(true);
       try {
+        console.log("Starting subscription check for user:", session.user.id);
+        
         // First, wait a short moment to allow the trigger to create the profile
         await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log("Waited for profile creation, checking subscription...");
 
         // Check subscription status
         const { data: subscription, error } = await supabase
@@ -29,10 +32,18 @@ const Login = () => {
           .limit(1)
           .maybeSingle();
 
-        if (error) throw error;
+        console.log("Subscription data:", subscription);
+        console.log("Subscription status:", subscription?.status);
+        console.log("Plan type:", subscription?.plan_type);
+        
+        if (error) {
+          console.error("Subscription check error:", error);
+          throw error;
+        }
 
         // If subscription exists and was previously paid but is now canceled
         if (subscription?.has_been_paid && subscription.status !== 'active') {
+          console.log("Found canceled paid subscription:", subscription);
           toast({
             title: "Subscription Status",
             description: "Your subscription has been cancelled. You have been moved to the free tier.",
@@ -67,12 +78,14 @@ const Login = () => {
       }
       
       if (session) {
+        console.log("Found existing session, checking subscription...");
         checkSubscriptionAndRedirect(session);
       }
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event);
       if (event === 'SIGNED_IN' && session) {
         checkSubscriptionAndRedirect(session);
       }

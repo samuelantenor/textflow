@@ -72,6 +72,24 @@ const Billing = () => {
     }
   };
 
+  // Fetch subscription status
+  const { data: subscription } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
   return (
     <>
       <div className="min-h-screen bg-background">
@@ -100,7 +118,7 @@ const Billing = () => {
           </div>
 
           <div className="space-y-6">
-            <BillingOverview />
+            <BillingOverview subscription={subscription} />
             <UsageStats />
             <PaymentHistory />
           </div>
