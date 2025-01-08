@@ -1,8 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
 
 export const UsageStats = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const { data: messageStats } = useQuery({
     queryKey: ['message_stats'],
     queryFn: async () => {
@@ -30,6 +34,33 @@ export const UsageStats = () => {
       if (planLimitsError) throw planLimitsError;
 
       const limits = planLimits[0] || { message_limit: 20, campaign_limit: 3 };
+
+      // Check if monthly limit is exactly 1000 and update subscription status
+      if (limits.message_limit === 1000) {
+        const { error: updateError } = await supabase
+          .from('subscriptions')
+          .update({ 
+            status: 'active',
+            plan_type: 'paid'
+          })
+          .eq('user_id', session.user.id);
+
+        if (updateError) {
+          console.error('Error updating subscription status:', updateError);
+          toast({
+            title: "Error",
+            description: "Failed to update subscription status",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Success",
+            description: "Your subscription has been activated",
+          });
+          // Invalidate subscription query to refresh the data
+          queryClient.invalidateQueries({ queryKey: ['subscription'] });
+        }
+      }
 
       return {
         totalSent: messageLogs?.length || 0,
