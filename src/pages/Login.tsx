@@ -17,11 +17,16 @@ const Login = () => {
       
       setIsLoading(true);
       try {
+        // First, wait a short moment to allow the trigger to create the profile
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         // Check subscription status
         const { data: subscription, error } = await supabase
           .from('subscriptions')
           .select('*')
           .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
           .maybeSingle();
 
         if (error) throw error;
@@ -41,7 +46,8 @@ const Login = () => {
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to verify subscription status",
+          description: "Failed to verify subscription status. Please try refreshing the page.",
+          duration: 5000,
         });
       } finally {
         setIsLoading(false);
