@@ -10,55 +10,12 @@ import { FormsOverview } from "@/components/forms/FormsOverview";
 import { PhoneNumbersList } from "@/components/phone-numbers/PhoneNumbersList";
 import { CampaignList } from "@/components/campaigns/CampaignList";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
-
-  // Fetch subscription status
-  const { data: subscription } = useQuery({
-    queryKey: ['subscription'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return null;
-
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const handleManageSubscription = async () => {
-    try {
-      const { data: sessionData, error: sessionError } = await supabase.functions.invoke(
-        'create-portal-session',
-        {
-          method: 'POST',
-        }
-      );
-
-      if (sessionError) throw sessionError;
-      if (!sessionData?.url) throw new Error('No portal URL received');
-
-      window.location.href = sessionData.url;
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to open subscription management",
-      });
-    }
-  };
 
   // Set initial tab from URL parameter
   useEffect(() => {
@@ -93,18 +50,6 @@ const Dashboard = () => {
       <DashboardHeader />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <Button
-            onClick={handleManageSubscription}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Settings className="h-4 w-4" />
-            Manage Subscription
-          </Button>
-        </div>
-
         <div className="space-y-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList className="flex flex-wrap gap-2 h-auto">
