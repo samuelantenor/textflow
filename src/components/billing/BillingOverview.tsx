@@ -26,11 +26,13 @@ export const BillingOverview = ({ subscription }: BillingOverviewProps) => {
     navigate('/pricing');
   };
 
+  const isFreePlan = subscription?.plan_type === 'free';
+
   return (
     <div className="bg-card rounded-lg p-6">
       <h2 className="text-lg font-semibold mb-6">Subscription Overview</h2>
       
-      {subscription ? (
+      {subscription && !isFreePlan ? (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Plan</span>
@@ -50,10 +52,13 @@ export const BillingOverview = ({ subscription }: BillingOverviewProps) => {
           </div>
         </div>
       ) : (
-        <div className="flex justify-end">
+        <div className="flex flex-col items-center space-y-4">
+          <p className="text-muted-foreground text-center">
+            Upgrade to our paid plan to unlock unlimited campaigns and increased message limits!
+          </p>
           <Button 
             onClick={handleSubscribe}
-            className="bg-primary hover:bg-primary/90"
+            className="bg-primary hover:bg-primary/90 w-full"
           >
             <CreditCard className="mr-2 h-4 w-4" />
             Subscribe Now
