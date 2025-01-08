@@ -62,6 +62,9 @@ export const BillingOverview = ({ subscription }: BillingOverviewProps) => {
 
   // Check if the user has a paid subscription based on status
   const isSubscribed = subscription?.status === 'active';
+  
+  // Add console log to debug subscription status
+  console.log('Current subscription status:', subscription?.status);
 
   return (
     <div className="bg-card rounded-lg p-6">
