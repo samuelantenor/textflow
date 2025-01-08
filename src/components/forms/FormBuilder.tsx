@@ -55,6 +55,22 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
     },
   });
 
+  // Reset form when dialog opens/closes
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      form.reset({
+        fields: [],
+        group_id: groupId || "",
+        background_color: "#FFFFFF",
+        font_family: "Inter",
+        primary_color: "#ea384c",
+      });
+      setActiveTab("fields");
+      setFormId(undefined);
+    }
+    setOpen(newOpen);
+  };
+
   const handleLogoUpload = async (file: File) => {
     try {
       const fileExt = file.name.split(".").pop();
@@ -127,7 +143,7 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="w-4 h-4 mr-2" />
@@ -152,7 +168,7 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
             />
             <FormActions
               isLoading={isLoading}
-              onCancel={() => setOpen(false)}
+              onCancel={() => handleOpenChange(false)}
             />
           </form>
         </Form>
