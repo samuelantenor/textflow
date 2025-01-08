@@ -83,6 +83,7 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
             <Button 
               onClick={handleSubscribe}
               disabled={isLoading}
+              className="bg-primary hover:bg-primary/90"
             >
               <CreditCard className="mr-2 h-4 w-4" />
               Subscribe Now
@@ -93,6 +94,18 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
           <p className="font-medium">Status</p>
           <p className="text-muted-foreground capitalize">{subscription?.status || 'Not subscribed'}</p>
         </div>
+        {!subscription?.status && (
+          <div className="pt-4">
+            <Button
+              onClick={handleSubscribe}
+              disabled={isLoading}
+              className="w-full bg-primary hover:bg-primary/90"
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              Upgrade to Premium
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
