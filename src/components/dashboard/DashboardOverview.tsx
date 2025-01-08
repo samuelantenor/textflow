@@ -7,13 +7,38 @@ import { Campaign } from "@/types/campaign";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dispatch, SetStateAction } from "react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { CreditCard } from "lucide-react";
 
 interface DashboardOverviewProps {
   setActiveTab: Dispatch<SetStateAction<string>>;
 }
 
 export const DashboardOverview = ({ setActiveTab }: DashboardOverviewProps) => {
-  // Fetch recent campaigns
+  const navigate = useNavigate();
+
+  // Fetch subscription status
+  const { data: subscription } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Check if user is on free plan
+  const isFreePlan = !subscription || subscription.plan_type === 'free';
+
   const { data: recentCampaigns, isLoading: isLoadingCampaigns } = useQuery({
     queryKey: ['recent-campaigns'],
     queryFn: async () => {
@@ -52,7 +77,18 @@ export const DashboardOverview = ({ setActiveTab }: DashboardOverviewProps) => {
     <div className="space-y-8">
       {/* Analytics Overview */}
       <div>
-        <h2 className="text-2xl font-bold mb-4">Analytics Overview</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">Analytics Overview</h2>
+          {isFreePlan && (
+            <Button
+              onClick={() => navigate('/billing')}
+              className="bg-primary hover:bg-primary/90"
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              Subscribe Now
+            </Button>
+          )}
+        </div>
         <StatsDisplay />
       </div>
 
