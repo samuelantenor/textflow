@@ -39,7 +39,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Find and update the message log
+    // Find the message log entry
     const { data: messageLog, error: findError } = await supabaseClient
       .from('message_logs')
       .select('*')
@@ -55,6 +55,8 @@ serve(async (req) => {
       console.error('Message log not found for SID:', messageSid);
       throw new Error('Message log not found')
     }
+
+    console.log('Found message log:', messageLog);
 
     // Update message status
     const { error: updateError } = await supabaseClient
@@ -73,7 +75,75 @@ serve(async (req) => {
     console.log('Successfully updated message status');
 
     // Update campaign analytics
-    await updateCampaignAnalytics(supabaseClient, messageLog.campaign_id);
+    const { data: analytics, error: analyticsError } = await supabaseClient
+      .from('campaign_analytics')
+      .select('*')
+      .eq('campaign_id', messageLog.campaign_id)
+      .single()
+
+    if (analyticsError && analyticsError.code !== 'PGRST116') { // Not found error
+      console.error('Error fetching campaign analytics:', analyticsError);
+      throw analyticsError
+    }
+
+    // Calculate new metrics
+    const { data: allMessages, error: messagesError } = await supabaseClient
+      .from('message_logs')
+      .select('status')
+      .eq('campaign_id', messageLog.campaign_id)
+
+    if (messagesError) {
+      console.error('Error fetching all messages:', messagesError);
+      throw messagesError
+    }
+
+    console.log('All messages for campaign:', allMessages);
+
+    const totalMessages = allMessages.length
+    const deliveredMessages = allMessages.filter(msg => msg.status === 'delivered').length
+    const deliveryRate = (deliveredMessages / totalMessages) * 100
+
+    console.log('Calculated metrics:', {
+      totalMessages,
+      deliveredMessages,
+      deliveryRate
+    });
+
+    // Update or insert analytics
+    const analyticsData = {
+      campaign_id: messageLog.campaign_id,
+      delivery_rate: deliveryRate,
+      updated_at: new Date().toISOString()
+    }
+
+    if (analytics) {
+      const { error: updateAnalyticsError } = await supabaseClient
+        .from('campaign_analytics')
+        .update(analyticsData)
+        .eq('campaign_id', messageLog.campaign_id)
+
+      if (updateAnalyticsError) {
+        console.error('Error updating analytics:', updateAnalyticsError);
+        throw updateAnalyticsError
+      }
+    } else {
+      const { error: insertAnalyticsError } = await supabaseClient
+        .from('campaign_analytics')
+        .insert([{
+          ...analyticsData,
+          open_rate: 0,
+          click_rate: 0,
+          cost: 0,
+          revenue: 0
+        }])
+
+      if (insertAnalyticsError) {
+        console.error('Error inserting analytics:', insertAnalyticsError);
+        throw insertAnalyticsError
+      }
+    }
+
+    console.log('Successfully updated campaign analytics');
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -87,42 +157,3 @@ serve(async (req) => {
     })
   }
 })
-
-async function updateCampaignAnalytics(supabaseClient: any, campaignId: string) {
-  try {
-    // Get all message logs for the campaign
-    const { data: messageLogs, error: messageLogsError } = await supabaseClient
-      .from('message_logs')
-      .select('status')
-      .eq('campaign_id', campaignId)
-
-    if (messageLogsError) {
-      console.error('Error fetching message logs:', messageLogsError);
-      throw messageLogsError;
-    }
-
-    // Calculate delivery rate
-    const totalMessages = messageLogs.length;
-    const deliveredMessages = messageLogs.filter(log => log.status === 'delivered').length;
-    const deliveryRate = totalMessages > 0 ? (deliveredMessages / totalMessages) * 100 : 0;
-
-    // Update campaign analytics
-    const { error: updateError } = await supabaseClient
-      .from('campaign_analytics')
-      .upsert({
-        campaign_id: campaignId,
-        delivery_rate: deliveryRate,
-        updated_at: new Date().toISOString()
-      })
-
-    if (updateError) {
-      console.error('Error updating campaign analytics:', updateError);
-      throw updateError;
-    }
-
-    console.log('Successfully updated campaign analytics');
-  } catch (error) {
-    console.error('Error in updateCampaignAnalytics:', error);
-    throw error;
-  }
-}
