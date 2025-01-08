@@ -44,6 +44,62 @@ serve(async (req) => {
     console.log('Processing webhook event:', event.type);
 
     switch (event.type) {
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object;
+        console.log('Subscription cancelled:', subscription.id);
+        
+        // Find the user_id from the subscription
+        const { data: subscriptionData, error: findError } = await supabaseClient
+          .from('subscriptions')
+          .select('user_id')
+          .eq('stripe_subscription_id', subscription.id)
+          .single();
+
+        if (findError || !subscriptionData) {
+          console.error('Error finding subscription:', findError);
+          throw findError || new Error('Subscription not found');
+        }
+
+        const userId = subscriptionData.user_id;
+
+        // Update subscription status
+        const { error: updateError } = await supabaseClient
+          .from('subscriptions')
+          .update({ 
+            status: 'canceled',
+            plan_type: 'free',
+            monthly_message_limit: 20,
+            campaign_limit: 3,
+            has_been_paid: false,
+            updated_at: new Date().toISOString()
+          })
+          .eq('stripe_subscription_id', subscription.id);
+
+        if (updateError) {
+          console.error('Error updating subscription:', updateError);
+          throw updateError;
+        }
+
+        // Add cancellation record to payment history
+        const { error: paymentHistoryError } = await supabaseClient
+          .from('payment_history')
+          .insert({
+            user_id: userId,
+            amount: 0,
+            status: 'subscription_cancelled',
+            payment_method: 'stripe',
+            payment_date: new Date().toISOString()
+          });
+
+        if (paymentHistoryError) {
+          console.error('Error recording payment history:', paymentHistoryError);
+          throw paymentHistoryError;
+        }
+
+        console.log('Successfully processed subscription cancellation for user:', userId);
+        break;
+      }
+      
       case 'checkout.session.completed': {
         const session = event.data.object;
         console.log('Session data:', session);
