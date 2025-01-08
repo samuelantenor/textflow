@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Circle } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -24,10 +24,38 @@ interface BillingOverviewProps {
   subscription?: Subscription | null;
 }
 
-export const BillingOverview = ({ subscription }: BillingOverviewProps) => {
+export const BillingOverview = ({ subscription: propSubscription }: BillingOverviewProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [subscription, setSubscription] = useState<Subscription | null>(propSubscription || null);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return;
+
+        const { data: subscriptionData, error } = await supabase
+          .from('subscriptions')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+        setSubscription(subscriptionData);
+        
+        // Add console log to debug subscription status
+        console.log('Fetched subscription:', subscriptionData);
+      } catch (error) {
+        console.error('Error fetching subscription:', error);
+      }
+    };
+
+    if (!propSubscription) {
+      fetchSubscription();
+    }
+  }, [propSubscription]);
 
   const handleSubscribe = () => {
     navigate('/pricing');
@@ -61,10 +89,6 @@ export const BillingOverview = ({ subscription }: BillingOverviewProps) => {
 
   // Check if the user has a paid subscription based on status and has_been_paid
   const isSubscribed = subscription?.status === 'active' && subscription?.has_been_paid;
-  
-  // Add console log to debug subscription status
-  console.log('Current subscription status:', subscription?.status);
-  console.log('Has been paid:', subscription?.has_been_paid);
 
   return (
     <div className="bg-card rounded-lg p-6">
