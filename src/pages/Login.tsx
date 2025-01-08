@@ -32,14 +32,9 @@ const Login = () => {
           .limit(1)
           .maybeSingle();
 
-        console.log("Subscription data:", subscription);
-        console.log("Subscription status:", subscription?.status);
-        console.log("Plan type:", subscription?.plan_type);
-        
-        if (error) {
-          console.error("Subscription check error:", error);
-          throw error;
-        }
+        console.log("Subscription check result:", { subscription, error });
+
+        if (error) throw error;
 
         // If subscription exists and was previously paid but is now canceled
         if (subscription?.has_been_paid && subscription.status !== 'active') {
