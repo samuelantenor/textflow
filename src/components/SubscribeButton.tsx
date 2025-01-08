@@ -10,25 +10,14 @@ const SubscribeButton = () => {
   const handleSubscribe = async () => {
     try {
       setIsLoading(true);
-      
-      // Get the current session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError || !session) {
-        throw new Error('Please log in to subscribe');
-      }
-
-      const { data: sessionData, error: checkoutError } = await supabase.functions.invoke(
+      const { data: sessionData, error: sessionError } = await supabase.functions.invoke(
         'create-checkout-session',
         {
           method: 'POST',
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
         }
       );
 
-      if (checkoutError) throw checkoutError;
+      if (sessionError) throw sessionError;
       if (!sessionData?.url) throw new Error('No checkout URL received');
 
       // Redirect to Stripe Checkout
