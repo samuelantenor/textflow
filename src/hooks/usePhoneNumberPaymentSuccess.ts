@@ -38,10 +38,9 @@ export function usePhoneNumberPaymentSuccess() {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              message: "New phone number purchase",
-              sessionId: sessionId,
               email: session.user.email,
               region: region,
+              message: `New phone number request:\nEmail: ${session.user.email}\nRegion: ${region}`,
             }),
           });
 
