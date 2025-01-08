@@ -4,14 +4,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-// Map of region codes to country names
+// Map of region codes to country names (only for shared region codes)
 const regionToCountry: Record<string, string> = {
-  US: "United States",
-  CA: "Canada",
-  GB: "United Kingdom",
-  AU: "Australia",
-  NZ: "New Zealand",
-  // Add more countries as needed
+  US: "United States (+1)",
+  CA: "Canada (+1)",
 };
 
 export function usePhoneNumberPaymentSuccess() {
