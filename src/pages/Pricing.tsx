@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield } from 'lucide-react';
+import { Shield, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
