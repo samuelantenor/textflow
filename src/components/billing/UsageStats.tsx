@@ -34,13 +34,18 @@ export const UsageStats = () => {
         .from('message_logs')
         .select(`
           *,
-          campaigns!inner(*)
+          campaigns!inner(user_id)
         `)
         .eq('campaigns.user_id', session.user.id)
         .gte('created_at', cycleStart)
         .lte('created_at', cycleEnd);
 
-      if (messageLogsError) throw messageLogsError;
+      if (messageLogsError) {
+        console.error('Error fetching message logs:', messageLogsError);
+        throw messageLogsError;
+      }
+
+      console.log('Message logs:', messageLogs); // Debug log
 
       return {
         totalSent: messageLogs?.length || 0,
@@ -52,6 +57,7 @@ export const UsageStats = () => {
         billingCycleEnd: limits.billing_cycle_end
       };
     },
+    refetchInterval: 5000, // Refresh every 5 seconds to keep counts up to date
   });
 
   const monthlyLimit = messageStats?.monthlyLimit || 20;
