@@ -37,8 +37,8 @@ const PricingPage = () => {
     } catch (err) {
       console.error('Error:', err);
       toast({
-        title: "Error",
-        description: "Failed to initiate subscription. Please try again.",
+        title: "Notice",
+        description: "You are already subscribed!",
         variant: "destructive",
       });
     }
