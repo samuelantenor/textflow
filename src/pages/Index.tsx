@@ -54,12 +54,6 @@ const Index = () => {
         .maybeSingle();
 
       if (error) throw error;
-
-      // Log subscription type
-      if (subscriptions) {
-        console.log('User subscription type:', subscriptions.plan_type);
-      }
-
       return subscriptions;
     },
   });
@@ -77,13 +71,12 @@ const Index = () => {
     );
   }
 
-  // If user has an active subscription, redirect to dashboard
-  if (subscription?.status === 'active') {
+  // Redirect to dashboard if user is already subscribed
+  if (subscription) {
     navigate("/dashboard");
     return null;
   }
 
-  // Show subscription page only for non-subscribed users
   return (
     <div className="min-h-screen p-8">
       <div className="absolute top-4 right-4">
