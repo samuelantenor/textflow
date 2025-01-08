@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
-import { format } from "date-fns";
 
 export const UsageStats = () => {
   const { data: messageStats } = useQuery({
@@ -10,26 +9,7 @@ export const UsageStats = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return null;
 
-      // Get user's plan limits and billing cycle
-      const { data: planLimits, error: planLimitsError } = await supabase
-        .rpc('get_user_plan_limits', {
-          user_id: session.user.id
-        });
-
-      if (planLimitsError) throw planLimitsError;
-
-      const limits = planLimits[0] || { 
-        message_limit: 20, 
-        campaign_limit: 3,
-        billing_cycle_start: new Date(),
-        billing_cycle_end: new Date()
-      };
-
-      // Format dates as ISO strings for Supabase
-      const cycleStart = new Date(limits.billing_cycle_start).toISOString();
-      const cycleEnd = new Date(limits.billing_cycle_end).toISOString();
-
-      // Get all message logs for the user's campaigns within the billing cycle
+      // Get all message logs for the user's campaigns
       const { data: messageLogs, error: messageLogsError } = await supabase
         .from('message_logs')
         .select(`
@@ -37,19 +17,26 @@ export const UsageStats = () => {
           campaigns!inner(*)
         `)
         .eq('campaigns.user_id', session.user.id)
-        .gte('created_at', cycleStart)
-        .lte('created_at', cycleEnd);
+        .gte('created_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString());
 
       if (messageLogsError) throw messageLogsError;
+
+      // Get user's plan limits
+      const { data: planLimits, error: planLimitsError } = await supabase
+        .rpc('get_user_plan_limits', {
+          user_id: session.user.id
+        });
+
+      if (planLimitsError) throw planLimitsError;
+
+      const limits = planLimits[0] || { message_limit: 20, campaign_limit: 3 };
 
       return {
         totalSent: messageLogs?.length || 0,
         delivered: messageLogs?.filter(log => log.status === 'delivered').length || 0,
         failed: messageLogs?.filter(log => log.status === 'failed').length || 0,
         pending: messageLogs?.filter(log => log.status === 'pending').length || 0,
-        monthlyLimit: limits.message_limit,
-        billingCycleStart: limits.billing_cycle_start,
-        billingCycleEnd: limits.billing_cycle_end
+        monthlyLimit: limits.message_limit
       };
     },
   });
@@ -79,13 +66,6 @@ export const UsageStats = () => {
               Monthly limit reached. Please upgrade your plan to send more messages.
             </p>
           )}
-          <p className="text-sm text-muted-foreground mt-2">
-            Billing cycle: {messageStats?.billingCycleStart ? (
-              <>
-                {format(new Date(messageStats.billingCycleStart), 'MMM d, yyyy')} - {format(new Date(messageStats.billingCycleEnd), 'MMM d, yyyy')}
-              </>
-            ) : 'Loading...'}
-          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">

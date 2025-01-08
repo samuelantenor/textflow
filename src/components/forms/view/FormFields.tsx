@@ -15,7 +15,7 @@ export function FormFields({ fields, formData, onFieldChange, customization }: F
   return (
     <div className="space-y-6">
       {fields.map((field: FormField) => (
-        <div key={`field-${field.id}-${field.label}`} className="space-y-2">
+        <div key={field.id} className="space-y-2">
           {field.type !== 'checkbox' && (
             <Label 
               htmlFor={field.id}

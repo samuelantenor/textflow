@@ -559,15 +559,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_user_billing_cycle: {
-        Args: {
-          user_id: string
-        }
-        Returns: {
-          cycle_start: string
-          cycle_end: string
-        }[]
-      }
       get_user_plan_limits: {
         Args: {
           user_id: string
@@ -576,8 +567,6 @@ export type Database = {
           message_limit: number
           campaign_limit: number
           can_buy_phone_numbers: boolean
-          billing_cycle_start: string
-          billing_cycle_end: string
         }[]
       }
     }

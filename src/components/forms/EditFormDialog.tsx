@@ -38,7 +38,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       title: initialForm.title,
       description: initialForm.description || "",
       fields: initialForm.fields,
-      group_id: initialForm.group_id || "",
+      group_id: initialForm.group_id,
       background_color: initialForm.background_color || "#FFFFFF",
       font_family: initialForm.font_family || "Inter",
       logo_url: initialForm.logo_url,
@@ -46,14 +46,13 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     },
   });
 
-  // Update form values when initialForm changes or dialog opens
   useEffect(() => {
     if (open) {
       form.reset({
         title: initialForm.title,
         description: initialForm.description || "",
         fields: initialForm.fields,
-        group_id: initialForm.group_id || "",
+        group_id: initialForm.group_id,
         background_color: initialForm.background_color || "#FFFFFF",
         font_family: initialForm.font_family || "Inter",
         logo_url: initialForm.logo_url,
