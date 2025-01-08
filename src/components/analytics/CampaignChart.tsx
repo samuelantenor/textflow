@@ -14,8 +14,45 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
+import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const CampaignChart = () => {
+  const { toast } = useToast();
+
+  // Set up realtime subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('campaign_analytics_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'campaign_analytics'
+        },
+        (payload) => {
+          console.log('Change received!', payload);
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Successfully subscribed to campaign analytics changes');
+        }
+        if (status === 'CHANNEL_ERROR') {
+          toast({
+            title: "Connection Error",
+            description: "Failed to connect to real-time updates. Will retry automatically.",
+            variant: "destructive",
+          });
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [toast]);
+
   const { data: analytics } = useQuery({
     queryKey: ['campaign-analytics'],
     queryFn: async () => {
@@ -33,6 +70,7 @@ const CampaignChart = () => {
       if (error) throw error;
       return data;
     },
+    refetchInterval: 5000, // Fallback polling if realtime fails
   });
 
   const chartData = analytics?.map((item) => ({

@@ -1,8 +1,45 @@
 import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const CampaignROI = () => {
+  const { toast } = useToast();
+
+  // Set up realtime subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('campaign_analytics_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'campaign_analytics'
+        },
+        (payload) => {
+          console.log('Change received!', payload);
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Successfully subscribed to campaign analytics changes');
+        }
+        if (status === 'CHANNEL_ERROR') {
+          toast({
+            title: "Connection Error",
+            description: "Failed to connect to real-time updates. Will retry automatically.",
+            variant: "destructive",
+          });
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [toast]);
+
   const { data: campaigns } = useQuery({
     queryKey: ['campaign-roi'],
     queryFn: async () => {
@@ -26,6 +63,7 @@ const CampaignROI = () => {
         roi: item.cost > 0 ? ((item.revenue - item.cost) / item.cost) * 100 : 0
       }));
     },
+    refetchInterval: 5000, // Fallback polling if realtime fails
   });
 
   return (
