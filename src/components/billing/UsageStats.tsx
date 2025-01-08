@@ -32,7 +32,10 @@ export const UsageStats = () => {
       // Get all message logs for the user's campaigns within the billing cycle
       const { data: messageLogs, error: messageLogsError } = await supabase
         .from('message_logs')
-        .select('*, campaigns!inner(user_id)')
+        .select(`
+          *,
+          campaigns!inner(user_id)
+        `)
         .eq('campaigns.user_id', session.user.id)
         .gte('created_at', cycleStart)
         .lte('created_at', cycleEnd);
@@ -42,10 +45,10 @@ export const UsageStats = () => {
         throw messageLogsError;
       }
 
-      console.log('Message logs:', messageLogs); // Debug log
-      console.log('Cycle start:', cycleStart); // Debug log
-      console.log('Cycle end:', cycleEnd); // Debug log
-      console.log('User ID:', session.user.id); // Debug log
+      console.log('Message logs:', messageLogs);
+      console.log('Cycle start:', cycleStart);
+      console.log('Cycle end:', cycleEnd);
+      console.log('User ID:', session.user.id);
 
       const stats = {
         totalSent: messageLogs?.length || 0,
@@ -57,7 +60,7 @@ export const UsageStats = () => {
         billingCycleEnd: limits.billing_cycle_end
       };
 
-      console.log('Calculated stats:', stats); // Debug log
+      console.log('Calculated stats:', stats);
 
       return stats;
     },
