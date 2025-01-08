@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { CreditCard, Settings, ArrowUpCircle } from "lucide-react";
+import { CreditCard, Settings } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -101,19 +101,6 @@ export const BillingOverview = ({ subscription }: BillingOverviewProps) => {
             {subscription?.status || 'Not subscribed'}
           </p>
         </div>
-        {!isSubscribed && (
-          <div className="pt-4">
-            <Button
-              onClick={handleSubscribe}
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary"
-              size="lg"
-            >
-              <ArrowUpCircle className="mr-2 h-5 w-5" />
-              Upgrade to Premium
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );
