@@ -46,10 +46,10 @@ export const UsageStats = () => {
     },
   });
 
-  // Check and update subscription status when usage indicates a paid plan
+  // Check and update subscription status when monthly limit is reached
   useEffect(() => {
     const updateSubscriptionStatus = async () => {
-      if (messageStats?.totalSent >= 1000) {
+      if (messageStats?.monthlyLimit === 1000) {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
 
@@ -79,7 +79,7 @@ export const UsageStats = () => {
     };
 
     updateSubscriptionStatus();
-  }, [messageStats?.totalSent, queryClient, toast]);
+  }, [messageStats?.monthlyLimit, queryClient, toast]);
 
   const monthlyLimit = messageStats?.monthlyLimit || 20;
   const usagePercentage = ((messageStats?.totalSent || 0) / monthlyLimit) * 100;
