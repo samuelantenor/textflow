@@ -16,15 +16,27 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Phone } from "lucide-react";
 import { BuyPhoneNumberForm } from "./BuyPhoneNumberForm";
 import { usePhoneNumberPaymentSuccess } from "@/hooks/usePhoneNumberPaymentSuccess";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export function PhoneNumbersList() {
   const [isAddingNumber, setIsAddingNumber] = useState(false);
+  const [isEditingNumber, setIsEditingNumber] = useState(false);
+  const [selectedNumber, setSelectedNumber] = useState<any>(null);
   const [newNumber, setNewNumber] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [buyDialogOpen, setBuyDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  // Use the phone number specific payment success hook
   usePhoneNumberPaymentSuccess();
 
   const { data: phoneNumbers, isLoading, refetch } = useQuery({
@@ -75,6 +87,66 @@ export function PhoneNumbersList() {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleEditNumber = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('phone_numbers')
+        .update({ phone_number: newNumber })
+        .eq('id', selectedNumber.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Phone number updated",
+        description: "Your phone number has been updated successfully.",
+      });
+
+      setIsEditingNumber(false);
+      setNewNumber("");
+      setSelectedNumber(null);
+      refetch();
+    } catch (error) {
+      console.error("Error updating phone number:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update phone number. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from('phone_numbers')
+        .delete()
+        .eq('id', selectedNumber.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Phone number deleted",
+        description: "Your phone number has been deleted successfully.",
+      });
+
+      setDeleteDialogOpen(false);
+      setSelectedNumber(null);
+      refetch();
+    } catch (error) {
+      console.error("Error deleting phone number:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete phone number. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -167,10 +239,25 @@ export function PhoneNumbersList() {
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  setSelectedNumber(number);
+                  setNewNumber(number.phone_number);
+                  setIsEditingNumber(true);
+                }}
+              >
                 Edit
               </Button>
-              <Button variant="destructive" size="sm">
+              <Button 
+                variant="destructive" 
+                size="sm"
+                onClick={() => {
+                  setSelectedNumber(number);
+                  setDeleteDialogOpen(true);
+                }}
+              >
                 Delete
               </Button>
             </div>
@@ -183,6 +270,76 @@ export function PhoneNumbersList() {
           </div>
         )}
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditingNumber} onOpenChange={setIsEditingNumber}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Phone Number</DialogTitle>
+            <DialogDescription>
+              Update your phone number details.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEditNumber} className="space-y-4">
+            <div>
+              <Label htmlFor="edit_phone_number">Phone Number</Label>
+              <Input
+                id="edit_phone_number"
+                placeholder="+1234567890"
+                value={newNumber}
+                onChange={(e) => setNewNumber(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsEditingNumber(false);
+                  setSelectedNumber(null);
+                  setNewNumber("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Save Changes
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the phone number
+              from your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setDeleteDialogOpen(false);
+              setSelectedNumber(null);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
