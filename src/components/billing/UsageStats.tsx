@@ -32,10 +32,7 @@ export const UsageStats = () => {
       // Get all message logs for the user's campaigns within the billing cycle
       const { data: messageLogs, error: messageLogsError } = await supabase
         .from('message_logs')
-        .select(`
-          *,
-          campaigns!inner(user_id)
-        `)
+        .select('*, campaigns!inner(user_id)')
         .eq('campaigns.user_id', session.user.id)
         .gte('created_at', cycleStart)
         .lte('created_at', cycleEnd);
@@ -46,8 +43,11 @@ export const UsageStats = () => {
       }
 
       console.log('Message logs:', messageLogs); // Debug log
+      console.log('Cycle start:', cycleStart); // Debug log
+      console.log('Cycle end:', cycleEnd); // Debug log
+      console.log('User ID:', session.user.id); // Debug log
 
-      return {
+      const stats = {
         totalSent: messageLogs?.length || 0,
         delivered: messageLogs?.filter(log => log.status === 'delivered').length || 0,
         failed: messageLogs?.filter(log => log.status === 'failed').length || 0,
@@ -56,6 +56,10 @@ export const UsageStats = () => {
         billingCycleStart: limits.billing_cycle_start,
         billingCycleEnd: limits.billing_cycle_end
       };
+
+      console.log('Calculated stats:', stats); // Debug log
+
+      return stats;
     },
     refetchInterval: 5000, // Refresh every 5 seconds to keep counts up to date
   });
