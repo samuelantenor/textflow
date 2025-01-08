@@ -1,61 +1,13 @@
 import { Button } from "@/components/ui/button";
-import { Circle } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
-// Define the subscription type
-type Subscription = {
-  id: string;
-  user_id: string;
-  stripe_subscription_id: string;
-  status: string;
-  plan_type: string;
-  monthly_message_limit: number;
-  campaign_limit: number;
-  has_been_paid: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-// Define the component props
-interface BillingOverviewProps {
-  subscription?: Subscription | null;
-}
-
-export const BillingOverview = ({ subscription: propSubscription }: BillingOverviewProps) => {
+export const BillingOverview = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [subscription, setSubscription] = useState<Subscription | null>(propSubscription || null);
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchSubscription = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) return;
-
-        const { data: subscriptionData, error } = await supabase
-          .from('subscriptions')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
-
-        if (error) throw error;
-        setSubscription(subscriptionData);
-        
-        // Add console log to debug subscription status
-        console.log('Fetched subscription:', subscriptionData);
-      } catch (error) {
-        console.error('Error fetching subscription:', error);
-      }
-    };
-
-    if (!propSubscription) {
-      fetchSubscription();
-    }
-  }, [propSubscription]);
 
   const handleSubscribe = () => {
     navigate('/pricing');
@@ -87,38 +39,17 @@ export const BillingOverview = ({ subscription: propSubscription }: BillingOverv
     }
   };
 
-  // Check if the user has a paid subscription based on status and has_been_paid
-  const isSubscribed = subscription?.status === 'active' && subscription?.has_been_paid;
-
   return (
     <div className="bg-card rounded-lg p-6">
       <h2 className="text-lg font-semibold mb-6">Subscription Overview</h2>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Circle 
-            className={`h-4 w-4 ${isSubscribed ? 'text-green-500 fill-green-500' : 'text-red-500 fill-red-500'}`}
-          />
-          <span className="text-muted-foreground">
-            {isSubscribed ? 'Active' : 'Inactive'}
-          </span>
-        </div>
-        {isSubscribed ? (
-          <Button 
-            onClick={handleManageSubscription}
-            disabled={isLoading}
-            variant="outline"
-          >
-            Manage Subscription
-          </Button>
-        ) : (
-          <Button 
-            onClick={handleSubscribe}
-            disabled={isLoading}
-            className="bg-primary hover:bg-primary/90"
-          >
-            Subscribe
-          </Button>
-        )}
+      <div className="flex items-center justify-end">
+        <Button 
+          onClick={handleSubscribe}
+          disabled={isLoading}
+          className="bg-primary hover:bg-primary/90"
+        >
+          Subscribe
+        </Button>
       </div>
     </div>
   );
