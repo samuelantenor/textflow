@@ -15,7 +15,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Phone } from "lucide-react";
 import { BuyPhoneNumberForm } from "./BuyPhoneNumberForm";
-import { usePaymentSuccess } from "@/hooks/usePaymentSuccess";
+import { usePhoneNumberPaymentSuccess } from "@/hooks/usePhoneNumberPaymentSuccess";
 
 export function PhoneNumbersList() {
   const [isAddingNumber, setIsAddingNumber] = useState(false);
@@ -24,8 +24,8 @@ export function PhoneNumbersList() {
   const [buyDialogOpen, setBuyDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  // Use the payment success hook
-  usePaymentSuccess();
+  // Use the phone number specific payment success hook
+  usePhoneNumberPaymentSuccess();
 
   const { data: phoneNumbers, isLoading, refetch } = useQuery({
     queryKey: ['phone-numbers'],
