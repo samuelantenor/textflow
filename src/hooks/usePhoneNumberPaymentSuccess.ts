@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export function usePhoneNumberPaymentSuccess() {
   const [searchParams] = useSearchParams();
@@ -15,6 +16,21 @@ export function usePhoneNumberPaymentSuccess() {
       
       if (sessionId) {
         try {
+          // Get user session to retrieve email
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session?.user?.email) throw new Error('User email not found');
+
+          // Get the phone number request to retrieve region
+          const { data: requests, error: requestError } = await supabase
+            .from('phone_number_requests')
+            .select('region')
+            .eq('email', session.user.email)
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+          if (requestError) throw requestError;
+          const region = requests?.[0]?.region || 'Unknown region';
+
           // Send notification via Formspree
           await fetch("https://formspree.io/f/mnnnowqq", {
             method: "POST",
@@ -24,6 +40,8 @@ export function usePhoneNumberPaymentSuccess() {
             body: JSON.stringify({
               message: "New phone number purchase",
               sessionId: sessionId,
+              email: session.user.email,
+              region: region,
             }),
           });
 
