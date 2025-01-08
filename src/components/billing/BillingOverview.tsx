@@ -4,7 +4,6 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 
 // Define the subscription type
 type Subscription = {
@@ -60,11 +59,12 @@ export const BillingOverview = ({ subscription }: BillingOverviewProps) => {
     }
   };
 
-  // Check if the user has a paid subscription based on status
-  const isSubscribed = subscription?.status === 'active';
+  // Check if the user has a paid subscription based on status and has_been_paid
+  const isSubscribed = subscription?.status === 'active' && subscription?.has_been_paid;
   
   // Add console log to debug subscription status
   console.log('Current subscription status:', subscription?.status);
+  console.log('Has been paid:', subscription?.has_been_paid);
 
   return (
     <div className="bg-card rounded-lg p-6">
