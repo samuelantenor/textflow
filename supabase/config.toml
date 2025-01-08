@@ -1,3 +1,5 @@
 project_id = "upfhnofgkuafejuvxkrr"
 [functions.twilio-webhook]
 verify_jwt = false
+[functions.twilio-opt-out]
+verify_jwt = false
