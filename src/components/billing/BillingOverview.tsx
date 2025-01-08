@@ -60,6 +60,8 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
     }
   };
 
+  const isSubscribed = subscription?.status === 'active';
+
   return (
     <div className="bg-card rounded-lg p-6">
       <h2 className="text-lg font-semibold mb-6">Subscription Overview</h2>
@@ -68,10 +70,10 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
           <div>
             <p className="font-medium">Current Plan</p>
             <p className="text-muted-foreground">
-              {subscription?.status === 'active' ? subscription.plan_name || 'Premium Plan' : 'Free Plan'}
+              {isSubscribed ? 'Premium Plan' : 'Free Plan'}
             </p>
           </div>
-          {subscription?.status === 'active' ? (
+          {isSubscribed ? (
             <Button 
               onClick={handleManageSubscription}
               disabled={isLoading}
@@ -92,9 +94,11 @@ export const BillingOverview = ({ subscription }: { subscription: any }) => {
         </div>
         <div>
           <p className="font-medium">Status</p>
-          <p className="text-muted-foreground capitalize">{subscription?.status || 'Not subscribed'}</p>
+          <p className="text-muted-foreground capitalize">
+            {subscription?.status || 'Not subscribed'}
+          </p>
         </div>
-        {!subscription?.status && (
+        {!isSubscribed && (
           <div className="pt-4">
             <Button
               onClick={handleSubscribe}

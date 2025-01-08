@@ -63,12 +63,21 @@ serve(async (req) => {
       if (subscriptions.data.length > 0) {
         throw new Error("Customer already has an active subscription")
       }
+    } else {
+      // Create new customer
+      console.log('Creating new customer...');
+      const customer = await stripe.customers.create({
+        email: email,
+        metadata: {
+          supabase_user_id: user.id
+        }
+      });
+      customer_id = customer.id;
     }
 
     console.log('Creating checkout session...');
     const session = await stripe.checkout.sessions.create({
       customer: customer_id,
-      customer_email: customer_id ? undefined : email,
       client_reference_id: user.id, // Add this line to link the session to the user
       line_items: [
         {
