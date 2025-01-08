@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { CreditCard, Settings } from "lucide-react";
+import { Circle } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -60,46 +60,38 @@ export const BillingOverview = ({ subscription }: BillingOverviewProps) => {
     }
   };
 
-  // Check if the user has a paid subscription based on status and plan_type
-  const isSubscribed = subscription?.status === 'active' && subscription?.plan_type === 'paid';
+  // Check if the user has a paid subscription based on status
+  const isSubscribed = subscription?.status === 'active';
 
   return (
     <div className="bg-card rounded-lg p-6">
       <h2 className="text-lg font-semibold mb-6">Subscription Overview</h2>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-medium">Current Plan</p>
-            <p className="text-muted-foreground">
-              {isSubscribed ? 'Premium Plan' : 'Free Plan'}
-            </p>
-          </div>
-          {isSubscribed ? (
-            <Button 
-              onClick={handleManageSubscription}
-              disabled={isLoading}
-              variant="outline"
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              Manage Subscription
-            </Button>
-          ) : (
-            <Button 
-              onClick={handleSubscribe}
-              disabled={isLoading}
-              className="bg-primary hover:bg-primary/90"
-            >
-              <CreditCard className="mr-2 h-4 w-4" />
-              Subscribe Now
-            </Button>
-          )}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Circle 
+            className={`h-4 w-4 ${isSubscribed ? 'text-green-500 fill-green-500' : 'text-red-500 fill-red-500'}`}
+          />
+          <span className="text-muted-foreground">
+            {isSubscribed ? 'Active' : 'Inactive'}
+          </span>
         </div>
-        <div>
-          <p className="font-medium">Status</p>
-          <p className="text-muted-foreground capitalize">
-            {subscription?.status || 'Not subscribed'}
-          </p>
-        </div>
+        {isSubscribed ? (
+          <Button 
+            onClick={handleManageSubscription}
+            disabled={isLoading}
+            variant="outline"
+          >
+            Manage Subscription
+          </Button>
+        ) : (
+          <Button 
+            onClick={handleSubscribe}
+            disabled={isLoading}
+            className="bg-primary hover:bg-primary/90"
+          >
+            Subscribe
+          </Button>
+        )}
       </div>
     </div>
   );
