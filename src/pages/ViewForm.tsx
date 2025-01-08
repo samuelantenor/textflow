@@ -57,13 +57,29 @@ export default function ViewForm() {
 
     setSubmitting(true);
     try {
-      console.log('Creating contact with:', {
-        group_id: form.group_id,
-        name,
-        phone_number: phoneNumber
-      });
+      // Check if the phone number already exists in the group
+      const { data: existingContact, error: checkError } = await supabase
+        .from('contacts')
+        .select('id')
+        .eq('group_id', form.group_id)
+        .eq('phone_number', phoneNumber)
+        .single();
 
-      // First create the contact
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 means no rows returned
+        throw checkError;
+      }
+
+      if (existingContact) {
+        toast({
+          title: "Already Subscribed",
+          description: "This phone number is already registered in this group.",
+          variant: "destructive",
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      // If we get here, the phone number is not a duplicate
       const { data: contactData, error: contactError } = await supabase
         .from('contacts')
         .insert({
@@ -81,7 +97,7 @@ export default function ViewForm() {
 
       console.log('Contact created successfully:', contactData);
 
-      // Then create the form submission
+      // Create the form submission
       const { error: submissionError } = await supabase
         .from('form_submissions')
         .insert({
