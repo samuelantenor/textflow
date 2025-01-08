@@ -6,10 +6,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FormPreview } from "../FormPreview";
 import { FONT_OPTIONS } from "./constants";
-import { Palette, Save } from "lucide-react";
+import { Palette, Save, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface FormDesignTabProps {
   form: UseFormReturn<any>;
@@ -21,9 +24,37 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const formData = form.watch();
+  const [backgroundImage, setBackgroundImage] = useState<File | null>(null);
 
   const handleColorChange = (field: string, value: string) => {
     form.setValue(field, value, { shouldDirty: true });
+  };
+
+  const handleBackgroundImageUpload = async (file: File) => {
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from("landing_page_assets")
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("landing_page_assets")
+        .getPublicUrl(fileName);
+      
+      form.setValue("background_image_url", publicUrl);
+      setBackgroundImage(file);
+    } catch (error) {
+      console.error('Error uploading background image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload background image. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSaveDesign = async () => {
@@ -45,6 +76,11 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
           font_family: formData.font_family,
           logo_url: formData.logo_url,
           primary_color: formData.primary_color,
+          background_image_url: formData.background_image_url,
+          background_image_style: formData.background_image_style,
+          background_opacity: formData.background_opacity,
+          input_background_color: formData.input_background_color,
+          show_border: formData.show_border,
         })
         .eq('id', formId);
 
@@ -104,7 +140,25 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
           </div>
 
           <div className="space-y-4">
-            <Label>Primary Color</Label>
+            <Label>Input Background Color</Label>
+            <div className="flex gap-2">
+              <Input
+                type="color"
+                className="w-12 h-12 p-1 cursor-pointer"
+                value={formData.input_background_color || "#FFFFFF"}
+                onChange={(e) => handleColorChange("input_background_color", e.target.value)}
+              />
+              <Input
+                type="text"
+                className="flex-1"
+                value={formData.input_background_color || "#FFFFFF"}
+                onChange={(e) => handleColorChange("input_background_color", e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <Label>Primary Color (Buttons & Accents)</Label>
             <div className="flex gap-2">
               <Input
                 type="color"
@@ -118,6 +172,54 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
                 value={formData.primary_color}
                 onChange={(e) => handleColorChange("primary_color", e.target.value)}
               />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <Label>Background Image</Label>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleBackgroundImageUpload(file);
+              }}
+            />
+            {formData.background_image_url && (
+              <div className="mt-2">
+                <Label>Background Image Style</Label>
+                <RadioGroup
+                  value={formData.background_image_style || "cover"}
+                  onValueChange={(value) => form.setValue("background_image_style", value)}
+                  className="mt-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="cover" id="cover" />
+                    <Label htmlFor="cover">Cover</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="contain" id="contain" />
+                    <Label htmlFor="contain">Contain</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="repeat" id="repeat" />
+                    <Label htmlFor="repeat">Mosaic (Repeat)</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <Label>Background Opacity</Label>
+            <Slider
+              value={[formData.background_opacity || 100]}
+              onValueChange={([value]) => form.setValue("background_opacity", value)}
+              max={100}
+              step={1}
+            />
+            <div className="text-sm text-muted-foreground text-right">
+              {formData.background_opacity || 100}%
             </div>
           </div>
 
@@ -138,6 +240,16 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label>Show Border</Label>
+              <Switch
+                checked={formData.show_border}
+                onCheckedChange={(checked) => form.setValue("show_border", checked)}
+              />
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -172,6 +284,11 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
             fontFamily: formData.font_family,
             logoUrl: formData.logo_url,
             primaryColor: formData.primary_color,
+            backgroundImageUrl: formData.background_image_url,
+            backgroundImageStyle: formData.background_image_style,
+            backgroundOpacity: formData.background_opacity,
+            inputBackgroundColor: formData.input_background_color,
+            showBorder: formData.show_border,
           }}
         />
       </ScrollArea>

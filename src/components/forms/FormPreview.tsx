@@ -30,6 +30,11 @@ interface FormPreviewProps {
     fontFamily?: string;
     logoUrl?: string;
     primaryColor?: string;
+    backgroundImageUrl?: string;
+    backgroundImageStyle?: 'cover' | 'contain' | 'repeat';
+    backgroundOpacity?: number;
+    inputBackgroundColor?: string;
+    showBorder?: boolean;
   };
 }
 
@@ -39,7 +44,9 @@ export function FormPreview({ title, description, fields, customization }: FormP
       id: `field-${index}`,
       placeholder: field.placeholder,
       style: {
-        borderColor: customization?.primaryColor,
+        backgroundColor: customization?.inputBackgroundColor || '#FFFFFF',
+        borderColor: customization?.showBorder ? customization?.primaryColor : 'transparent',
+        borderWidth: customization?.showBorder ? '1px' : '0',
         borderRadius: '0.375rem',
       },
     };
@@ -111,6 +118,21 @@ export function FormPreview({ title, description, fields, customization }: FormP
     }
   };
 
+  const backgroundStyle: React.CSSProperties = {
+    backgroundColor: customization?.backgroundColor || '#FFFFFF',
+    fontFamily: customization?.fontFamily || 'Inter',
+    position: 'relative',
+  };
+
+  if (customization?.backgroundImageUrl) {
+    Object.assign(backgroundStyle, {
+      backgroundImage: `url(${customization.backgroundImageUrl})`,
+      backgroundSize: customization.backgroundImageStyle === 'repeat' ? 'auto' : customization.backgroundImageStyle,
+      backgroundRepeat: customization.backgroundImageStyle === 'repeat' ? 'repeat' : 'no-repeat',
+      backgroundPosition: 'center',
+    });
+  }
+
   return (
     <div className="h-full">
       <div className="flex items-center gap-2 mb-4 text-muted-foreground">
@@ -118,13 +140,19 @@ export function FormPreview({ title, description, fields, customization }: FormP
         <span className="text-sm font-medium">Form Preview</span>
       </div>
       <Card 
-        className="p-6 bg-card/50 backdrop-blur-sm h-[calc(100%-2rem)] overflow-y-auto"
-        style={{
-          backgroundColor: customization?.backgroundColor || '#FFFFFF',
-          fontFamily: customization?.fontFamily || 'Inter',
-        }}
+        className="p-6 bg-card/50 backdrop-blur-sm h-[calc(100%-2rem)] overflow-y-auto relative"
+        style={backgroundStyle}
       >
-        <div className="space-y-6">
+        {customization?.backgroundImageUrl && (
+          <div 
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundColor: customization.backgroundColor,
+              opacity: (customization.backgroundOpacity || 100) / 100,
+            }}
+          />
+        )}
+        <div className="space-y-6 relative z-10">
           {customization?.logoUrl && (
             <div className="flex justify-center mb-6">
               <img 
