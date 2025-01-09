@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
@@ -55,27 +55,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       show_border: initialForm.show_border ?? true,
     },
   });
-
-  // Update form values when initialForm changes or dialog opens
-  useEffect(() => {
-    if (open) {
-      form.reset({
-        title: initialForm.title,
-        description: initialForm.description || "",
-        fields: initialForm.fields,
-        group_id: initialForm.group_id || "",
-        background_color: initialForm.background_color || "#FFFFFF",
-        font_family: initialForm.font_family || "Inter",
-        logo_url: initialForm.logo_url,
-        primary_color: initialForm.primary_color || "#ea384c",
-        background_image_url: initialForm.background_image_url,
-        background_image_style: initialForm.background_image_style || "cover",
-        background_opacity: initialForm.background_opacity || 100,
-        input_background_color: initialForm.input_background_color || "#FFFFFF",
-        show_border: initialForm.show_border ?? true,
-      });
-    }
-  }, [initialForm, open, form]);
 
   const handleLogoUpload = async (file: File) => {
     try {
