@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
@@ -35,16 +35,32 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   
   const form = useForm({
     defaultValues: {
-      title: initialForm.title,
-      description: initialForm.description || "",
-      fields: initialForm.fields,
-      group_id: initialForm.group_id || "",
-      background_color: initialForm.background_color || "#FFFFFF",
-      font_family: initialForm.font_family || "Inter",
-      logo_url: initialForm.logo_url,
-      primary_color: initialForm.primary_color || "#ea384c",
+      title: "",
+      description: "",
+      fields: [],
+      group_id: "",
+      background_color: "#FFFFFF",
+      font_family: "Inter",
+      logo_url: null,
+      primary_color: "#ea384c",
     },
   });
+
+  // Reset form values when initialForm changes or dialog opens
+  useEffect(() => {
+    if (open && initialForm) {
+      form.reset({
+        title: initialForm.title,
+        description: initialForm.description || "",
+        fields: initialForm.fields,
+        group_id: initialForm.group_id || "",
+        background_color: initialForm.background_color || "#FFFFFF",
+        font_family: initialForm.font_family || "Inter",
+        logo_url: initialForm.logo_url,
+        primary_color: initialForm.primary_color || "#ea384c",
+      });
+    }
+  }, [initialForm, open, form]);
 
   const handleLogoUpload = async (file: File) => {
     try {
@@ -111,6 +127,13 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       setIsLoading(false);
     }
   };
+
+  // Reset active tab when dialog opens/closes
+  useEffect(() => {
+    if (!open) {
+      setActiveTab("fields");
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
