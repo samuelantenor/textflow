@@ -33,16 +33,19 @@ export function useFormData(): UseFormDataReturn {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const validateFields = (fields: unknown): fields is FormField[] => {
-    if (!Array.isArray(fields)) return false;
-    return fields.every(field => 
-      typeof field === 'object' && 
-      field !== null && 
-      'id' in field &&
-      'type' in field && 
-      'label' in field &&
-      'required' in field
+  const validateField = (field: any): field is FormField => {
+    return (
+      typeof field === 'object' &&
+      field !== null &&
+      typeof field.id === 'string' &&
+      typeof field.type === 'string' &&
+      typeof field.label === 'string' &&
+      typeof field.required === 'boolean'
     );
+  };
+
+  const validateFields = (fields: any[]): fields is FormField[] => {
+    return Array.isArray(fields) && fields.every(validateField);
   };
 
   const fetchForm = async (formId: string) => {
@@ -56,11 +59,36 @@ export function useFormData(): UseFormDataReturn {
       if (formError) throw formError;
       if (!formResponse) throw new Error('Form not found');
 
-      if (!validateFields(formResponse.fields)) {
+      // Ensure fields is an array and validate its structure
+      const fields = Array.isArray(formResponse.fields) ? formResponse.fields : [];
+      
+      // Transform the fields to ensure they have all required properties
+      const transformedFields: FormField[] = fields.map((field: any, index: number) => ({
+        id: field.id || `field-${index}`,
+        type: field.type || 'text',
+        label: field.label || '',
+        required: field.required || false,
+        placeholder: field.placeholder,
+        description: field.description,
+        options: Array.isArray(field.options) 
+          ? field.options.map((opt: any) => ({
+              label: typeof opt === 'string' ? opt : opt.label || '',
+              value: typeof opt === 'string' ? opt : opt.value || ''
+            }))
+          : undefined
+      }));
+
+      if (!validateFields(transformedFields)) {
         throw new Error('Invalid form fields format');
       }
 
-      setForm(formResponse as FormResponse);
+      const validatedForm: FormResponse = {
+        ...formResponse,
+        fields: transformedFields,
+        background_image_style: (formResponse.background_image_style as 'cover' | 'contain' | 'repeat' | null) || null,
+      };
+
+      setForm(validatedForm);
     } catch (error) {
       console.error('Error fetching form:', error);
       toast({
