@@ -20,10 +20,6 @@ interface FormResponse {
   background_opacity: number | null;
   input_background_color: string | null;
   show_border: boolean | null;
-  website_background_color: string | null;
-  website_background_gradient: string | null;
-  website_background_image_url: string | null;
-  website_background_style: 'color' | 'gradient' | 'image' | null;
 }
 
 interface UseFormDataReturn {
@@ -75,11 +71,7 @@ export function useFormData(): UseFormDataReturn {
           background_image_style,
           background_opacity,
           input_background_color,
-          show_border,
-          website_background_color,
-          website_background_gradient,
-          website_background_image_url,
-          website_background_style
+          show_border
         `)
         .eq('id', formId)
         .single();
@@ -124,10 +116,6 @@ export function useFormData(): UseFormDataReturn {
         background_opacity: formResponse.background_opacity || 100,
         input_background_color: formResponse.input_background_color || '#FFFFFF',
         show_border: formResponse.show_border ?? true,
-        website_background_color: formResponse.website_background_color || '#FFFFFF',
-        website_background_gradient: formResponse.website_background_gradient || null,
-        website_background_image_url: formResponse.website_background_image_url || null,
-        website_background_style: (formResponse.website_background_style as 'color' | 'gradient' | 'image' | null) || 'color',
       };
 
       setForm(validatedForm);

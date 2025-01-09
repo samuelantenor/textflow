@@ -49,32 +49,6 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
     }
   };
 
-  const handleWebsiteBackgroundImageUpload = async (file: File) => {
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from("landing_page_assets")
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("landing_page_assets")
-        .getPublicUrl(fileName);
-      
-      form.setValue("website_background_image_url", publicUrl);
-    } catch (error) {
-      console.error('Error uploading website background image:', error);
-      toast({
-        title: "Error",
-        description: "Failed to upload website background image. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleSaveDesign = async () => {
     if (!formId) {
       toast({
@@ -99,10 +73,6 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
           background_opacity: formData.background_opacity,
           input_background_color: formData.input_background_color,
           show_border: formData.show_border,
-          website_background_color: formData.website_background_color,
-          website_background_gradient: formData.website_background_gradient,
-          website_background_image_url: formData.website_background_image_url,
-          website_background_style: formData.website_background_style,
         })
         .eq('id', formId);
 
@@ -152,7 +122,6 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
           <BackgroundSection
             form={form}
             onBackgroundImageUpload={handleBackgroundImageUpload}
-            onWebsiteBackgroundImageUpload={handleWebsiteBackgroundImageUpload}
           />
 
           <InputStyleSection form={form} />
@@ -176,10 +145,6 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
             backgroundOpacity: formData.background_opacity,
             inputBackgroundColor: formData.input_background_color,
             showBorder: formData.show_border,
-            websiteBackgroundColor: formData.website_background_color,
-            websiteBackgroundGradient: formData.website_background_gradient,
-            websiteBackgroundImageUrl: formData.website_background_image_url,
-            websiteBackgroundStyle: formData.website_background_style,
           }}
         />
       </ScrollArea>

@@ -23,35 +23,18 @@ interface FormPreviewProps {
     backgroundOpacity?: number;
     inputBackgroundColor?: string;
     showBorder?: boolean;
-    websiteBackgroundColor?: string;
-    websiteBackgroundGradient?: string;
-    websiteBackgroundImageUrl?: string;
-    websiteBackgroundStyle?: string;
   };
 }
 
 export function FormPreview({ title, description, fields, customization }: FormPreviewProps) {
-  const websiteBackgroundStyle: React.CSSProperties = {
-    backgroundColor: customization?.websiteBackgroundColor || '#FFFFFF',
-    backgroundImage: customization?.websiteBackgroundStyle === 'gradient' 
-      ? customization.websiteBackgroundGradient
-      : customization?.websiteBackgroundStyle === 'image' && customization.websiteBackgroundImageUrl
-        ? `url(${customization.websiteBackgroundImageUrl})`
-        : 'none',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    minHeight: '100%',
-    padding: '2rem',
-  };
-
-  const formBackgroundStyle: React.CSSProperties = {
+  const backgroundStyle: React.CSSProperties = {
     backgroundColor: customization?.backgroundColor || '#FFFFFF',
     fontFamily: customization?.fontFamily || 'Inter',
     position: 'relative',
   };
 
   if (customization?.backgroundImageUrl) {
-    Object.assign(formBackgroundStyle, {
+    Object.assign(backgroundStyle, {
       backgroundImage: `url(${customization.backgroundImageUrl})`,
       backgroundSize: customization.backgroundImageStyle === 'repeat' ? 'auto' : customization.backgroundImageStyle,
       backgroundRepeat: customization.backgroundImageStyle === 'repeat' ? 'repeat' : 'no-repeat',
@@ -65,28 +48,26 @@ export function FormPreview({ title, description, fields, customization }: FormP
         <Eye className="w-4 h-4" />
         <span className="text-sm font-medium">Form Preview</span>
       </div>
-      <div style={websiteBackgroundStyle}>
-        <Card 
-          className="p-6 bg-card/50 backdrop-blur-sm max-w-2xl mx-auto"
-          style={formBackgroundStyle}
-        >
-          {customization?.backgroundImageUrl && (
-            <div 
-              className="absolute inset-0 z-0"
-              style={{
-                backgroundColor: customization.backgroundColor,
-                opacity: (customization.backgroundOpacity || 100) / 100,
-              }}
-            />
-          )}
-          <FormPreviewContent
-            title={title}
-            description={description}
-            fields={fields}
-            customization={customization}
+      <Card 
+        className="p-6 bg-card/50 backdrop-blur-sm h-[calc(100%-2rem)] overflow-y-auto relative"
+        style={backgroundStyle}
+      >
+        {customization?.backgroundImageUrl && (
+          <div 
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundColor: customization.backgroundColor,
+              opacity: (customization.backgroundOpacity || 100) / 100,
+            }}
           />
-        </Card>
-      </div>
+        )}
+        <FormPreviewContent
+          title={title}
+          description={description}
+          fields={fields}
+          customization={customization}
+        />
+      </Card>
     </div>
   );
 }
