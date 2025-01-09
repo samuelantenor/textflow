@@ -24,7 +24,7 @@ const StatsDisplay = () => {
 
         console.log('Fetching message logs for user:', user.id);
 
-        // Use the new database function to get message counts
+        // Use the database function to get message counts
         const { data: statusCounts, error: countError } = await supabase
           .rpc('get_message_counts_by_status', {
             p_user_id: user.id
