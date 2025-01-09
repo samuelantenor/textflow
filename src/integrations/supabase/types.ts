@@ -592,6 +592,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_message_counts_by_status: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: {
+          status: string
+          count: number
+        }[]
+      }
       get_user_billing_cycle: {
         Args: {
           user_id: string
