@@ -38,6 +38,8 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
+  console.log("EditFormDialog - Initial Form Data:", initialForm);
+  
   const form = useForm({
     defaultValues: {
       title: initialForm.title,
@@ -85,6 +87,8 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   const onSubmit = async (data: any) => {
     try {
       setIsLoading(true);
+      console.log("Submitting form data:", data);
+      console.log("Form ID being updated:", initialForm.id);
 
       const { error } = await supabase
         .from("custom_forms")
