@@ -21,6 +21,7 @@ export const FormsOverview = () => {
   const { forms, groups, isLoadingForms, queryClient } = useFormsData();
 
   useEffect(() => {
+    console.log('Setting up realtime subscription');
     const channel = supabase
       .channel("custom_forms_changes")
       .on("postgres_changes", {
@@ -28,16 +29,19 @@ export const FormsOverview = () => {
         schema: "public",
         table: "custom_forms",
       }, () => {
+        console.log('Received form change, invalidating query');
         queryClient.invalidateQueries({ queryKey: ["custom-forms"] });
       })
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      console.log('Cleaning up realtime subscription');
+      channel.unsubscribe();
     };
   }, [queryClient]);
 
   const handleEdit = async (form: CustomForm) => {
+    console.log('Opening edit dialog for form:', form.id);
     try {
       const { data, error } = await supabase
         .from("custom_forms")
@@ -55,11 +59,13 @@ export const FormsOverview = () => {
   };
 
   const handleShare = (form: CustomForm) => {
+    console.log('Opening share dialog for form:', form.id);
     setSelectedShareForm(form);
     setShareDialogOpen(true);
   };
 
   const handleViewSubmissions = (form: CustomForm) => {
+    console.log('Opening submissions dialog for form:', form.id);
     setSelectedSubmissionForm(form);
     setSubmissionsDialogOpen(true);
   };
@@ -78,6 +84,21 @@ export const FormsOverview = () => {
     } catch (error) {
       toast({ title: "Error", description: "Failed to delete form.", variant: "destructive" });
     }
+  };
+
+  const handleCloseShareDialog = () => {
+    setShareDialogOpen(false);
+    setSelectedShareForm(null);
+  };
+
+  const handleCloseSubmissionsDialog = () => {
+    setSubmissionsDialogOpen(false);
+    setSelectedSubmissionForm(null);
+  };
+
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false);
+    setSelectedEditForm(null);
   };
 
   if (!groups?.length) {
@@ -107,36 +128,23 @@ export const FormsOverview = () => {
         onDelete={handleDelete}
         onViewSubmissions={handleViewSubmissions}
       />
-      {selectedShareForm && (
-        <ShareFormDialog
-  form={selectedShareForm}
-  open={shareDialogOpen}
-  onOpenChange={(newOpen) => {
-    setShareDialogOpen(newOpen);
-    if (!newOpen) setSelectedShareForm(null); // Clear selected form state
-  }}
-/>
-      )}
+      <ShareFormDialog
+        form={selectedShareForm}
+        open={shareDialogOpen}
+        onOpenChange={handleCloseShareDialog}
+      />
       {selectedEditForm && (
         <EditFormDialog 
           form={selectedEditForm} 
           open={editDialogOpen} 
-          onOpenChange={(open) => {
-            setEditDialogOpen(open);
-            if (!open) setSelectedEditForm(null);
-          }} 
+          onOpenChange={handleCloseEditDialog}
         />
       )}
-      {selectedSubmissionForm && (
-        <ViewSubmissionsDialog
-  formId={selectedSubmissionForm?.id || ""}
-  open={submissionsDialogOpen}
-  onOpenChange={(newOpen) => {
-    setSubmissionsDialogOpen(newOpen);
-    if (!newOpen) setSelectedSubmissionForm(null);
-  }}
-/>
-      )}
+      <ViewSubmissionsDialog
+        formId={selectedSubmissionForm?.id}
+        open={submissionsDialogOpen}
+        onOpenChange={handleCloseSubmissionsDialog}
+      />
     </div>
   );
 };
