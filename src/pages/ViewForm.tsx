@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { FormLoader } from "@/components/forms/view/FormLoader";
 import { FormError } from "@/components/forms/view/FormError";
@@ -56,28 +55,7 @@ export default function ViewForm() {
 
     setSubmitting(true);
     try {
-      // Check if the phone number already exists in the group
-      const { data: existingContact, error: checkError } = await supabase
-        .from('contacts')
-        .select('id')
-        .eq('group_id', form.group_id)
-        .eq('phone_number', phoneNumber)
-        .single();
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
-      }
-
-      if (existingContact) {
-        toast({
-          title: "Already Subscribed",
-          description: "This phone number is already registered in this group.",
-          variant: "destructive",
-        });
-        setSubmitting(false);
-        return;
-      }
-
+      // First create the contact
       const { data: contactData, error: contactError } = await supabase
         .from('contacts')
         .insert({
@@ -85,11 +63,15 @@ export default function ViewForm() {
           name: name,
           phone_number: phoneNumber,
         })
-        .select()
+        .select('id')
         .single();
 
-      if (contactError) throw contactError;
+      if (contactError) {
+        console.error('Error creating contact:', contactError);
+        throw contactError;
+      }
 
+      // Then create the form submission
       const { error: submissionError } = await supabase
         .from('form_submissions')
         .insert({
@@ -97,15 +79,18 @@ export default function ViewForm() {
           data: formData,
         });
 
-      if (submissionError) throw submissionError;
+      if (submissionError) {
+        console.error('Error creating submission:', submissionError);
+        throw submissionError;
+      }
 
       toast({
         title: "Success",
         description: "Form submitted successfully",
       });
 
+      // Reset form
       setFormData({});
-      
       const formElements = document.querySelectorAll('input, textarea, select');
       formElements.forEach((element: any) => {
         if (element.type !== 'submit') {
