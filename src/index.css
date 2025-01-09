@@ -34,9 +34,9 @@
 }
 
 .campaign-card {
-  @apply bg-card/80 backdrop-blur-sm transition-all duration-300 hover:bg-card/90;
+  @apply bg-card/80 backdrop-blur-sm transition-all duration-300;
 }
 
 .campaign-card:hover {
-  @apply transform shadow-lg;
+  @apply transform shadow-lg bg-card/90;
 }
