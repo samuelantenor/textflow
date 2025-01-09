@@ -58,7 +58,7 @@ serve(async (req) => {
       client_reference_id: user.id,
       line_items: [
         {
-          price: 'price_1QeVc9B4RWKZ2dNzcZkA0mS4',
+          price: 'YOUR_NEW_PHONE_NUMBER_PRICE_ID_HERE', // Replace this with your new phone number price ID
           quantity: 1,
         },
       ],
