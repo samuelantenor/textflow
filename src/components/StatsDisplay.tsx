@@ -3,8 +3,6 @@ import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
-import { useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
 
 const COLORS = {
   delivered: "#22c55e",  // green
@@ -13,43 +11,6 @@ const COLORS = {
 };
 
 const StatsDisplay = () => {
-  const { toast } = useToast();
-
-  // Set up realtime subscription
-  useEffect(() => {
-    const channel = supabase
-      .channel('message_logs_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'message_logs'
-        },
-        (payload) => {
-          console.log('Message logs change received:', payload);
-          // The useQuery hook will automatically refetch data when invalidated
-        }
-      )
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('Successfully subscribed to message logs changes');
-        }
-        if (status === 'CHANNEL_ERROR') {
-          console.error('Realtime subscription error:', status);
-          toast({
-            title: "Connection Error",
-            description: "Failed to connect to real-time updates. Will retry automatically.",
-            variant: "destructive",
-          });
-        }
-      });
-
-    return () => {
-      channel.unsubscribe();
-    };
-  }, [toast]);
-
   const { data: analytics, isLoading } = useQuery({
     queryKey: ['campaign-analytics-summary'],
     queryFn: async () => {
@@ -89,7 +50,7 @@ const StatsDisplay = () => {
         status_counts: statusCounts
       };
     },
-    refetchInterval: 5000, // Fallback polling if realtime fails
+    refetchInterval: 5000, // Regular polling every 5 seconds
   });
 
   return (
