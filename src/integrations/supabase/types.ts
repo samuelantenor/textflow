@@ -202,45 +202,60 @@ export type Database = {
       custom_forms: {
         Row: {
           background_color: string | null
+          background_image_style: string | null
+          background_image_url: string | null
+          background_opacity: number | null
           created_at: string
           description: string | null
           fields: Json
           font_family: string | null
           group_id: string
           id: string
+          input_background_color: string | null
           is_active: boolean | null
           logo_url: string | null
           primary_color: string | null
+          show_border: boolean | null
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
           background_color?: string | null
+          background_image_style?: string | null
+          background_image_url?: string | null
+          background_opacity?: number | null
           created_at?: string
           description?: string | null
           fields?: Json
           font_family?: string | null
           group_id: string
           id?: string
+          input_background_color?: string | null
           is_active?: boolean | null
           logo_url?: string | null
           primary_color?: string | null
+          show_border?: boolean | null
           title: string
           updated_at?: string
           user_id: string
         }
         Update: {
           background_color?: string | null
+          background_image_style?: string | null
+          background_image_url?: string | null
+          background_opacity?: number | null
           created_at?: string
           description?: string | null
           fields?: Json
           font_family?: string | null
           group_id?: string
           id?: string
+          input_background_color?: string | null
           is_active?: boolean | null
           logo_url?: string | null
           primary_color?: string | null
+          show_border?: boolean | null
           title?: string
           updated_at?: string
           user_id?: string

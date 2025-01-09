@@ -1,18 +1,16 @@
 import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FormPreview } from "../FormPreview";
-import { FONT_OPTIONS } from "./constants";
-import { Palette, Save, Upload } from "lucide-react";
+import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ColorPicker } from "./design/ColorPicker";
+import { BackgroundSection } from "./design/BackgroundSection";
+import { InputStyleSection } from "./design/InputStyleSection";
+import { LogoSection } from "./design/LogoSection";
+import { FontSection } from "./design/FontSection";
 
 interface FormDesignTabProps {
   form: UseFormReturn<any>;
@@ -24,11 +22,6 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const formData = form.watch();
-  const [backgroundImage, setBackgroundImage] = useState<File | null>(null);
-
-  const handleColorChange = (field: string, value: string) => {
-    form.setValue(field, value, { shouldDirty: true });
-  };
 
   const handleBackgroundImageUpload = async (file: File) => {
     try {
@@ -46,7 +39,6 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
         .getPublicUrl(fileName);
       
       form.setValue("background_image_url", publicUrl);
-      setBackgroundImage(file);
     } catch (error) {
       console.error('Error uploading background image:', error);
       toast({
@@ -121,159 +113,23 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
             </Button>
           </div>
 
-          <div className="space-y-4">
-            <Label>Background Color</Label>
-            <div className="flex gap-2">
-              <Input
-                type="color"
-                className="w-12 h-12 p-1 cursor-pointer"
-                value={formData.background_color}
-                onChange={(e) => handleColorChange("background_color", e.target.value)}
-              />
-              <Input
-                type="text"
-                className="flex-1"
-                value={formData.background_color}
-                onChange={(e) => handleColorChange("background_color", e.target.value)}
-              />
-            </div>
-          </div>
+          <ColorPicker
+            label="Primary Color (Buttons & Accents)"
+            value={formData.primary_color}
+            onChange={(value) => form.setValue("primary_color", value)}
+          />
 
-          <div className="space-y-4">
-            <Label>Input Background Color</Label>
-            <div className="flex gap-2">
-              <Input
-                type="color"
-                className="w-12 h-12 p-1 cursor-pointer"
-                value={formData.input_background_color || "#FFFFFF"}
-                onChange={(e) => handleColorChange("input_background_color", e.target.value)}
-              />
-              <Input
-                type="text"
-                className="flex-1"
-                value={formData.input_background_color || "#FFFFFF"}
-                onChange={(e) => handleColorChange("input_background_color", e.target.value)}
-              />
-            </div>
-          </div>
+          <BackgroundSection
+            form={form}
+            onBackgroundImageUpload={handleBackgroundImageUpload}
+          />
 
-          <div className="space-y-4">
-            <Label>Primary Color (Buttons & Accents)</Label>
-            <div className="flex gap-2">
-              <Input
-                type="color"
-                className="w-12 h-12 p-1 cursor-pointer"
-                value={formData.primary_color}
-                onChange={(e) => handleColorChange("primary_color", e.target.value)}
-              />
-              <Input
-                type="text"
-                className="flex-1"
-                value={formData.primary_color}
-                onChange={(e) => handleColorChange("primary_color", e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <Label>Background Image</Label>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleBackgroundImageUpload(file);
-              }}
-            />
-            {formData.background_image_url && (
-              <div className="mt-2">
-                <Label>Background Image Style</Label>
-                <RadioGroup
-                  value={formData.background_image_style || "cover"}
-                  onValueChange={(value) => form.setValue("background_image_style", value)}
-                  className="mt-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="cover" id="cover" />
-                    <Label htmlFor="cover">Cover</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="contain" id="contain" />
-                    <Label htmlFor="contain">Contain</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="repeat" id="repeat" />
-                    <Label htmlFor="repeat">Mosaic (Repeat)</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-4">
-            <Label>Background Opacity</Label>
-            <Slider
-              value={[formData.background_opacity || 100]}
-              onValueChange={([value]) => form.setValue("background_opacity", value)}
-              max={100}
-              step={1}
-            />
-            <div className="text-sm text-muted-foreground text-right">
-              {formData.background_opacity || 100}%
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <Label>Font Family</Label>
-            <Select
-              value={formData.font_family}
-              onValueChange={(value) => form.setValue("font_family", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a font" />
-              </SelectTrigger>
-              <SelectContent>
-                {FONT_OPTIONS.map((font) => (
-                  <SelectItem key={font.value} value={font.value}>
-                    {font.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label>Show Border</Label>
-              <Switch
-                checked={formData.show_border}
-                onCheckedChange={(checked) => form.setValue("show_border", checked)}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <Label>Logo</Label>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleLogoUpload(file);
-              }}
-            />
-            {formData.logo_url && (
-              <div className="mt-2">
-                <img
-                  src={formData.logo_url}
-                  alt="Form logo"
-                  className="max-h-20 rounded"
-                />
-              </div>
-            )}
-          </div>
+          <InputStyleSection form={form} />
+          <FontSection form={form} />
+          <LogoSection form={form} onLogoUpload={handleLogoUpload} />
         </div>
       </ScrollArea>
+
       <ScrollArea className="h-[calc(90vh-220px)]">
         <FormPreview
           title={formData.title}

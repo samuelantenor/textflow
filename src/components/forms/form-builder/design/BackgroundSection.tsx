@@ -1,0 +1,73 @@
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Slider } from "@/components/ui/slider";
+import { ColorPicker } from "./ColorPicker";
+import { UseFormReturn } from "react-hook-form";
+
+interface BackgroundSectionProps {
+  form: UseFormReturn<any>;
+  onBackgroundImageUpload: (file: File) => Promise<void>;
+}
+
+export function BackgroundSection({ form, onBackgroundImageUpload }: BackgroundSectionProps) {
+  const formData = form.watch();
+
+  return (
+    <div className="space-y-6">
+      <ColorPicker
+        label="Background Color"
+        value={formData.background_color}
+        onChange={(value) => form.setValue("background_color", value)}
+      />
+
+      <div className="space-y-4">
+        <Label>Background Image</Label>
+        <Input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) onBackgroundImageUpload(file);
+          }}
+        />
+        {formData.background_image_url && (
+          <div className="mt-2">
+            <Label>Background Image Style</Label>
+            <RadioGroup
+              value={formData.background_image_style || "cover"}
+              onValueChange={(value) => form.setValue("background_image_style", value)}
+              className="mt-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="cover" id="cover" />
+                <Label htmlFor="cover">Cover</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="contain" id="contain" />
+                <Label htmlFor="contain">Contain</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="repeat" id="repeat" />
+                <Label htmlFor="repeat">Mosaic (Repeat)</Label>
+              </div>
+            </RadioGroup>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-4">
+        <Label>Background Opacity</Label>
+        <Slider
+          value={[formData.background_opacity || 100]}
+          onValueChange={([value]) => form.setValue("background_opacity", value)}
+          max={100}
+          step={1}
+        />
+        <div className="text-sm text-muted-foreground text-right">
+          {formData.background_opacity || 100}%
+        </div>
+      </div>
+    </div>
+  );
+}
