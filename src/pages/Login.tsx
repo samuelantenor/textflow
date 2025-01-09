@@ -2,16 +2,35 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import AuthContainer from "@/components/auth/AuthContainer";
 import LoadingState from "@/components/auth/LoadingState";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const { isLoading, authError, setAuthError, checkUserAndRedirect } = useAuthRedirect();
   const [view, setView] = useState<'sign_in' | 'update_password'>('sign_in');
+  const { toast } = useToast();
 
   useEffect(() => {
+    // Check URL for error parameters
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const error = hashParams.get('error');
+    const errorDescription = hashParams.get('error_description');
+
+    if (error === 'access_denied' && errorDescription) {
+      setAuthError(errorDescription.replace(/\+/g, ' '));
+      toast({
+        variant: "destructive",
+        title: "Password Reset Error",
+        description: "The reset link has expired. Please request a new password reset.",
+      });
+      setView('sign_in');
+      // Clean up the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+
     // Check if we're in a password reset flow
     const hash = window.location.hash;
     if (hash && hash.includes('#access_token') && hash.includes('type=recovery')) {
@@ -60,7 +79,7 @@ const Login = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [view, checkUserAndRedirect, setAuthError]);
+  }, [view, checkUserAndRedirect, setAuthError, toast]);
 
   if (isLoading) {
     return <LoadingState />;
