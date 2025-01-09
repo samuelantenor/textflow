@@ -39,26 +39,13 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     });
 
-    console.log('Checking existing customers...');
-    const customers = await stripe.customers.list({
-      email: email,
-      limit: 1
-    });
-
-    let customer_id = undefined;
-    if (customers.data.length > 0) {
-      customer_id = customers.data[0].id;
-      console.log('Found existing customer:', customer_id);
-    }
-
     console.log('Creating checkout session...');
     const session = await stripe.checkout.sessions.create({
-      customer: customer_id,
-      customer_email: customer_id ? undefined : email,
+      customer_email: email,
       client_reference_id: user.id,
       line_items: [
         {
-          price: 'YOUR_NEW_PHONE_NUMBER_PRICE_ID_HERE', // Replace this with your new phone number price ID
+          price: 'price_1QdDlVB4RWKZ2dNzJSaGZNPB',
           quantity: 1,
         },
       ],

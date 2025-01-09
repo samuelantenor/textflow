@@ -54,7 +54,7 @@ serve(async (req) => {
       const subscriptions = await stripe.subscriptions.list({
         customer: customer_id,
         status: 'active',
-        price: 'YOUR_NEW_PRICE_ID_HERE', // Replace this with your new price ID
+        price: 'price_1QdDlVB4RWKZ2dNzJSaGZNPB',
         limit: 1
       });
 
@@ -79,7 +79,7 @@ serve(async (req) => {
       client_reference_id: user.id,
       line_items: [
         {
-          price: 'YOUR_NEW_PRICE_ID_HERE', // Replace this with your new price ID
+          price: 'price_1QdDlVB4RWKZ2dNzJSaGZNPB',
           quantity: 1,
         },
       ],
