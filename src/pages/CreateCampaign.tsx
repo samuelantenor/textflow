@@ -37,7 +37,8 @@ const CreateCampaign = () => {
         description: "Campaign created successfully",
       });
 
-      navigate("/dashboard?tab=campaigns");
+      // Refresh the page and redirect to dashboard with campaigns tab
+      window.location.href = "/dashboard?tab=campaigns";
     } catch (error) {
       console.error("Error creating campaign:", error);
       toast({
