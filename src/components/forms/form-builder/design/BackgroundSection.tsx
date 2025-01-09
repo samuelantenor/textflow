@@ -1,10 +1,11 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { ColorPicker } from "./ColorPicker";
 import { UseFormReturn } from "react-hook-form";
+import { X } from "lucide-react";
 
 interface BackgroundSectionProps {
   form: UseFormReturn<any>;
@@ -18,6 +19,16 @@ export function BackgroundSection({
   onWebsiteBackgroundImageUpload 
 }: BackgroundSectionProps) {
   const formData = form.watch();
+
+  const handleRemoveBackgroundImage = () => {
+    form.setValue("background_image_url", null);
+    form.setValue("background_image_style", "cover");
+  };
+
+  const handleRemoveWebsiteBackgroundImage = () => {
+    form.setValue("website_background_image_url", null);
+    form.setValue("website_background_style", "color");
+  };
 
   return (
     <div className="space-y-6">
@@ -45,12 +56,22 @@ export function BackgroundSection({
               }}
             />
             {formData.background_image_url && (
-              <div className="mt-2">
-                <Label>Background Image Style</Label>
+              <div className="mt-2 space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>Background Image Style</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRemoveBackgroundImage}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Remove Image
+                  </Button>
+                </div>
                 <RadioGroup
                   value={formData.background_image_style || "cover"}
                   onValueChange={(value) => form.setValue("background_image_style", value)}
-                  className="mt-2"
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="cover" id="cover" />
@@ -71,11 +92,13 @@ export function BackgroundSection({
 
           <div className="space-y-4">
             <Label>Form Background Opacity</Label>
-            <Slider
-              value={[formData.background_opacity || 100]}
-              onValueChange={([value]) => form.setValue("background_opacity", value)}
-              max={100}
-              step={1}
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={formData.background_opacity || 100}
+              onChange={(e) => form.setValue("background_opacity", parseInt(e.target.value))}
+              className="w-full"
             />
             <div className="text-sm text-muted-foreground text-right">
               {formData.background_opacity || 100}%
@@ -95,7 +118,6 @@ export function BackgroundSection({
             <RadioGroup
               value={formData.website_background_style || "color"}
               onValueChange={(value) => form.setValue("website_background_style", value)}
-              className="mt-2"
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="color" id="website-color" />
@@ -124,6 +146,7 @@ export function BackgroundSection({
                 ].map((gradient) => (
                   <button
                     key={gradient}
+                    type="button"
                     className="h-12 rounded-md border"
                     style={{ background: gradient }}
                     onClick={() => form.setValue("website_background_gradient", gradient)}
@@ -135,7 +158,20 @@ export function BackgroundSection({
 
           {formData.website_background_style === 'image' && (
             <div className="space-y-4">
-              <Label>Website Background Image</Label>
+              <div className="flex items-center justify-between">
+                <Label>Website Background Image</Label>
+                {formData.website_background_image_url && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRemoveWebsiteBackgroundImage}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Remove Image
+                  </Button>
+                )}
+              </div>
               <Input
                 type="file"
                 accept="image/*"

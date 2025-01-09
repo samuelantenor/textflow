@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { FormLoader } from "@/components/forms/view/FormLoader";
@@ -118,13 +117,30 @@ export default function ViewForm() {
     return <FormError />;
   }
 
-  const backgroundStyle = {
+  const websiteBackgroundStyle: React.CSSProperties = {
+    minHeight: '100vh',
+    padding: '12px 16px',
+  };
+
+  // Apply website background styling based on the selected style
+  if (form.website_background_style === 'gradient' && form.website_background_gradient) {
+    websiteBackgroundStyle.backgroundImage = form.website_background_gradient;
+  } else if (form.website_background_style === 'image' && form.website_background_image_url) {
+    websiteBackgroundStyle.backgroundImage = `url(${form.website_background_image_url})`;
+    websiteBackgroundStyle.backgroundSize = 'cover';
+    websiteBackgroundStyle.backgroundPosition = 'center';
+  } else {
+    websiteBackgroundStyle.backgroundColor = form.website_background_color || '#FFFFFF';
+  }
+
+  const formBackgroundStyle: React.CSSProperties = {
     backgroundColor: form.background_color || '#FFFFFF',
     fontFamily: form.font_family || 'Inter',
+    position: 'relative',
   };
 
   if (form.background_image_url) {
-    Object.assign(backgroundStyle, {
+    Object.assign(formBackgroundStyle, {
       backgroundImage: `url(${form.background_image_url})`,
       backgroundSize: form.background_image_style === 'repeat' ? 'auto' : form.background_image_style,
       backgroundRepeat: form.background_image_style === 'repeat' ? 'repeat' : 'no-repeat',
@@ -133,15 +149,10 @@ export default function ViewForm() {
   }
 
   return (
-    <div 
-      className="min-h-screen py-12 px-4"
-      style={backgroundStyle}
-    >
+    <div style={websiteBackgroundStyle}>
       <Card 
         className="max-w-2xl mx-auto p-6 relative overflow-hidden"
-        style={{
-          backgroundColor: form.background_color || '#FFFFFF',
-        }}
+        style={formBackgroundStyle}
       >
         {form.background_image_url && (
           <div 
