@@ -28,4 +28,8 @@ export interface FormResponse {
   background_opacity: number | null;
   input_background_color: string | null;
   show_border: boolean | null;
+  website_background_color: string | null;
+  website_background_gradient: string | null;
+  website_background_image_url: string | null;
+  website_background_style: 'color' | 'gradient' | 'image' | null;
 }

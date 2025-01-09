@@ -6,6 +6,7 @@ import { FormLoader } from "@/components/forms/view/FormLoader";
 import { FormError } from "@/components/forms/view/FormError";
 import { ViewFormContent } from "@/components/forms/view/ViewFormContent";
 import { useFormData } from "@/hooks/forms/useFormData";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function ViewForm() {
   const { id } = useParams();
