@@ -11,6 +11,23 @@ import { FormFieldsTab } from "./form-builder/FormFieldsTab";
 import { FormDesignTab } from "./form-builder/FormDesignTab";
 import { useQueryClient } from "@tanstack/react-query";
 
+// Store last customization settings in memory
+let lastCustomizationSettings = {
+  background_color: "#FFFFFF",
+  font_family: "Inter",
+  logo_url: null,
+  primary_color: "#ea384c",
+  background_image_url: null,
+  background_image_style: "cover",
+  background_opacity: 100,
+  input_background_color: "#FFFFFF",
+  show_border: true,
+  website_background_color: "#FFFFFF",
+  website_background_gradient: null,
+  website_background_image_url: null,
+  website_background_style: "color",
+};
+
 interface EditFormDialogProps {
   form: {
     id: string;
@@ -48,44 +65,35 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       description: "",
       fields: [],
       group_id: "",
-      background_color: "#FFFFFF",
-      font_family: "Inter",
-      logo_url: null,
-      primary_color: "#ea384c",
-      background_image_url: null,
-      background_image_style: "cover",
-      background_opacity: 100,
-      input_background_color: "#FFFFFF",
-      show_border: true,
-      website_background_color: "#FFFFFF",
-      website_background_gradient: null,
-      website_background_image_url: null,
-      website_background_style: "color",
+      ...lastCustomizationSettings
     },
   });
 
   // Reset form values when initialForm changes or dialog opens
   useEffect(() => {
     if (open && initialForm) {
-      form.reset({
+      // Merge initial form data with last customization settings
+      const formValues = {
         title: initialForm.title,
         description: initialForm.description || "",
         fields: initialForm.fields,
         group_id: initialForm.group_id || "",
-        background_color: initialForm.background_color || "#FFFFFF",
-        font_family: initialForm.font_family || "Inter",
-        logo_url: initialForm.logo_url || null,
-        primary_color: initialForm.primary_color || "#ea384c",
-        background_image_url: initialForm.background_image_url || null,
-        background_image_style: initialForm.background_image_style || "cover",
-        background_opacity: initialForm.background_opacity || 100,
-        input_background_color: initialForm.input_background_color || "#FFFFFF",
-        show_border: initialForm.show_border ?? true,
-        website_background_color: initialForm.website_background_color || "#FFFFFF",
-        website_background_gradient: initialForm.website_background_gradient || null,
-        website_background_image_url: initialForm.website_background_image_url || null,
-        website_background_style: initialForm.website_background_style || "color",
-      });
+        // Use last customization settings as fallback
+        background_color: initialForm.background_color || lastCustomizationSettings.background_color,
+        font_family: initialForm.font_family || lastCustomizationSettings.font_family,
+        logo_url: initialForm.logo_url || lastCustomizationSettings.logo_url,
+        primary_color: initialForm.primary_color || lastCustomizationSettings.primary_color,
+        background_image_url: initialForm.background_image_url || lastCustomizationSettings.background_image_url,
+        background_image_style: initialForm.background_image_style || lastCustomizationSettings.background_image_style,
+        background_opacity: initialForm.background_opacity ?? lastCustomizationSettings.background_opacity,
+        input_background_color: initialForm.input_background_color || lastCustomizationSettings.input_background_color,
+        show_border: initialForm.show_border ?? lastCustomizationSettings.show_border,
+        website_background_color: initialForm.website_background_color || lastCustomizationSettings.website_background_color,
+        website_background_gradient: initialForm.website_background_gradient || lastCustomizationSettings.website_background_gradient,
+        website_background_image_url: initialForm.website_background_image_url || lastCustomizationSettings.website_background_image_url,
+        website_background_style: initialForm.website_background_style || lastCustomizationSettings.website_background_style,
+      };
+      form.reset(formValues);
     }
   }, [initialForm, open, form]);
 
@@ -119,6 +127,23 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     try {
       setIsLoading(true);
 
+      // Update last customization settings
+      lastCustomizationSettings = {
+        background_color: data.background_color,
+        font_family: data.font_family,
+        logo_url: data.logo_url,
+        primary_color: data.primary_color,
+        background_image_url: data.background_image_url,
+        background_image_style: data.background_image_style,
+        background_opacity: data.background_opacity,
+        input_background_color: data.input_background_color,
+        show_border: data.show_border,
+        website_background_color: data.website_background_color,
+        website_background_gradient: data.website_background_gradient,
+        website_background_image_url: data.website_background_image_url,
+        website_background_style: data.website_background_style,
+      };
+
       const { error } = await supabase
         .from("custom_forms")
         .update({
@@ -126,19 +151,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
           description: data.description,
           fields: data.fields,
           group_id: data.group_id,
-          background_color: data.background_color,
-          font_family: data.font_family,
-          logo_url: data.logo_url,
-          primary_color: data.primary_color,
-          background_image_url: data.background_image_url,
-          background_image_style: data.background_image_style,
-          background_opacity: data.background_opacity,
-          input_background_color: data.input_background_color,
-          show_border: data.show_border,
-          website_background_color: data.website_background_color,
-          website_background_gradient: data.website_background_gradient,
-          website_background_image_url: data.website_background_image_url,
-          website_background_style: data.website_background_style,
+          ...lastCustomizationSettings
         })
         .eq('id', initialForm.id);
 
