@@ -12,9 +12,6 @@ export interface CustomForm {
   logo_url?: string | null;
   primary_color?: string;
   submit_button_color?: string;
-  background_image_url?: string | null;
-  background_image_style?: 'cover' | 'contain' | 'repeat';
-  background_opacity?: number;
   input_background_color?: string;
   show_border?: boolean;
   website_background_color?: string;
@@ -33,9 +30,6 @@ export interface FormData {
   logo_url?: string | null;
   primary_color?: string;
   submit_button_color?: string;
-  background_image_url?: string | null;
-  background_image_style?: 'cover' | 'contain' | 'repeat';
-  background_opacity?: number;
   input_background_color?: string;
   show_border?: boolean;
   website_background_color?: string;

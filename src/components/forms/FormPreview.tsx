@@ -19,8 +19,6 @@ interface FormPreviewProps {
     logoUrl?: string;
     primaryColor?: string;
     submitButtonColor?: string;
-    backgroundImageUrl?: string;
-    backgroundImageStyle?: 'cover' | 'contain' | 'repeat';
     inputBackgroundColor?: string;
     showBorder?: boolean;
     websiteBackgroundColor?: string;
@@ -49,15 +47,6 @@ export function FormPreview({ title, description, fields, customization }: FormP
     fontFamily: customization?.fontFamily || 'Inter',
     position: 'relative',
   };
-
-  if (customization?.backgroundImageUrl) {
-    Object.assign(formBackgroundStyle, {
-      backgroundImage: `url(${customization.backgroundImageUrl})`,
-      backgroundSize: customization.backgroundImageStyle === 'repeat' ? 'auto' : customization.backgroundImageStyle,
-      backgroundRepeat: customization.backgroundImageStyle === 'repeat' ? 'repeat' : 'no-repeat',
-      backgroundPosition: 'center',
-    });
-  }
 
   return (
     <div className="h-full">

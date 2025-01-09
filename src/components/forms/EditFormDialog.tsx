@@ -31,9 +31,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       logo_url: initialForm.logo_url || "",
       primary_color: initialForm.primary_color || "#ea384c",
       submit_button_color: initialForm.submit_button_color || "#ea384c",
-      background_image_url: initialForm.background_image_url,
-      background_image_style: initialForm.background_image_style,
-      background_opacity: initialForm.background_opacity,
       input_background_color: initialForm.input_background_color || "#FFFFFF",
       show_border: initialForm.show_border,
       website_background_color: initialForm.website_background_color || "#FFFFFF",
@@ -43,7 +40,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     },
   });
 
-  // Reset form values when a different form is selected
   useEffect(() => {
     form.reset({
       title: initialForm.title,
@@ -55,9 +51,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       logo_url: initialForm.logo_url || "",
       primary_color: initialForm.primary_color || "#ea384c",
       submit_button_color: initialForm.submit_button_color || "#ea384c",
-      background_image_url: initialForm.background_image_url,
-      background_image_style: initialForm.background_image_style,
-      background_opacity: initialForm.background_opacity,
       input_background_color: initialForm.input_background_color || "#FFFFFF",
       show_border: initialForm.show_border,
       website_background_color: initialForm.website_background_color || "#FFFFFF",
@@ -109,9 +102,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
           logo_url: data.logo_url,
           primary_color: data.primary_color,
           submit_button_color: data.submit_button_color,
-          background_image_url: data.background_image_url,
-          background_image_style: data.background_image_style,
-          background_opacity: data.background_opacity,
           input_background_color: data.input_background_color,
           show_border: data.show_border,
           website_background_color: data.website_background_color,
