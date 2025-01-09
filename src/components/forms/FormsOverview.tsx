@@ -33,25 +33,13 @@ export const FormsOverview = () => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      channel.unsubscribe();
     };
   }, [queryClient]);
 
-  const handleEdit = async (form: CustomForm) => {
-    try {
-      const { data, error } = await supabase
-        .from("custom_forms")
-        .select("*")
-        .eq("id", form.id)
-        .single();
-
-      if (error) throw error;
-
-      setSelectedEditForm(data);
-      setEditDialogOpen(true);
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to load form data.", variant: "destructive" });
-    }
+  const handleEdit = (form: CustomForm) => {
+    setSelectedEditForm(form);
+    setEditDialogOpen(true);
   };
 
   const handleShare = (form: CustomForm) => {
@@ -109,13 +97,13 @@ export const FormsOverview = () => {
       />
       {selectedShareForm && (
         <ShareFormDialog
-  form={selectedShareForm}
-  open={shareDialogOpen}
-  onOpenChange={(newOpen) => {
-    setShareDialogOpen(newOpen);
-    if (!newOpen) setSelectedShareForm(null); // Clear selected form state
-  }}
-/>
+          form={selectedShareForm}
+          open={shareDialogOpen}
+          onOpenChange={(newOpen) => {
+            setShareDialogOpen(newOpen);
+            if (!newOpen) setSelectedShareForm(null);
+          }}
+        />
       )}
       {selectedEditForm && (
         <EditFormDialog 
@@ -129,13 +117,13 @@ export const FormsOverview = () => {
       )}
       {selectedSubmissionForm && (
         <ViewSubmissionsDialog
-  formId={selectedSubmissionForm?.id || ""}
-  open={submissionsDialogOpen}
-  onOpenChange={(newOpen) => {
-    setSubmissionsDialogOpen(newOpen);
-    if (!newOpen) setSelectedSubmissionForm(null);
-  }}
-/>
+          formId={selectedSubmissionForm.id}
+          open={submissionsDialogOpen}
+          onOpenChange={(newOpen) => {
+            setSubmissionsDialogOpen(newOpen);
+            if (!newOpen) setSelectedSubmissionForm(null);
+          }}
+        />
       )}
     </div>
   );
