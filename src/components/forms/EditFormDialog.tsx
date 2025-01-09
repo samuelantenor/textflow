@@ -44,28 +44,20 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     },
   });
 
-  // Reset form values when initialForm changes
+  // Only update non-design fields when initialForm changes
   useEffect(() => {
-    form.reset({
-      title: initialForm.title,
-      description: initialForm.description || "",
-      fields: initialForm.fields,
-      group_id: initialForm.group_id,
-      background_color: initialForm.background_color || "#FFFFFF",
-      font_family: initialForm.font_family || "Inter",
-      logo_url: initialForm.logo_url || "",
-      primary_color: initialForm.primary_color || "#ea384c",
-      submit_button_color: initialForm.submit_button_color || "#ea384c",
-      background_image_url: initialForm.background_image_url,
-      background_image_style: initialForm.background_image_style,
-      background_opacity: initialForm.background_opacity,
-      input_background_color: initialForm.input_background_color || "#FFFFFF",
-      show_border: initialForm.show_border,
-      website_background_color: initialForm.website_background_color || "#FFFFFF",
-      website_background_gradient: initialForm.website_background_gradient,
-      website_background_image_url: initialForm.website_background_image_url,
-      website_background_style: initialForm.website_background_style,
-    });
+    form.setValue("title", initialForm.title);
+    form.setValue("description", initialForm.description || "");
+    form.setValue("fields", initialForm.fields);
+    form.setValue("group_id", initialForm.group_id);
+    form.setValue("logo_url", initialForm.logo_url || "");
+    form.setValue("background_image_url", initialForm.background_image_url);
+    form.setValue("background_image_style", initialForm.background_image_style);
+    form.setValue("background_opacity", initialForm.background_opacity);
+    form.setValue("show_border", initialForm.show_border);
+    form.setValue("website_background_gradient", initialForm.website_background_gradient);
+    form.setValue("website_background_image_url", initialForm.website_background_image_url);
+    form.setValue("website_background_style", initialForm.website_background_style);
   }, [initialForm, form]);
 
   const handleLogoUpload = async (file: File) => {
