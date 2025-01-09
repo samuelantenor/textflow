@@ -11,8 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { FormGeneralSection } from "./form-builder/general/FormGeneralSection";
 import { FormDesignSection } from "./form-builder/design/FormDesignSection";
 import { FormBackgroundSection } from "./form-builder/background/FormBackgroundSection";
-import { FormData } from "./types";
-import { CustomForm } from "@/types/form";
+import { FormData, CustomForm } from "./types";
 
 interface EditFormDialogProps {
   form: CustomForm;
@@ -132,6 +131,15 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
           logo_url: data.logo_url,
           primary_color: data.primary_color,
           submit_button_color: data.submit_button_color,
+          background_image_url: data.background_image_url,
+          background_image_style: data.background_image_style,
+          background_opacity: data.background_opacity,
+          input_background_color: data.input_background_color,
+          show_border: data.show_border,
+          website_background_color: data.website_background_color,
+          website_background_gradient: data.website_background_gradient,
+          website_background_image_url: data.website_background_image_url,
+          website_background_style: data.website_background_style,
         })
         .eq('id', initialForm.id);
 
