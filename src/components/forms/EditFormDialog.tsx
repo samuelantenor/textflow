@@ -6,11 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { FormFieldsTab } from "./form-builder/FormFieldsTab";
-import { FormDesignTab } from "./form-builder/FormDesignTab";
-import { FormData, CustomForm } from "./types";
+import { FormTabs } from "./form-builder/FormTabs";
+import { FormActions } from "./form-builder/FormActions";
+import { CustomForm } from "./types";
 
 interface EditFormDialogProps {
   form: CustomForm;
@@ -23,7 +21,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   const [activeTab, setActiveTab] = useState("fields");
   const { toast } = useToast();
   
-  const form = useForm<FormData>({
+  const form = useForm({
     defaultValues: {
       title: initialForm.title,
       description: initialForm.description || "",
@@ -31,7 +29,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       group_id: initialForm.group_id,
       background_color: initialForm.background_color || "#FFFFFF",
       font_family: initialForm.font_family || "Inter",
-      logo_url: initialForm.logo_url || null,
+      logo_url: initialForm.logo_url || "",
       primary_color: initialForm.primary_color || "#ea384c",
       submit_button_color: initialForm.submit_button_color || "#ea384c",
       background_image_url: initialForm.background_image_url,
@@ -46,7 +44,33 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     },
   });
 
-  const onSubmit = async (data: FormData) => {
+  const handleLogoUpload = async (file: File) => {
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from("landing_page_assets")
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("landing_page_assets")
+        .getPublicUrl(fileName);
+      
+      form.setValue("logo_url", publicUrl);
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      toast({
+        title: "Error",
+        description: "Failed to upload logo. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const onSubmit = async (data: any) => {
     try {
       setIsLoading(true);
 
@@ -96,43 +120,23 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-[1200px] h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Edit Form: {initialForm.title}</DialogTitle>
+          <DialogTitle>Edit Form</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList>
-                <TabsTrigger value="fields">Form Fields</TabsTrigger>
-                <TabsTrigger value="design">Design</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="fields" className="flex-1 overflow-hidden">
-                <FormFieldsTab form={form} />
-              </TabsContent>
-
-              <TabsContent value="design" className="flex-1 overflow-hidden">
-                <FormDesignTab form={form} formId={initialForm.id} />
-              </TabsContent>
-
-              <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  className="w-full sm:w-auto"
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-                  {isLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Save Changes
-                </Button>
-              </div>
-            </Tabs>
+            <FormTabs
+              form={form}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              handleLogoUpload={handleLogoUpload}
+              formId={initialForm.id}
+            />
+            <FormActions
+              isLoading={isLoading}
+              onCancel={() => onOpenChange(false)}
+            />
           </form>
         </Form>
       </DialogContent>
