@@ -51,10 +51,17 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Find all groups containing this contact
-    const { data: contacts, error: contactsError } = await supabaseClient
+    // First, find all contacts with this phone number and their associated groups
+    const { data: contactsWithGroups, error: contactsError } = await supabaseClient
       .from('contacts')
-      .select('id, group_id, campaign_groups(name)')
+      .select(`
+        id,
+        group_id,
+        campaign_groups!inner (
+          user_id,
+          name
+        )
+      `)
       .eq('phone_number', fromNumber);
 
     if (contactsError) {
@@ -62,34 +69,51 @@ serve(async (req) => {
       throw contactsError;
     }
 
-    console.log('Found contacts:', contacts);
+    console.log('Found contacts:', contactsWithGroups);
 
-    // Delete the contact from all groups
-    for (const contact of contacts) {
+    if (!contactsWithGroups || contactsWithGroups.length === 0) {
+      console.log('No contacts found for this number');
+      return new Response(JSON.stringify({ 
+        success: true, 
+        message: 'No contacts found for this number'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
+    // Group contacts by user_id for logging purposes
+    const userGroups = contactsWithGroups.reduce((acc, contact) => {
+      const userId = contact.campaign_groups.user_id;
+      if (!acc[userId]) {
+        acc[userId] = [];
+      }
+      acc[userId].push(contact);
+      return acc;
+    }, {});
+
+    // Delete contacts and log for each user
+    for (const [userId, contacts] of Object.entries(userGroups)) {
+      // Delete all contacts for this user
+      const contactIds = contacts.map(c => c.id);
       const { error: deleteError } = await supabaseClient
         .from('contacts')
         .delete()
-        .eq('id', contact.id);
+        .in('id', contactIds);
 
       if (deleteError) {
-        console.error('Error deleting contact:', deleteError);
+        console.error(`Error deleting contacts for user ${userId}:`, deleteError);
         throw deleteError;
       }
 
-      console.log(`Successfully removed ${fromNumber} from group ${contact.campaign_groups?.name || 'Unknown'}`);
+      console.log(`Successfully removed ${fromNumber} from ${contacts.length} groups for user ${userId}`);
     }
-
-    // Log the successful opt-out
-    const logMessage = `Successfully removed ${fromNumber} from ${contacts.length} groups: ${contacts
-      .map(c => c.campaign_groups?.name || 'Unknown')
-      .join(', ')}`;
-    console.log(logMessage);
 
     return new Response(JSON.stringify({ 
       success: true, 
       message: 'Contact successfully opted out',
-      removedFromGroups: contacts.length,
-      details: logMessage
+      removedFromGroups: contactsWithGroups.length,
+      details: `Removed from ${contactsWithGroups.length} groups across ${Object.keys(userGroups).length} users`
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
