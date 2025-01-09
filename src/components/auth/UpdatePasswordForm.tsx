@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
+import { useNavigate } from 'react-router-dom';
 
 const UpdatePasswordForm = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,11 +45,12 @@ const UpdatePasswordForm = () => {
 
       toast({
         title: "Password updated",
-        description: "Your password has been successfully updated.",
+        description: "Your password has been successfully updated. Please sign in with your new password.",
       });
       
-      setPassword('');
-      setConfirmPassword('');
+      // Sign out and redirect to login
+      await supabase.auth.signOut();
+      navigate('/login');
     } catch (error: any) {
       toast({
         variant: "destructive",

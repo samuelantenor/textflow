@@ -48,8 +48,9 @@ const Login = () => {
         return;
       }
       
+      // Only redirect to dashboard if we're not in password reset flow
       if (session && view !== 'update_password') {
-        console.log("Found existing session, redirecting...");
+        console.log("Found existing session, checking user status...");
         checkUserAndRedirect(session);
       }
     });
@@ -61,10 +62,12 @@ const Login = () => {
       if (event === 'PASSWORD_RECOVERY') {
         setView('update_password');
         setAuthError(null);
-      } else if (event === 'SIGNED_IN' && session) {
-        // Only redirect if not in password recovery flow
+      } else if (event === 'SIGNED_IN') {
+        // If it's a recovery flow, don't redirect
         const hash = window.location.hash;
-        if (!hash.includes('type=recovery')) {
+        if (hash && hash.includes('type=recovery')) {
+          setView('update_password');
+        } else if (session) {
           checkUserAndRedirect(session);
         }
       } else if (event === 'SIGNED_OUT') {
@@ -72,11 +75,13 @@ const Login = () => {
         setView('sign_in');
       } else if (event === 'USER_UPDATED') {
         setAuthError(null);
-        // After password is updated, show success message but don't redirect
+        // After password is updated, sign out the user
+        await supabase.auth.signOut();
         toast({
           title: "Password Updated",
-          description: "Your password has been successfully updated.",
+          description: "Please sign in with your new password.",
         });
+        setView('sign_in');
       }
     });
 
