@@ -1,8 +1,23 @@
 import { Button } from "@/components/ui/button";
-import { FormFields } from "../FormFields";
+import { FormFieldRenderer } from "../FormFieldRenderer";
 
 interface ViewFormContentProps {
-  form: any;
+  form: {
+    title: string;
+    description?: string;
+    fields: Array<{
+      type: string;
+      label: string;
+      required: boolean;
+      placeholder?: string;
+      options?: string[];
+      description?: string;
+    }>;
+    logo_url?: string;
+    primary_color?: string;
+    input_background_color?: string;
+    show_border?: boolean;
+  };
   formData: Record<string, any>;
   onFieldChange: (fieldName: string, value: any) => void;
   onSubmit: (e: React.FormEvent) => Promise<void>;
@@ -33,16 +48,21 @@ export function ViewFormContent({ form, formData, onFieldChange, onSubmit, submi
         )}
       </div>
 
-      <FormFields
-        fields={form.fields}
-        formData={formData}
-        onFieldChange={onFieldChange}
-        customization={{
-          primaryColor: form.primary_color,
-          inputBackgroundColor: form.input_background_color,
-          showBorder: form.show_border,
-        }}
-      />
+      <div className="space-y-6">
+        {form.fields.map((field, index) => (
+          <div key={`field-${index}`} className="space-y-2">
+            <FormFieldRenderer
+              field={field}
+              value={formData[field.label]}
+              onChange={(value) => onFieldChange(field.label, value)}
+              customization={{
+                primaryColor: form.primary_color,
+                fontFamily: form.font_family,
+              }}
+            />
+          </div>
+        ))}
+      </div>
 
       <Button 
         type="submit" 

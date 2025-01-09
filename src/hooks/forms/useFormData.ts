@@ -15,6 +15,11 @@ interface FormResponse {
   font_family: string | null;
   logo_url: string | null;
   primary_color: string | null;
+  background_image_url: string | null;
+  background_image_style: 'cover' | 'contain' | 'repeat' | null;
+  background_opacity: number | null;
+  input_background_color: string | null;
+  show_border: boolean | null;
 }
 
 interface UseFormDataReturn {
@@ -64,7 +69,12 @@ export function useFormData(): UseFormDataReturn {
         background_color: formResponse.background_color,
         font_family: formResponse.font_family,
         logo_url: formResponse.logo_url,
-        primary_color: formResponse.primary_color
+        primary_color: formResponse.primary_color,
+        background_image_url: formResponse.background_image_url,
+        background_image_style: formResponse.background_image_style,
+        background_opacity: formResponse.background_opacity,
+        input_background_color: formResponse.input_background_color,
+        show_border: formResponse.show_border,
       };
 
       setForm(formData);
