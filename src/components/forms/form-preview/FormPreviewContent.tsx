@@ -1,6 +1,5 @@
 import { Label } from "@/components/ui/label";
 import { FormPreviewField } from "./FormPreviewField";
-import { Button } from "@/components/ui/button";
 
 interface FormPreviewContentProps {
   title: string;
@@ -18,7 +17,9 @@ interface FormPreviewContentProps {
     fontFamily?: string;
     logoUrl?: string;
     primaryColor?: string;
-    submitButtonColor?: string;
+    backgroundImageUrl?: string;
+    backgroundImageStyle?: 'cover' | 'contain' | 'repeat';
+    backgroundOpacity?: number;
     inputBackgroundColor?: string;
     showBorder?: boolean;
   };
@@ -47,7 +48,6 @@ export function FormPreviewContent({ title, description, fields, customization }
           <p className="text-muted-foreground">{description}</p>
         )}
       </div>
-
       <div className="space-y-8">
         {fields.map((field, index) => (
           <FormPreviewField
@@ -57,17 +57,6 @@ export function FormPreviewContent({ title, description, fields, customization }
           />
         ))}
       </div>
-
-      <Button 
-        type="submit" 
-        className="w-full"
-        style={{
-          backgroundColor: customization?.submitButtonColor || customization?.primaryColor,
-          borderColor: customization?.submitButtonColor || customization?.primaryColor,
-        }}
-      >
-        Submit
-      </Button>
     </div>
   );
 }

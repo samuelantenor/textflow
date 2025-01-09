@@ -144,15 +144,9 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
           </div>
 
           <ColorPicker
-            label="Primary Color (Links & Accents)"
+            label="Primary Color (Buttons & Accents)"
             value={formData.primary_color}
             onChange={(value) => form.setValue("primary_color", value)}
-          />
-
-          <ColorPicker
-            label="Submit Button Color"
-            value={formData.submit_button_color}
-            onChange={(value) => form.setValue("submit_button_color", value)}
           />
 
           <BackgroundSection
@@ -177,9 +171,9 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
             fontFamily: formData.font_family,
             logoUrl: formData.logo_url,
             primaryColor: formData.primary_color,
-            submitButtonColor: formData.submit_button_color,
             backgroundImageUrl: formData.background_image_url,
             backgroundImageStyle: formData.background_image_style,
+            backgroundOpacity: formData.background_opacity,
             inputBackgroundColor: formData.input_background_color,
             showBorder: formData.show_border,
             websiteBackgroundColor: formData.website_background_color,

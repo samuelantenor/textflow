@@ -18,7 +18,6 @@ interface FormPreviewProps {
     fontFamily?: string;
     logoUrl?: string;
     primaryColor?: string;
-    submitButtonColor?: string;
     backgroundImageUrl?: string;
     backgroundImageStyle?: 'cover' | 'contain' | 'repeat';
     inputBackgroundColor?: string;
