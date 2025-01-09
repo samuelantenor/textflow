@@ -36,7 +36,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       website_background_color: initialForm.website_background_color || "#FFFFFF",
       website_background_gradient: initialForm.website_background_gradient,
       website_background_image_url: initialForm.website_background_image_url,
-      website_background_style: initialForm.website_background_style,
+      website_background_style: initialForm.website_background_style || "color",
     },
   });
 
@@ -56,7 +56,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       website_background_color: initialForm.website_background_color || "#FFFFFF",
       website_background_gradient: initialForm.website_background_gradient,
       website_background_image_url: initialForm.website_background_image_url,
-      website_background_style: initialForm.website_background_style,
+      website_background_style: initialForm.website_background_style || "color",
     });
   }, [initialForm.id]);
 
