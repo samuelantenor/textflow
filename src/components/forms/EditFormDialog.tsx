@@ -43,7 +43,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     },
   });
 
-  // Reset all form values when a different form is selected
+  // Reset form values when a different form is selected
   useEffect(() => {
     form.reset({
       title: initialForm.title,
@@ -65,7 +65,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       website_background_image_url: initialForm.website_background_image_url,
       website_background_style: initialForm.website_background_style,
     });
-  }, [initialForm.id]); // Only reset when the form ID changes
+  }, [initialForm.id]);
 
   const handleLogoUpload = async (file: File) => {
     try {
