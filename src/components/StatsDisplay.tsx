@@ -18,42 +18,54 @@ const StatsDisplay = () => {
     queryKey: ['campaign-analytics-summary'],
     queryFn: async () => {
       try {
-        // First get the current user
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         if (userError) throw userError;
         if (!user) throw new Error('No authenticated user found');
 
         console.log('Fetching message logs for user:', user.id);
 
-        // Get all message logs for the user
-        const { data: messageLogs, error: messageLogsError } = await supabase
+        // Get message count by status
+        const { data: messageCountByStatus, error: countError } = await supabase
           .from('message_logs')
-          .select('status, created_at, campaign_id')
-          .eq('user_id', user.id);
+          .select('status, count', { count: 'exact' })
+          .eq('user_id', user.id)
+          .then(({ data, error }) => {
+            if (error) throw error;
+            return {
+              data: data?.reduce((acc, curr) => {
+                acc[curr.status] = (acc[curr.status] || 0) + 1;
+                return acc;
+              }, {} as Record<string, number>),
+              error: null
+            };
+          });
 
-        if (messageLogsError) {
-          console.error('Error fetching message logs:', messageLogsError);
-          throw messageLogsError;
+        if (countError) {
+          console.error('Error counting messages:', countError);
+          throw countError;
         }
 
-        console.log('Retrieved message logs:', messageLogs);
-        
-        // Calculate delivery metrics
-        const totalMessages = messageLogs?.length || 0;
-        const statusCounts = messageLogs?.reduce((acc, log) => {
-          acc[log.status] = (acc[log.status] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>) || {};
+        console.log('Message counts by status:', messageCountByStatus);
 
+        // Calculate total messages and status counts
+        const statusCounts = {
+          delivered: messageCountByStatus?.delivered || 0,
+          failed: messageCountByStatus?.failed || 0,
+          pending: messageCountByStatus?.pending || 0
+        };
+
+        const totalMessages = Object.values(statusCounts).reduce((sum, count) => sum + count, 0);
+        
+        // Calculate delivery rate
         const deliveryRate = totalMessages > 0 
-          ? ((statusCounts.delivered || 0) / totalMessages * 100).toFixed(1) 
+          ? ((statusCounts.delivered / totalMessages) * 100).toFixed(1)
           : '0';
 
-        // Prepare data for pie chart
+        // Prepare chart data
         const chartData = [
-          { name: 'Delivered', value: statusCounts.delivered || 0, color: COLORS.delivered },
-          { name: 'Failed', value: statusCounts.failed || 0, color: COLORS.failed },
-          { name: 'Pending', value: statusCounts.pending || 0, color: COLORS.pending }
+          { name: 'Delivered', value: statusCounts.delivered, color: COLORS.delivered },
+          { name: 'Failed', value: statusCounts.failed, color: COLORS.failed },
+          { name: 'Pending', value: statusCounts.pending, color: COLORS.pending }
         ];
 
         return {
