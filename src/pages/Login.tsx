@@ -83,6 +83,14 @@ const Login = () => {
         return;
       }
       
+      // Check if we're in a password reset flow
+      const hash = window.location.hash;
+      if (hash && hash.includes('#access_token') && hash.includes('type=recovery')) {
+        // Don't redirect automatically, let the user reset their password
+        setAuthError(null);
+        return;
+      }
+      
       if (session) {
         console.log("Found existing session, checking user status...");
         checkUserAndRedirect(session);
@@ -93,18 +101,30 @@ const Login = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event);
       
-      if (event === 'SIGNED_IN' && session) {
-        checkUserAndRedirect(session);
+      if (event === 'PASSWORD_RECOVERY') {
+        // Don't redirect, let the user reset their password
+        setAuthError(null);
+      } else if (event === 'SIGNED_IN' && session) {
+        // Only redirect if it's not a password recovery flow
+        const hash = window.location.hash;
+        if (!hash.includes('type=recovery')) {
+          checkUserAndRedirect(session);
+        }
       } else if (event === 'SIGNED_OUT') {
         setAuthError(null);
       } else if (event === 'USER_UPDATED') {
         setAuthError(null);
-      } else if (event === 'PASSWORD_RECOVERY') {
-        setAuthError(null);
+        // After password is updated, redirect to dashboard
+        if (session) {
+          navigate("/dashboard", { replace: true });
+        }
       } else if (event === 'INITIAL_SESSION') {
         // Handle initial session load
         if (session) {
-          checkUserAndRedirect(session);
+          const hash = window.location.hash;
+          if (!hash.includes('type=recovery')) {
+            checkUserAndRedirect(session);
+          }
         }
       }
     });
