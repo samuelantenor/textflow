@@ -24,12 +24,11 @@ const StatsDisplay = () => {
 
         console.log('Fetching message logs for user:', user.id);
 
-        // Get message count grouped by status using count aggregate
+        // Use the new database function to get message counts
         const { data: statusCounts, error: countError } = await supabase
-          .from('message_logs')
-          .select('status, count(*)')
-          .eq('user_id', user.id)
-          .groupBy('status');
+          .rpc('get_message_counts_by_status', {
+            p_user_id: user.id
+          });
 
         if (countError) {
           console.error('Error counting messages:', countError);
@@ -40,7 +39,7 @@ const StatsDisplay = () => {
 
         // Transform the data into the required format
         const messageCountByStatus = statusCounts?.reduce((acc, curr) => {
-          acc[curr.status] = parseInt(curr.count);
+          acc[curr.status] = Number(curr.count);
           return acc;
         }, {} as Record<string, number>) || {};
 
