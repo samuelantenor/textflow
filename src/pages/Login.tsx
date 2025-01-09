@@ -48,6 +48,7 @@ const Login = () => {
         return;
       }
       
+      // Only redirect to dashboard if we're not in password reset flow
       if (session && view !== 'update_password') {
         console.log("Found existing session, checking user status...");
         checkUserAndRedirect(session);
@@ -55,15 +56,18 @@ const Login = () => {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event);
       
       if (event === 'PASSWORD_RECOVERY') {
         setView('update_password');
         setAuthError(null);
-      } else if (event === 'SIGNED_IN' && session) {
-        // Only redirect if it's not a password recovery flow
-        if (view !== 'update_password') {
+      } else if (event === 'SIGNED_IN') {
+        // If it's a recovery flow, don't redirect
+        const hash = window.location.hash;
+        if (hash && hash.includes('type=recovery')) {
+          setView('update_password');
+        } else if (session) {
           checkUserAndRedirect(session);
         }
       } else if (event === 'SIGNED_OUT') {
@@ -71,17 +75,20 @@ const Login = () => {
         setView('sign_in');
       } else if (event === 'USER_UPDATED') {
         setAuthError(null);
-        // After password is updated, redirect to dashboard
-        if (session) {
-          checkUserAndRedirect(session);
-        }
+        // After password is updated, sign out the user
+        await supabase.auth.signOut();
+        toast({
+          title: "Password Updated",
+          description: "Please sign in with your new password.",
+        });
+        setView('sign_in');
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [view, checkUserAndRedirect, setAuthError, toast]);
+  }, [checkUserAndRedirect, setAuthError, toast]);
 
   if (isLoading) {
     return <LoadingState />;

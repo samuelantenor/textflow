@@ -32,11 +32,10 @@ const UpdatePasswordForm = () => {
 
       toast({
         title: "Password updated",
-        description: "Your password has been successfully updated",
+        description: "Your password has been successfully updated. Please sign in with your new password.",
       });
-
-      // Redirect to login after successful password update
-      window.location.href = '/login';
+      
+      // The USER_UPDATED event will trigger in Login.tsx and handle the sign out
     } catch (error: any) {
       toast({
         variant: "destructive",
