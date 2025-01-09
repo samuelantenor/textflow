@@ -20,7 +20,6 @@ interface FormPreviewProps {
     primaryColor?: string;
     backgroundImageUrl?: string;
     backgroundImageStyle?: 'cover' | 'contain' | 'repeat';
-    backgroundOpacity?: number;
     inputBackgroundColor?: string;
     showBorder?: boolean;
     websiteBackgroundColor?: string;
@@ -70,15 +69,6 @@ export function FormPreview({ title, description, fields, customization }: FormP
           className="p-6 bg-card/50 backdrop-blur-sm max-w-2xl mx-auto"
           style={formBackgroundStyle}
         >
-          {customization?.backgroundImageUrl && (
-            <div 
-              className="absolute inset-0 z-0"
-              style={{
-                backgroundColor: customization.backgroundColor,
-                opacity: (customization.backgroundOpacity || 100) / 100,
-              }}
-            />
-          )}
           <FormPreviewContent
             title={title}
             description={description}

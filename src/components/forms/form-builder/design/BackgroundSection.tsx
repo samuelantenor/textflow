@@ -89,21 +89,6 @@ export function BackgroundSection({
               </div>
             )}
           </div>
-
-          <div className="space-y-4">
-            <Label>Form Background Opacity</Label>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={formData.background_opacity || 100}
-              onChange={(e) => form.setValue("background_opacity", parseInt(e.target.value))}
-              className="w-full"
-            />
-            <div className="text-sm text-muted-foreground text-right">
-              {formData.background_opacity || 100}%
-            </div>
-          </div>
         </TabsContent>
 
         <TabsContent value="website" className="space-y-6">
