@@ -8,7 +8,7 @@ export const CreateCampaignButton = () => {
   return (
     <Button 
       className="bg-primary hover:bg-primary/90 text-white"
-      onClick={() => navigate("/campaigns/new")}
+      onClick={() => navigate("/campaigns/create")}
     >
       <Plus className="w-4 h-4 mr-2" />
       New Campaign
