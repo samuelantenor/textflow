@@ -13,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 export const FormsOverview = () => {
   const [selectedForm, setSelectedForm] = useState<CustomForm | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [submissionsDialogOpen, setSubmissionsDialogOpen] = useState(false);
   const { toast } = useToast();
   const { forms, groups, isLoadingForms, queryClient } = useFormsData();
 
@@ -28,13 +30,54 @@ export const FormsOverview = () => {
 
   const handleEdit = async (form: CustomForm) => {
     try {
-      const { data, error } = await supabase.from("custom_forms").select("*").eq("id", form.id).single();
+      const { data, error } = await supabase
+        .from("custom_forms")
+        .select("*")
+        .eq("id", form.id)
+        .single();
+
       if (error) throw error;
 
-      setSelectedForm(data);
+      setSelectedForm(form);
       setEditDialogOpen(true);
-    } catch {
-      toast({ title: "Error", description: "Failed to load form data.", variant: "destructive" });
+    } catch (error) {
+      console.error("Error fetching form:", error);
+      toast({ 
+        title: "Error", 
+        description: "Failed to load form data. Please try again.",
+        variant: "destructive" 
+      });
+    }
+  };
+
+  const handleShare = (form: CustomForm) => {
+    setSelectedForm(form);
+    setShareDialogOpen(true);
+  };
+
+  const handleViewSubmissions = (form: CustomForm) => {
+    setSelectedForm(form);
+    setSubmissionsDialogOpen(true);
+  };
+
+  const handleDelete = async (form: CustomForm) => {
+    try {
+      const { error } = await supabase
+        .from("custom_forms")
+        .delete()
+        .eq("id", form.id);
+
+      if (error) throw error;
+
+      toast({ title: "Success", description: "Form deleted successfully." });
+      queryClient.invalidateQueries({ queryKey: ["custom-forms"] });
+    } catch (error) {
+      console.error("Error deleting form:", error);
+      toast({ 
+        title: "Error", 
+        description: "Failed to delete form.", 
+        variant: "destructive" 
+      });
     }
   };
 
@@ -55,9 +98,32 @@ export const FormsOverview = () => {
         <h2 className="text-2xl font-bold">Forms</h2>
         <FormBuilder groupId={groups[0].id} />
       </div>
-      <FormsList forms={forms} isLoading={isLoadingForms} onEdit={handleEdit} />
+      <FormsList
+        forms={forms}
+        isLoading={isLoadingForms}
+        onEdit={handleEdit}
+        onShare={handleShare}
+        onDelete={handleDelete}
+        onViewSubmissions={handleViewSubmissions}
+      />
       {selectedForm && (
-        <EditFormDialog form={selectedForm} open={editDialogOpen} onOpenChange={setEditDialogOpen} />
+        <>
+          <ShareFormDialog 
+            form={selectedForm} 
+            open={shareDialogOpen} 
+            onOpenChange={setShareDialogOpen} 
+          />
+          <EditFormDialog 
+            form={selectedForm} 
+            open={editDialogOpen} 
+            onOpenChange={setEditDialogOpen} 
+          />
+          <ViewSubmissionsDialog
+            form={selectedForm}
+            open={submissionsDialogOpen}
+            onOpenChange={setSubmissionsDialogOpen}
+          />
+        </>
       )}
     </div>
   );
