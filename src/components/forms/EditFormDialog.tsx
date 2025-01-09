@@ -46,9 +46,9 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       group_id: initialForm.group_id,
       background_color: initialForm.background_color || "#FFFFFF",
       font_family: initialForm.font_family || "Inter",
-      logo_url: initialForm.logo_url || "",
+      logo_url: initialForm.logo_url,
       primary_color: initialForm.primary_color || "#ea384c",
-      background_image_url: initialForm.background_image_url || "",
+      background_image_url: initialForm.background_image_url,
       background_image_style: initialForm.background_image_style || "cover",
       background_opacity: initialForm.background_opacity || 100,
       input_background_color: initialForm.input_background_color || "#FFFFFF",
@@ -65,13 +65,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
           .eq("id", initialForm.id)
           .single();
         if (!error && data) {
-          form.reset({
-            ...data,
-            fields: Array.isArray(data.fields) ? data.fields : [],
-            description: data.description || "",
-            logo_url: data.logo_url || "",
-            background_image_url: data.background_image_url || "",
-          });
+          form.reset(data);
         }
       };
       fetchForm();
@@ -88,12 +82,12 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
         .upload(fileName, file);
       if (uploadError) throw new Error("File upload failed");
 
-      const { data } = await supabase.storage
+      const { data: publicUrlData, error: urlError } = supabase.storage
         .from("landing_page_assets")
         .getPublicUrl(fileName);
+      if (urlError || !publicUrlData) throw new Error("Failed to fetch public URL");
 
-      if (!data) throw new Error("Failed to fetch public URL");
-      form.setValue("logo_url", data.publicUrl);
+      form.setValue("logo_url", publicUrlData.publicUrl);
     } catch (error) {
       toast({
         title: "Error",
