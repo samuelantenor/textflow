@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -9,7 +10,6 @@ import { Loader2 } from "lucide-react";
 import { FormFieldsTab } from "./form-builder/FormFieldsTab";
 import { FormDesignTab } from "./form-builder/FormDesignTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState, useEffect } from "react";
 
 interface EditFormDialogProps {
   form: {
@@ -38,8 +38,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  console.log("EditFormDialog - Initial Form Data:", initialForm);
-  
   const form = useForm({
     defaultValues: {
       title: initialForm.title,
@@ -57,27 +55,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       show_border: initialForm.show_border ?? true,
     },
   });
-
-  // Update form values when initialForm changes
-  useEffect(() => {
-    if (open) {
-      form.reset({
-        title: initialForm.title,
-        description: initialForm.description || "",
-        fields: initialForm.fields || [],
-        group_id: initialForm.group_id,
-        background_color: initialForm.background_color || "#FFFFFF",
-        font_family: initialForm.font_family || "Inter",
-        logo_url: initialForm.logo_url,
-        primary_color: initialForm.primary_color || "#ea384c",
-        background_image_url: initialForm.background_image_url,
-        background_image_style: initialForm.background_image_style || "cover",
-        background_opacity: initialForm.background_opacity || 100,
-        input_background_color: initialForm.input_background_color || "#FFFFFF",
-        show_border: initialForm.show_border ?? true,
-      });
-    }
-  }, [initialForm, open, form]);
 
   const handleLogoUpload = async (file: File) => {
     try {
