@@ -31,7 +31,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       font_family: initialForm.font_family || "Inter",
       logo_url: initialForm.logo_url || "",
       primary_color: initialForm.primary_color || "#ea384c",
-      submit_button_color: initialForm.submit_button_color || "#ea384c",
+      submit_button_color: initialForm.submit_button_color,
       background_image_url: initialForm.background_image_url,
       background_image_style: initialForm.background_image_style,
       background_opacity: initialForm.background_opacity,
@@ -44,8 +44,9 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     },
   });
 
-  // Reset form values when initialForm changes
+  // Reset form values when initialForm changes, preserving certain color values
   useEffect(() => {
+    const currentValues = form.getValues();
     form.reset({
       title: initialForm.title,
       description: initialForm.description || "",
@@ -55,13 +56,14 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       font_family: initialForm.font_family || "Inter",
       logo_url: initialForm.logo_url || "",
       primary_color: initialForm.primary_color || "#ea384c",
-      submit_button_color: initialForm.submit_button_color || "#ea384c",
+      // Preserve these color values from the current form state
+      submit_button_color: currentValues.submit_button_color || initialForm.submit_button_color,
       background_image_url: initialForm.background_image_url,
       background_image_style: initialForm.background_image_style,
       background_opacity: initialForm.background_opacity,
-      input_background_color: initialForm.input_background_color,
+      input_background_color: currentValues.input_background_color || initialForm.input_background_color,
       show_border: initialForm.show_border,
-      website_background_color: initialForm.website_background_color,
+      website_background_color: currentValues.website_background_color || initialForm.website_background_color,
       website_background_gradient: initialForm.website_background_gradient,
       website_background_image_url: initialForm.website_background_image_url,
       website_background_style: initialForm.website_background_style,
