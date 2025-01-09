@@ -1,15 +1,15 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormFieldsTab } from "./form-builder/FormFieldsTab";
 import { FormDesignTab } from "./form-builder/FormDesignTab";
-import { useQueryClient } from "@tanstack/react-query";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
 
 interface EditFormDialogProps {
   form: {
@@ -44,8 +44,8 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     defaultValues: {
       title: initialForm.title,
       description: initialForm.description || "",
-      fields: initialForm.fields,
-      group_id: initialForm.group_id || "",
+      fields: initialForm.fields || [],
+      group_id: initialForm.group_id,
       background_color: initialForm.background_color || "#FFFFFF",
       font_family: initialForm.font_family || "Inter",
       logo_url: initialForm.logo_url,
@@ -57,6 +57,27 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       show_border: initialForm.show_border ?? true,
     },
   });
+
+  // Update form values when initialForm changes
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        title: initialForm.title,
+        description: initialForm.description || "",
+        fields: initialForm.fields || [],
+        group_id: initialForm.group_id,
+        background_color: initialForm.background_color || "#FFFFFF",
+        font_family: initialForm.font_family || "Inter",
+        logo_url: initialForm.logo_url,
+        primary_color: initialForm.primary_color || "#ea384c",
+        background_image_url: initialForm.background_image_url,
+        background_image_style: initialForm.background_image_style || "cover",
+        background_opacity: initialForm.background_opacity || 100,
+        input_background_color: initialForm.input_background_color || "#FFFFFF",
+        show_border: initialForm.show_border ?? true,
+      });
+    }
+  }, [initialForm, open, form]);
 
   const handleLogoUpload = async (file: File) => {
     try {
