@@ -2,7 +2,7 @@ import { stripe } from '../stripe-client.ts';
 import { supabaseClient } from '../supabase-client.ts';
 
 export async function handleSubscriptionDeleted(subscription: any) {
-  console.log('Subscription cancelled:', subscription.id);
+  console.log('Processing subscription cancellation:', subscription.id);
   
   // Find the user_id from the subscription
   const { data: subscriptionData, error: findError } = await supabaseClient
@@ -17,6 +17,7 @@ export async function handleSubscriptionDeleted(subscription: any) {
   }
 
   const userId = subscriptionData.user_id;
+  console.log('Found user ID:', userId);
 
   // Update subscription status
   const { error: updateError } = await supabaseClient
@@ -56,7 +57,8 @@ export async function handleSubscriptionDeleted(subscription: any) {
 }
 
 export async function handleCheckoutCompleted(session: any) {
-  console.log('Session data:', session);
+  console.log('Processing checkout session:', session.id);
+  console.log('Session data:', JSON.stringify(session, null, 2));
   
   if (!session.client_reference_id) {
     throw new Error('No client_reference_id found in session');
@@ -64,7 +66,7 @@ export async function handleCheckoutCompleted(session: any) {
 
   if (session.mode === 'subscription') {
     const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-    console.log('Subscription data:', subscription);
+    console.log('Retrieved subscription data:', JSON.stringify(subscription, null, 2));
 
     // Update subscription in database
     const { error: updateError } = await supabaseClient
@@ -99,11 +101,14 @@ export async function handleCheckoutCompleted(session: any) {
       console.error('Error recording payment:', paymentError);
       throw paymentError;
     }
+
+    console.log('Successfully processed checkout session');
   }
 }
 
 export async function handleSubscriptionUpdated(subscription: any) {
-  console.log('Updating subscription status:', subscription.id, subscription.status);
+  console.log('Processing subscription update:', subscription.id);
+  console.log('Subscription data:', JSON.stringify(subscription, null, 2));
   
   // Find the user_id from the subscription
   const { data: subscriptionData, error: findError } = await supabaseClient
@@ -133,4 +138,6 @@ export async function handleSubscriptionUpdated(subscription: any) {
     console.error('Error updating subscription:', updateError);
     throw updateError;
   }
+
+  console.log('Successfully processed subscription update');
 }
