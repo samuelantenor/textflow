@@ -592,6 +592,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_campaign_message_stats: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: {
+          campaign_status: string
+          message_status: string
+          count: number
+        }[]
+      }
       get_message_counts_by_status: {
         Args: {
           p_user_id: string
