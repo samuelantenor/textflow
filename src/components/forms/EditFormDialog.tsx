@@ -22,11 +22,6 @@ interface EditFormDialogProps {
     font_family?: string;
     logo_url?: string;
     primary_color?: string;
-    background_image_url?: string;
-    background_image_style?: string;
-    background_opacity?: number;
-    input_background_color?: string;
-    show_border?: boolean;
   };
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -48,11 +43,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       font_family: initialForm.font_family || "Inter",
       logo_url: initialForm.logo_url,
       primary_color: initialForm.primary_color || "#ea384c",
-      background_image_url: initialForm.background_image_url,
-      background_image_style: initialForm.background_image_style || "cover",
-      background_opacity: initialForm.background_opacity || 100,
-      input_background_color: initialForm.input_background_color || "#FFFFFF",
-      show_border: initialForm.show_border ?? true,
     },
   });
 
@@ -68,11 +58,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
         font_family: initialForm.font_family || "Inter",
         logo_url: initialForm.logo_url,
         primary_color: initialForm.primary_color || "#ea384c",
-        background_image_url: initialForm.background_image_url,
-        background_image_style: initialForm.background_image_style || "cover",
-        background_opacity: initialForm.background_opacity || 100,
-        input_background_color: initialForm.input_background_color || "#FFFFFF",
-        show_border: initialForm.show_border ?? true,
       });
     }
   }, [initialForm, open, form]);
@@ -118,11 +103,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
           font_family: data.font_family,
           logo_url: data.logo_url,
           primary_color: data.primary_color,
-          background_image_url: data.background_image_url,
-          background_image_style: data.background_image_style,
-          background_opacity: data.background_opacity,
-          input_background_color: data.input_background_color,
-          show_border: data.show_border,
         })
         .eq('id', initialForm.id);
 
