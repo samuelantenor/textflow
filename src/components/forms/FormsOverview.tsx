@@ -19,13 +19,20 @@ export const FormsOverview = () => {
   const { forms, groups, isLoadingForms, queryClient } = useFormsData();
 
   useEffect(() => {
-    const channel = supabase.channel("custom_forms_changes").on("postgres_changes", {
-      event: "*",
-      schema: "public",
-      table: "custom_forms",
-    }, () => queryClient.invalidateQueries({ queryKey: ["custom-forms"] })).subscribe();
+    const channel = supabase
+      .channel("custom_forms_changes")
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "custom_forms",
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ["custom-forms"] });
+      })
+      .subscribe();
 
-    return () => supabase.removeChannel(channel);
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, [queryClient]);
 
   const handleEdit = async (form: CustomForm) => {
@@ -86,7 +93,9 @@ export const FormsOverview = () => {
       <div className="space-y-8">
         <h2 className="text-2xl font-bold">Forms</h2>
         <Card className="p-12 text-center space-y-4 mt-4">
-          <p className="text-muted-foreground">You need to create a contact group before you can create a form.</p>
+          <p className="text-muted-foreground">
+            You need to create a contact group before you can create a form.
+          </p>
         </Card>
       </div>
     );
@@ -119,7 +128,7 @@ export const FormsOverview = () => {
             onOpenChange={setEditDialogOpen} 
           />
           <ViewSubmissionsDialog
-            form={selectedForm}
+            formId={selectedForm.id}
             open={submissionsDialogOpen}
             onOpenChange={setSubmissionsDialogOpen}
           />
