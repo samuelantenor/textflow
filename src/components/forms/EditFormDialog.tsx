@@ -57,22 +57,29 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   });
 
   useEffect(() => {
-    if (open) {
-      form.reset({
-        title: initialForm.title,
-        description: initialForm.description || "",
-        fields: initialForm.fields || [],
-        group_id: initialForm.group_id,
-        background_color: initialForm.background_color || "#FFFFFF",
-        font_family: initialForm.font_family || "Inter",
-        logo_url: initialForm.logo_url,
-        primary_color: initialForm.primary_color || "#ea384c",
-        background_image_url: initialForm.background_image_url,
-        background_image_style: initialForm.background_image_style || "cover",
-        background_opacity: initialForm.background_opacity || 100,
-        input_background_color: initialForm.input_background_color || "#FFFFFF",
-        show_border: initialForm.show_border ?? true,
-      });
+    if (open && initialForm) {
+      const currentValues = form.getValues();
+      const hasChanges = Object.keys(currentValues).some(
+        (key) => currentValues[key] !== initialForm[key]
+      );
+
+      if (hasChanges) {
+        form.reset({
+          title: initialForm.title,
+          description: initialForm.description || "",
+          fields: initialForm.fields || [],
+          group_id: initialForm.group_id,
+          background_color: initialForm.background_color || "#FFFFFF",
+          font_family: initialForm.font_family || "Inter",
+          logo_url: initialForm.logo_url,
+          primary_color: initialForm.primary_color || "#ea384c",
+          background_image_url: initialForm.background_image_url,
+          background_image_style: initialForm.background_image_style || "cover",
+          background_opacity: initialForm.background_opacity || 100,
+          input_background_color: initialForm.input_background_color || "#FFFFFF",
+          show_border: initialForm.show_border ?? true,
+        });
+      }
     }
   }, [initialForm, open, form]);
 
@@ -80,21 +87,43 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     try {
       const fileExt = file.name.split(".").pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
+
       const { error: uploadError } = await supabase.storage.from("landing_page_assets").upload(fileName, file);
+      if (uploadError) throw new Error("File upload failed");
 
-      if (uploadError) throw uploadError;
+      const { data: publicUrlData, error: urlError } = supabase.storage.from("landing_page_assets").getPublicUrl(fileName);
+      if (urlError || !publicUrlData) throw new Error("Failed to fetch public URL");
 
-      const { data: { publicUrl } } = supabase.storage.from("landing_page_assets").getPublicUrl(fileName);
-      form.setValue("logo_url", publicUrl);
+      form.setValue("logo_url", publicUrlData.publicUrl);
     } catch (error) {
-      toast({ title: "Error", description: "Failed to upload logo.", variant: "destructive" });
+      toast({ title: "Error", description: (error as Error).message, variant: "destructive" });
     }
   };
 
   const onSubmit = async (data: any) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.from("custom_forms").update({ ...data }).eq("id", initialForm.id);
+
+      const sanitizedData = {
+        title: data.title,
+        description: data.description,
+        fields: data.fields,
+        group_id: data.group_id,
+        background_color: data.background_color,
+        font_family: data.font_family,
+        logo_url: data.logo_url,
+        primary_color: data.primary_color,
+        background_image_url: data.background_image_url,
+        background_image_style: data.background_image_style,
+        background_opacity: data.background_opacity,
+        input_background_color: data.input_background_color,
+        show_border: data.show_border,
+      };
+
+      const { error } = await supabase
+        .from("custom_forms")
+        .update(sanitizedData)
+        .eq("id", initialForm.id);
 
       if (error) throw error;
 
@@ -117,7 +146,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden">
-            <Tabs value={activeTab} onValueChange={(tab) => setActiveTab(tab as "fields" | "design")} className="h-full flex flex-col">
+            <Tabs value={activeTab} onValueChange={(tab: "fields" | "design") => setActiveTab(tab)} className="h-full flex flex-col">
               <TabsList className="mb-4">
                 <TabsTrigger value="fields">Form Fields</TabsTrigger>
                 <TabsTrigger value="design">Design</TabsTrigger>
