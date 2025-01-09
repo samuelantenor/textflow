@@ -108,14 +108,14 @@ export const FormsOverview = () => {
         onViewSubmissions={handleViewSubmissions}
       />
       {selectedShareForm && (
-        <ShareFormDialog 
-          form={selectedShareForm} 
-          open={shareDialogOpen} 
-          onOpenChange={(open) => {
-            setShareDialogOpen(open);
-            if (!open) setSelectedShareForm(null);
-          }} 
-        />
+        <ShareFormDialog
+  form={selectedShareForm}
+  open={shareDialogOpen}
+  onOpenChange={(newOpen) => {
+    setShareDialogOpen(newOpen);
+    if (!newOpen) setSelectedShareForm(null); // Clear selected form state
+  }}
+/>
       )}
       {selectedEditForm && (
         <EditFormDialog 
@@ -129,13 +129,13 @@ export const FormsOverview = () => {
       )}
       {selectedSubmissionForm && (
         <ViewSubmissionsDialog
-          formId={selectedSubmissionForm.id}
-          open={submissionsDialogOpen}
-          onOpenChange={(open) => {
-            setSubmissionsDialogOpen(open);
-            if (!open) setSelectedSubmissionForm(null);
-          }}
-        />
+  formId={selectedSubmissionForm?.id || ""}
+  open={submissionsDialogOpen}
+  onOpenChange={(newOpen) => {
+    setSubmissionsDialogOpen(newOpen);
+    if (!newOpen) setSelectedSubmissionForm(null);
+  }}
+/>
       )}
     </div>
   );
