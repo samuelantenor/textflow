@@ -1,53 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FormFieldsTab } from "./form-builder/FormFieldsTab";
-import { FormDesignTab } from "./form-builder/FormDesignTab";
-import { useQueryClient } from "@tanstack/react-query";
-
-// Store last customization settings in memory
-let lastCustomizationSettings = {
-  background_color: "#FFFFFF",
-  font_family: "Inter",
-  logo_url: null,
-  primary_color: "#ea384c",
-  background_image_url: null,
-  background_image_style: "cover",
-  input_background_color: "#FFFFFF",
-  show_border: true,
-  website_background_color: "#FFFFFF",
-  website_background_gradient: null,
-  website_background_image_url: null,
-  website_background_style: "color",
-};
+import { FormTabs } from "./form-builder/FormTabs";
+import { FormActions } from "./form-builder/FormActions";
+import { CustomForm } from "./types";
 
 interface EditFormDialogProps {
-  form: {
-    id: string;
-    title: string;
-    description: string | null;
-    fields: any[];
-    group_id: string;
-    background_color?: string;
-    font_family?: string;
-    logo_url?: string;
-    primary_color?: string;
-    background_image_url?: string;
-    background_image_style?: string;
-    background_opacity?: number;
-    input_background_color?: string;
-    show_border?: boolean;
-    website_background_color?: string;
-    website_background_gradient?: string;
-    website_background_image_url?: string;
-    website_background_style?: string;
-  };
+  form: CustomForm;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -56,44 +19,53 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("fields");
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   
   const form = useForm({
     defaultValues: {
-      title: "",
-      description: "",
-      fields: [],
-      group_id: "",
-      ...lastCustomizationSettings
+      title: initialForm.title,
+      description: initialForm.description || "",
+      fields: initialForm.fields,
+      group_id: initialForm.group_id,
+      background_color: initialForm.background_color || "#FFFFFF",
+      font_family: initialForm.font_family || "Inter",
+      logo_url: initialForm.logo_url || "",
+      primary_color: initialForm.primary_color || "#ea384c",
+      submit_button_color: initialForm.submit_button_color || "#ea384c",
+      background_image_url: initialForm.background_image_url,
+      background_image_style: initialForm.background_image_style,
+      background_opacity: initialForm.background_opacity,
+      input_background_color: initialForm.input_background_color || "#FFFFFF",
+      show_border: initialForm.show_border,
+      website_background_color: initialForm.website_background_color || "#FFFFFF",
+      website_background_gradient: initialForm.website_background_gradient,
+      website_background_image_url: initialForm.website_background_image_url,
+      website_background_style: initialForm.website_background_style,
     },
   });
 
-  // Reset form values when initialForm changes or dialog opens
+  // Reset all form values when a different form is selected
   useEffect(() => {
-    if (open && initialForm) {
-      // Merge initial form data with last customization settings
-      const formValues = {
-        title: initialForm.title,
-        description: initialForm.description || "",
-        fields: initialForm.fields,
-        group_id: initialForm.group_id || "",
-        // Use last customization settings as fallback
-        background_color: initialForm.background_color || lastCustomizationSettings.background_color,
-        font_family: initialForm.font_family || lastCustomizationSettings.font_family,
-        logo_url: initialForm.logo_url || lastCustomizationSettings.logo_url,
-        primary_color: initialForm.primary_color || lastCustomizationSettings.primary_color,
-        background_image_url: initialForm.background_image_url || lastCustomizationSettings.background_image_url,
-        background_image_style: initialForm.background_image_style || lastCustomizationSettings.background_image_style,
-        input_background_color: initialForm.input_background_color || lastCustomizationSettings.input_background_color,
-        show_border: initialForm.show_border ?? lastCustomizationSettings.show_border,
-        website_background_color: initialForm.website_background_color || lastCustomizationSettings.website_background_color,
-        website_background_gradient: initialForm.website_background_gradient || lastCustomizationSettings.website_background_gradient,
-        website_background_image_url: initialForm.website_background_image_url || lastCustomizationSettings.website_background_image_url,
-        website_background_style: initialForm.website_background_style || lastCustomizationSettings.website_background_style,
-      };
-      form.reset(formValues);
-    }
-  }, [initialForm, open, form]);
+    form.reset({
+      title: initialForm.title,
+      description: initialForm.description || "",
+      fields: initialForm.fields,
+      group_id: initialForm.group_id,
+      background_color: initialForm.background_color || "#FFFFFF",
+      font_family: initialForm.font_family || "Inter",
+      logo_url: initialForm.logo_url || "",
+      primary_color: initialForm.primary_color || "#ea384c",
+      submit_button_color: initialForm.submit_button_color || "#ea384c",
+      background_image_url: initialForm.background_image_url,
+      background_image_style: initialForm.background_image_style,
+      background_opacity: initialForm.background_opacity,
+      input_background_color: initialForm.input_background_color || "#FFFFFF",
+      show_border: initialForm.show_border,
+      website_background_color: initialForm.website_background_color || "#FFFFFF",
+      website_background_gradient: initialForm.website_background_gradient,
+      website_background_image_url: initialForm.website_background_image_url,
+      website_background_style: initialForm.website_background_style,
+    });
+  }, [initialForm.id]); // Only reset when the form ID changes
 
   const handleLogoUpload = async (file: File) => {
     try {
@@ -125,22 +97,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     try {
       setIsLoading(true);
 
-      // Update last customization settings
-      lastCustomizationSettings = {
-        background_color: data.background_color,
-        font_family: data.font_family,
-        logo_url: data.logo_url,
-        primary_color: data.primary_color,
-        background_image_url: data.background_image_url,
-        background_image_style: data.background_image_style,
-        input_background_color: data.input_background_color,
-        show_border: data.show_border,
-        website_background_color: data.website_background_color,
-        website_background_gradient: data.website_background_gradient,
-        website_background_image_url: data.website_background_image_url,
-        website_background_style: data.website_background_style,
-      };
-
       const { error } = await supabase
         .from("custom_forms")
         .update({
@@ -148,13 +104,24 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
           description: data.description,
           fields: data.fields,
           group_id: data.group_id,
-          ...lastCustomizationSettings
+          background_color: data.background_color,
+          font_family: data.font_family,
+          logo_url: data.logo_url,
+          primary_color: data.primary_color,
+          submit_button_color: data.submit_button_color,
+          background_image_url: data.background_image_url,
+          background_image_style: data.background_image_style,
+          background_opacity: data.background_opacity,
+          input_background_color: data.input_background_color,
+          show_border: data.show_border,
+          website_background_color: data.website_background_color,
+          website_background_gradient: data.website_background_gradient,
+          website_background_image_url: data.website_background_image_url,
+          website_background_style: data.website_background_style,
         })
         .eq('id', initialForm.id);
 
       if (error) throw error;
-
-      await queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
 
       toast({
         title: "Success",
@@ -174,51 +141,25 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     }
   };
 
-  // Reset active tab when dialog opens/closes
-  useEffect(() => {
-    if (!open) {
-      setActiveTab("fields");
-    }
-  }, [open]);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[1200px] h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Edit Form: {initialForm.title}</DialogTitle>
+          <DialogTitle>Edit Form</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList className="mb-4">
-                <TabsTrigger value="fields">Form Fields</TabsTrigger>
-                <TabsTrigger value="design">Design</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="fields" className="flex-1 overflow-hidden">
-                <FormFieldsTab form={form} />
-              </TabsContent>
-
-              <TabsContent value="design" className="flex-1 overflow-hidden">
-                <FormDesignTab form={form} handleLogoUpload={handleLogoUpload} formId={initialForm.id} />
-              </TabsContent>
-            </Tabs>
-
-            <div className="flex justify-end space-x-4 pt-4 sticky bottom-0 bg-background p-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Save Changes
-              </Button>
-            </div>
+            <FormTabs
+              form={form}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              handleLogoUpload={handleLogoUpload}
+              formId={initialForm.id}
+            />
+            <FormActions
+              isLoading={isLoading}
+              onCancel={() => onOpenChange(false)}
+            />
           </form>
         </Form>
       </DialogContent>
