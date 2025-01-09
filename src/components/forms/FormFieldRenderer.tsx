@@ -25,13 +25,17 @@ export interface FormFieldRendererProps {
   customization?: {
     primaryColor?: string;
     fontFamily?: string;
+    inputBackgroundColor?: string;
+    showBorder?: boolean;
   };
 }
 
 export const FormFieldRenderer = ({ field, value, onChange, customization }: FormFieldRendererProps) => {
   const commonInputStyles = {
     fontFamily: customization?.fontFamily || 'Inter',
-    borderColor: customization?.primaryColor,
+    backgroundColor: customization?.inputBackgroundColor,
+    borderColor: customization?.showBorder ? customization?.primaryColor : 'transparent',
+    borderWidth: customization?.showBorder ? '1px' : '0',
   };
 
   switch (field.type) {
@@ -47,12 +51,12 @@ export const FormFieldRenderer = ({ field, value, onChange, customization }: For
             ...commonInputStyles,
             width: '100%',
             height: '40px',
-            backgroundColor: '#000000',
+            backgroundColor: customization?.inputBackgroundColor || '#000000',
             color: '#ffffff',
-            border: '1px solid #333333',
+            border: customization?.showBorder ? `1px solid ${customization.primaryColor}` : '1px solid #333333',
           }}
           buttonStyle={{
-            backgroundColor: '#000000',
+            backgroundColor: customization?.inputBackgroundColor || '#000000',
             borderColor: '#333333',
             borderRight: '1px solid #333333',
           }}
@@ -60,12 +64,12 @@ export const FormFieldRenderer = ({ field, value, onChange, customization }: For
             width: '100%',
           }}
           dropdownStyle={{
-            backgroundColor: '#000000',
+            backgroundColor: customization?.inputBackgroundColor || '#000000',
             color: '#ffffff',
             border: '1px solid #333333',
           }}
           searchStyle={{
-            backgroundColor: '#000000',
+            backgroundColor: customization?.inputBackgroundColor || '#000000',
             color: '#ffffff',
             border: '1px solid #333333',
             margin: '0',
