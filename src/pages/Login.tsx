@@ -15,6 +15,31 @@ const Login = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check URL for error parameters
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const error = hashParams.get('error');
+    const errorDescription = hashParams.get('error_description');
+
+    if (error === 'access_denied' && errorDescription) {
+      setAuthError(errorDescription.replace(/\+/g, ' '));
+      toast({
+        variant: "destructive",
+        title: "Password Reset Error",
+        description: "The reset link has expired. Please request a new password reset.",
+      });
+      setView('sign_in');
+      // Clean up the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+
+    // Check if we're in a password reset flow
+    const hash = window.location.hash;
+    if (hash && hash.includes('#access_token') && hash.includes('type=recovery')) {
+      setView('update_password');
+      return;
+    }
+    
     // Check current session on mount
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
@@ -23,7 +48,8 @@ const Login = () => {
         return;
       }
       
-      if (session) {
+      // Only redirect to dashboard if we're not in password reset flow
+      if (session && view !== 'update_password') {
         console.log("Found existing session, checking user status...");
         checkUserAndRedirect(session);
       }
@@ -36,13 +62,21 @@ const Login = () => {
       if (event === 'PASSWORD_RECOVERY') {
         setView('update_password');
         setAuthError(null);
-      } else if (event === 'SIGNED_IN' && session) {
-        checkUserAndRedirect(session);
+      } else if (event === 'SIGNED_IN') {
+        // If it's a recovery flow, don't redirect
+        const hash = window.location.hash;
+        if (hash && hash.includes('type=recovery')) {
+          setView('update_password');
+        } else if (session) {
+          checkUserAndRedirect(session);
+        }
       } else if (event === 'SIGNED_OUT') {
         setAuthError(null);
         setView('sign_in');
       } else if (event === 'USER_UPDATED') {
         setAuthError(null);
+        // After password is updated, sign out the user
+        await supabase.auth.signOut();
         toast({
           title: "Password Updated",
           description: "Please sign in with your new password.",
