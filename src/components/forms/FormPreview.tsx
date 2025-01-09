@@ -1,6 +1,5 @@
 import { Eye } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { FormPreviewContent } from "./form-preview/FormPreviewContent";
 
 interface FormPreviewProps {
