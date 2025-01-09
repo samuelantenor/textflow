@@ -184,6 +184,18 @@ const Login = () => {
             }}
             theme="dark"
             providers={[]}
+            localization={{
+              variables: {
+                sign_in: {
+                  email_label: 'Email',
+                  password_label: 'Password',
+                },
+                update_password: {
+                  password_label: 'New Password',
+                  button_label: 'Update Password',
+                },
+              },
+            }}
           />
         </div>
       </div>
