@@ -148,7 +148,6 @@ const Login = () => {
                     password_input_placeholder: 'Your password',
                     email_input_placeholder: 'Your email',
                     link_text: "Don't have an account? Sign up",
-                    forgotten_password_text: 'Forgot your password?',
                   },
                 },
               }}
