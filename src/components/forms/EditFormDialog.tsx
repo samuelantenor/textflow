@@ -8,9 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FormGeneralSection } from "./form-builder/general/FormGeneralSection";
-import { FormDesignSection } from "./form-builder/design/FormDesignSection";
-import { FormBackgroundSection } from "./form-builder/background/FormBackgroundSection";
+import { FormFieldsTab } from "./form-builder/FormFieldsTab";
+import { FormDesignTab } from "./form-builder/FormDesignTab";
 import { FormData, CustomForm } from "./types";
 
 interface EditFormDialogProps {
@@ -21,7 +20,7 @@ interface EditFormDialogProps {
 
 export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFormDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("general");
+  const [activeTab, setActiveTab] = useState("fields");
   const { toast } = useToast();
   
   const form = useForm<FormData>({
@@ -35,86 +34,17 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       logo_url: initialForm.logo_url || null,
       primary_color: initialForm.primary_color || "#ea384c",
       submit_button_color: initialForm.submit_button_color || "#ea384c",
+      background_image_url: initialForm.background_image_url,
+      background_image_style: initialForm.background_image_style,
+      background_opacity: initialForm.background_opacity,
+      input_background_color: initialForm.input_background_color,
+      show_border: initialForm.show_border,
+      website_background_color: initialForm.website_background_color,
+      website_background_gradient: initialForm.website_background_gradient,
+      website_background_image_url: initialForm.website_background_image_url,
+      website_background_style: initialForm.website_background_style,
     },
   });
-
-  const handleLogoUpload = async (file: File) => {
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from("landing_page_assets")
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("landing_page_assets")
-        .getPublicUrl(fileName);
-      
-      form.setValue("logo_url", publicUrl);
-    } catch (error) {
-      console.error("Error uploading logo:", error);
-      toast({
-        title: "Error",
-        description: "Failed to upload logo. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleBackgroundImageUpload = async (file: File) => {
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from("landing_page_assets")
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("landing_page_assets")
-        .getPublicUrl(fileName);
-      
-      form.setValue("background_image_url", publicUrl);
-    } catch (error) {
-      console.error("Error uploading background image:", error);
-      toast({
-        title: "Error",
-        description: "Failed to upload background image. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleWebsiteBackgroundImageUpload = async (file: File) => {
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from("landing_page_assets")
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("landing_page_assets")
-        .getPublicUrl(fileName);
-      
-      form.setValue("website_background_image_url", publicUrl);
-    } catch (error) {
-      console.error("Error uploading website background image:", error);
-      toast({
-        title: "Error",
-        description: "Failed to upload website background image. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -126,6 +56,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
           title: data.title,
           description: data.description,
           fields: data.fields,
+          group_id: data.group_id,
           background_color: data.background_color,
           font_family: data.font_family,
           logo_url: data.logo_url,
@@ -171,50 +102,37 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
               <TabsList>
-                <TabsTrigger value="general">General</TabsTrigger>
+                <TabsTrigger value="fields">Form Fields</TabsTrigger>
                 <TabsTrigger value="design">Design</TabsTrigger>
-                <TabsTrigger value="background">Background</TabsTrigger>
               </TabsList>
 
-              <ScrollArea className="flex-1 px-1">
-                <TabsContent value="general" className="mt-4">
-                  <FormGeneralSection form={form} />
-                </TabsContent>
+              <TabsContent value="fields" className="flex-1 overflow-hidden">
+                <FormFieldsTab form={form} />
+              </TabsContent>
 
-                <TabsContent value="design" className="mt-4">
-                  <FormDesignSection 
-                    form={form}
-                    onLogoUpload={handleLogoUpload}
-                  />
-                </TabsContent>
+              <TabsContent value="design" className="flex-1 overflow-hidden">
+                <FormDesignTab form={form} formId={initialForm.id} />
+              </TabsContent>
 
-                <TabsContent value="background" className="mt-4">
-                  <FormBackgroundSection
-                    form={form}
-                    onBackgroundImageUpload={handleBackgroundImageUpload}
-                    onWebsiteBackgroundImageUpload={handleWebsiteBackgroundImageUpload}
-                  />
-                </TabsContent>
-              </ScrollArea>
+              <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  className="w-full sm:w-auto"
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+                  {isLoading && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Save Changes
+                </Button>
+              </div>
             </Tabs>
-
-            <div className="flex justify-end space-x-4 pt-4 sticky bottom-0 bg-background p-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Save Changes
-              </Button>
-            </div>
           </form>
         </Form>
       </DialogContent>
