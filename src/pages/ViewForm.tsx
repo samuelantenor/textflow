@@ -55,7 +55,7 @@ export default function ViewForm() {
 
     setSubmitting(true);
     try {
-      // First create the contact
+      // Create the contact first
       const { data: contactData, error: contactError } = await supabase
         .from('contacts')
         .insert({
