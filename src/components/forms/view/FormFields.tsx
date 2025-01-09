@@ -8,6 +8,9 @@ interface FormFieldsProps {
   onFieldChange: (fieldName: string, value: any) => void;
   customization?: {
     primaryColor?: string;
+    fontFamily?: string;
+    inputBackgroundColor?: string;
+    showBorder?: boolean;
   };
 }
 
@@ -34,7 +37,12 @@ export function FormFields({ fields, formData, onFieldChange, customization }: F
             field={field}
             value={formData[field.label]}
             onChange={(value) => onFieldChange(field.label, value)}
-            customization={customization}
+            customization={{
+              primaryColor: customization?.primaryColor,
+              fontFamily: customization?.fontFamily,
+              inputBackgroundColor: customization?.inputBackgroundColor,
+              showBorder: customization?.showBorder,
+            }}
           />
         </div>
       ))}

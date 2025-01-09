@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { FormFieldRenderer } from "../FormFieldRenderer";
+import { FormFields } from "./FormFields";
 import { FormField } from "@/types/form";
 
 interface ViewFormContentProps {
@@ -9,9 +9,9 @@ interface ViewFormContentProps {
     fields: FormField[];
     logo_url?: string;
     primary_color?: string;
+    font_family?: string;
     input_background_color?: string;
     show_border?: boolean;
-    font_family?: string;
   };
   formData: Record<string, any>;
   onFieldChange: (fieldName: string, value: any) => void;
@@ -43,21 +43,17 @@ export function ViewFormContent({ form, formData, onFieldChange, onSubmit, submi
         )}
       </div>
 
-      <div className="space-y-6">
-        {form.fields.map((field) => (
-          <div key={field.id} className="space-y-2">
-            <FormFieldRenderer
-              field={field}
-              value={formData[field.label]}
-              onChange={(value) => onFieldChange(field.label, value)}
-              customization={{
-                primaryColor: form.primary_color,
-                fontFamily: form.font_family,
-              }}
-            />
-          </div>
-        ))}
-      </div>
+      <FormFields
+        fields={form.fields}
+        formData={formData}
+        onFieldChange={onFieldChange}
+        customization={{
+          primaryColor: form.primary_color,
+          fontFamily: form.font_family,
+          inputBackgroundColor: form.input_background_color,
+          showBorder: form.show_border,
+        }}
+      />
 
       <Button 
         type="submit" 
