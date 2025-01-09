@@ -24,12 +24,12 @@ const StatsDisplay = () => {
 
         console.log('Fetching message logs for user:', user.id);
 
-        // Get message count grouped by status
+        // Get message count grouped by status using count aggregate
         const { data: statusCounts, error: countError } = await supabase
           .from('message_logs')
-          .select('status, count', { count: 'exact', head: false })
+          .select('status, count(*)')
           .eq('user_id', user.id)
-          .group_by('status');
+          .groupBy('status');
 
         if (countError) {
           console.error('Error counting messages:', countError);
