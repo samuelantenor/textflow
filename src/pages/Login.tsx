@@ -160,14 +160,6 @@ const Login = () => {
               }}
               redirectTo={`${window.location.origin}/dashboard`}
             />
-            <div className="mt-4 text-center">
-              <button
-                onClick={() => setView('forgot_password')}
-                className="text-sm text-muted-foreground hover:text-primary"
-              >
-                Forgot your password?
-              </button>
-            </div>
           </AuthContainer>
         );
     }
