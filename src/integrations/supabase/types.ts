@@ -216,9 +216,14 @@ export type Database = {
           logo_url: string | null
           primary_color: string | null
           show_border: boolean | null
+          submit_button_color: string | null
           title: string
           updated_at: string
           user_id: string
+          website_background_color: string | null
+          website_background_gradient: string | null
+          website_background_image_url: string | null
+          website_background_style: string | null
         }
         Insert: {
           background_color?: string | null
@@ -236,9 +241,14 @@ export type Database = {
           logo_url?: string | null
           primary_color?: string | null
           show_border?: boolean | null
+          submit_button_color?: string | null
           title: string
           updated_at?: string
           user_id: string
+          website_background_color?: string | null
+          website_background_gradient?: string | null
+          website_background_image_url?: string | null
+          website_background_style?: string | null
         }
         Update: {
           background_color?: string | null
@@ -256,9 +266,14 @@ export type Database = {
           logo_url?: string | null
           primary_color?: string | null
           show_border?: boolean | null
+          submit_button_color?: string | null
           title?: string
           updated_at?: string
           user_id?: string
+          website_background_color?: string | null
+          website_background_gradient?: string | null
+          website_background_image_url?: string | null
+          website_background_style?: string | null
         }
         Relationships: [
           {
