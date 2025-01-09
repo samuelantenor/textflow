@@ -23,23 +23,28 @@ interface FormPreviewProps {
     backgroundOpacity?: number;
     inputBackgroundColor?: string;
     showBorder?: boolean;
+    backgroundStyle?: 'color' | 'gradient' | 'image';
   };
 }
 
 export function FormPreview({ title, description, fields, customization }: FormPreviewProps) {
   const backgroundStyle: React.CSSProperties = {
-    backgroundColor: customization?.backgroundColor || '#FFFFFF',
-    fontFamily: customization?.fontFamily || 'Inter',
     position: 'relative',
   };
 
-  if (customization?.backgroundImageUrl) {
+  // Handle different background styles
+  if (customization?.backgroundStyle === 'gradient' && customization.backgroundColor) {
+    backgroundStyle.background = customization.backgroundColor;
+  } else if (customization?.backgroundStyle === 'image' && customization.backgroundImageUrl) {
     Object.assign(backgroundStyle, {
       backgroundImage: `url(${customization.backgroundImageUrl})`,
       backgroundSize: customization.backgroundImageStyle === 'repeat' ? 'auto' : customization.backgroundImageStyle,
       backgroundRepeat: customization.backgroundImageStyle === 'repeat' ? 'repeat' : 'no-repeat',
       backgroundPosition: 'center',
     });
+  } else {
+    // Default to solid color
+    backgroundStyle.backgroundColor = customization?.backgroundColor || '#FFFFFF';
   }
 
   return (
@@ -52,7 +57,7 @@ export function FormPreview({ title, description, fields, customization }: FormP
         className="p-6 bg-card/50 backdrop-blur-sm h-[calc(100%-2rem)] overflow-y-auto relative"
         style={backgroundStyle}
       >
-        {customization?.backgroundImageUrl && (
+        {(customization?.backgroundImageUrl || customization?.backgroundStyle === 'gradient') && (
           <div 
             className="absolute inset-0 z-0"
             style={{
