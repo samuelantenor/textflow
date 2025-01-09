@@ -55,7 +55,11 @@ export function MessageLogs({ campaignId }: MessageLogsProps) {
           {logs?.map((log) => (
             <TableRow key={log.id}>
               <TableCell>
-                {log.contacts?.name || log.contacts?.phone_number}
+                {/* First try to get info from the contacts relation */}
+                {log.contacts?.name || log.contacts?.phone_number || 
+                /* If contact was deleted, use the preserved info */
+                log.contact_name || log.contact_phone_number || 
+                'Unknown Contact'}
               </TableCell>
               <TableCell>
                 <Badge
