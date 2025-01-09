@@ -6,10 +6,12 @@ import AuthContainer from "@/components/auth/AuthContainer";
 import LoadingState from "@/components/auth/LoadingState";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useToast } from "@/hooks/use-toast";
+import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
+import UpdatePasswordForm from "@/components/auth/UpdatePasswordForm";
 
 const Login = () => {
   const { isLoading, authError, setAuthError, checkUserAndRedirect } = useAuthRedirect();
-  const [view, setView] = useState<'sign_in' | 'update_password'>('sign_in');
+  const [view, setView] = useState<'sign_in' | 'forgot_password' | 'update_password'>('sign_in');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -85,52 +87,87 @@ const Login = () => {
     return <LoadingState />;
   }
 
-  return (
-    <AuthContainer
-      title={view === 'update_password' ? 'Reset Your Password' : 'Welcome to FlowText'}
-      description={view === 'update_password' 
-        ? 'Please enter your new password below'
-        : 'Sign in to manage your campaigns'}
-      error={authError}
-    >
-      <Auth
-        supabaseClient={supabase}
-        view={view}
-        appearance={{ 
-          theme: ThemeSupa,
-          variables: {
-            default: {
-              colors: {
-                brand: '#000000',
-                brandAccent: '#666666',
-                inputText: '#ffffff',
-                inputBackground: '#1a1a1a',
-                inputPlaceholder: '#666666',
-              },
-            },
-          },
-          className: {
-            input: 'text-white',
-            label: 'text-white',
-          },
-        }}
-        theme="dark"
-        providers={[]}
-        localization={{
-          variables: {
-            sign_in: {
-              email_label: 'Email',
-              password_label: 'Password',
-            },
-            update_password: {
-              password_label: 'New Password',
-              button_label: 'Update Password',
-            },
-          },
-        }}
-      />
-    </AuthContainer>
-  );
+  const getContent = () => {
+    switch (view) {
+      case 'forgot_password':
+        return (
+          <AuthContainer
+            title="Reset Password"
+            description="Enter your email to receive a password reset link"
+            error={authError}
+          >
+            <ForgotPasswordForm onBack={() => setView('sign_in')} />
+          </AuthContainer>
+        );
+      case 'update_password':
+        return (
+          <AuthContainer
+            title="Set New Password"
+            description="Enter your new password"
+            error={authError}
+          >
+            <UpdatePasswordForm />
+          </AuthContainer>
+        );
+      default:
+        return (
+          <AuthContainer
+            title="Welcome to FlowText"
+            description="Sign in to manage your campaigns"
+            error={authError}
+          >
+            <Auth
+              supabaseClient={supabase}
+              view="sign_in"
+              appearance={{ 
+                theme: ThemeSupa,
+                variables: {
+                  default: {
+                    colors: {
+                      brand: '#000000',
+                      brandAccent: '#666666',
+                      inputText: '#ffffff',
+                      inputBackground: '#1a1a1a',
+                      inputPlaceholder: '#666666',
+                    },
+                  },
+                },
+                className: {
+                  input: 'text-white',
+                  label: 'text-white',
+                },
+              }}
+              theme="dark"
+              providers={[]}
+              localization={{
+                variables: {
+                  sign_in: {
+                    email_label: 'Email',
+                    password_label: 'Password',
+                    button_label: 'Sign In',
+                    password_input_placeholder: 'Your password',
+                    email_input_placeholder: 'Your email',
+                    link_text: "Don't have an account? Sign up",
+                    forgotten_password_text: 'Forgot your password?',
+                  },
+                },
+              }}
+              redirectTo={`${window.location.origin}/dashboard`}
+            />
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => setView('forgot_password')}
+                className="text-sm text-muted-foreground hover:text-primary"
+              >
+                Forgot your password?
+              </button>
+            </div>
+          </AuthContainer>
+        );
+    }
+  };
+
+  return getContent();
 };
 
 export default Login;
