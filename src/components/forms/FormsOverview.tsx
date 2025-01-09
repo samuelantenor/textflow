@@ -51,7 +51,11 @@ export const FormsOverview = () => {
 
       if (error) throw error;
 
-      setSelectedEditForm(data);
+      // Ensure campaign_groups is properly handled
+      setSelectedEditForm({
+        ...data,
+        campaign_groups: form.campaign_groups || null,
+      });
       setEditDialogOpen(true);
     } catch (error) {
       toast({ title: "Error", description: "Failed to load form data.", variant: "destructive" });

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
@@ -10,24 +9,10 @@ import { Loader2 } from "lucide-react";
 import { FormFieldsTab } from "./form-builder/FormFieldsTab";
 import { FormDesignTab } from "./form-builder/FormDesignTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CustomForm } from "./types";
 
 interface EditFormDialogProps {
-  form: {
-    id: string;
-    title: string;
-    description?: string | null;
-    fields: any[];
-    group_id: string;
-    background_color?: string;
-    font_family?: string;
-    logo_url?: string;
-    primary_color?: string;
-    background_image_url?: string;
-    background_image_style?: string;
-    background_opacity?: number;
-    input_background_color?: string;
-    show_border?: boolean;
-  };
+  form: CustomForm;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -36,13 +21,12 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"fields" | "design">("fields");
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const form = useForm({
     defaultValues: {
       title: initialForm.title,
       description: initialForm.description || "",
-      fields: initialForm.fields || [],
+      fields: Array.isArray(initialForm.fields) ? initialForm.fields : [],
       group_id: initialForm.group_id,
       background_color: initialForm.background_color || "#FFFFFF",
       font_family: initialForm.font_family || "Inter",
@@ -64,8 +48,24 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
           .select("*")
           .eq("id", initialForm.id)
           .single();
+          
         if (!error && data) {
-          form.reset(data);
+          // Ensure fields is an array before resetting the form
+          const formData = {
+            ...data,
+            fields: Array.isArray(data.fields) ? data.fields : [],
+            description: data.description || "",
+          };
+          
+          // Only include fields that are in the form's defaultValues
+          const sanitizedData = Object.keys(form.getValues()).reduce((acc, key) => {
+            if (key in formData) {
+              acc[key] = formData[key];
+            }
+            return acc;
+          }, {} as any);
+          
+          form.reset(sanitizedData);
         }
       };
       fetchForm();
@@ -82,12 +82,11 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
         .upload(fileName, file);
       if (uploadError) throw new Error("File upload failed");
 
-      const { data: publicUrlData, error: urlError } = supabase.storage
+      const { data: { publicUrl } } = supabase.storage
         .from("landing_page_assets")
         .getPublicUrl(fileName);
-      if (urlError || !publicUrlData) throw new Error("Failed to fetch public URL");
 
-      form.setValue("logo_url", publicUrlData.publicUrl);
+      form.setValue("logo_url", publicUrl);
     } catch (error) {
       toast({
         title: "Error",
@@ -123,8 +122,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
         .eq("id", initialForm.id);
 
       if (error) throw error;
-
-      await queryClient.invalidateQueries({ queryKey: ["custom-forms"] });
 
       toast({ title: "Success", description: "Form updated successfully." });
       onOpenChange(false);
