@@ -52,7 +52,24 @@ export function useFormData(): UseFormDataReturn {
     try {
       const { data: formResponse, error: formError } = await supabase
         .from('custom_forms')
-        .select('*')
+        .select(`
+          id,
+          title,
+          description,
+          fields,
+          user_id,
+          group_id,
+          is_active,
+          background_color,
+          font_family,
+          logo_url,
+          primary_color,
+          background_image_url,
+          background_image_style,
+          background_opacity,
+          input_background_color,
+          show_border
+        `)
         .eq('id', formId)
         .single();
 
@@ -86,6 +103,9 @@ export function useFormData(): UseFormDataReturn {
         ...formResponse,
         fields: transformedFields,
         background_image_style: (formResponse.background_image_style as 'cover' | 'contain' | 'repeat' | null) || null,
+        background_opacity: formResponse.background_opacity || 100,
+        input_background_color: formResponse.input_background_color || '#FFFFFF',
+        show_border: formResponse.show_border ?? true,
       };
 
       setForm(validatedForm);
