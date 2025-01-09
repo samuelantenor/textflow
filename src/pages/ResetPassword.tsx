@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import AuthContainer from "@/components/auth/AuthContainer";
-import UpdatePasswordForm from "@/components/auth/UpdatePasswordForm";
-import LoadingState from "@/components/auth/LoadingState";
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
+import AuthContainer from "@/components/auth/AuthContainer";
+import LoadingState from "@/components/auth/LoadingState";
+import UpdatePasswordForm from "@/components/auth/UpdatePasswordForm";
 import { useToast } from "@/hooks/use-toast";
 
 const ResetPassword = () => {
@@ -13,37 +13,25 @@ const ResetPassword = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const handlePasswordReset = async () => {
-      try {
-        // Get the session to check if we're authenticated
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) throw sessionError;
-
-        // If no session, check if we have a recovery token in the URL
-        if (!session) {
-          const hash = window.location.hash;
-          if (!hash || !hash.includes('access_token')) {
-            setError('Invalid or expired reset link. Please request a new password reset.');
-            toast({
-              variant: "destructive",
-              title: "Invalid Reset Link",
-              description: "The password reset link is invalid or has expired. Please request a new one.",
-            });
-            setTimeout(() => navigate('/login'), 3000);
-            return;
-          }
-        }
-
-        setLoading(false);
-      } catch (error: any) {
-        console.error('Error in password reset:', error);
-        setError(error.message);
-        setLoading(false);
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        setError("Invalid or expired reset link. Please request a new password reset.");
+        toast({
+          variant: "destructive",
+          title: "Invalid Reset Link",
+          description: "Please request a new password reset link.",
+        });
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
       }
+      
+      setLoading(false);
     };
 
-    handlePasswordReset();
+    checkSession();
   }, [navigate, toast]);
 
   if (loading) {
@@ -52,8 +40,8 @@ const ResetPassword = () => {
 
   return (
     <AuthContainer
-      title="Reset Your Password"
-      description="Enter your new password below"
+      title="Reset Password"
+      description="Enter your new password"
       error={error}
     >
       <UpdatePasswordForm />
