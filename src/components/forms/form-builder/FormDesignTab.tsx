@@ -23,6 +23,32 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
   const { toast } = useToast();
   const formData = form.watch();
 
+  const handleBackgroundImageUpload = async (file: File) => {
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from("landing_page_assets")
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("landing_page_assets")
+        .getPublicUrl(fileName);
+      
+      form.setValue("background_image_url", publicUrl);
+    } catch (error) {
+      console.error('Error uploading background image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload background image. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleWebsiteBackgroundImageUpload = async (file: File) => {
     try {
       const fileExt = file.name.split(".").pop();
@@ -68,6 +94,9 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
           font_family: formData.font_family,
           logo_url: formData.logo_url,
           primary_color: formData.primary_color,
+          background_image_url: formData.background_image_url,
+          background_image_style: formData.background_image_style,
+          background_opacity: formData.background_opacity,
           input_background_color: formData.input_background_color,
           show_border: formData.show_border,
           website_background_color: formData.website_background_color,
@@ -115,19 +144,14 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
           </div>
 
           <ColorPicker
-            label="Primary Color (Links & Accents)"
+            label="Primary Color (Buttons & Accents)"
             value={formData.primary_color}
             onChange={(value) => form.setValue("primary_color", value)}
           />
 
-          <ColorPicker
-            label="Submit Button Color"
-            value={formData.submit_button_color}
-            onChange={(value) => form.setValue("submit_button_color", value)}
-          />
-
           <BackgroundSection
             form={form}
+            onBackgroundImageUpload={handleBackgroundImageUpload}
             onWebsiteBackgroundImageUpload={handleWebsiteBackgroundImageUpload}
           />
 
@@ -147,7 +171,9 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
             fontFamily: formData.font_family,
             logoUrl: formData.logo_url,
             primaryColor: formData.primary_color,
-            submitButtonColor: formData.submit_button_color,
+            backgroundImageUrl: formData.background_image_url,
+            backgroundImageStyle: formData.background_image_style,
+            backgroundOpacity: formData.background_opacity,
             inputBackgroundColor: formData.input_background_color,
             showBorder: formData.show_border,
             websiteBackgroundColor: formData.website_background_color,

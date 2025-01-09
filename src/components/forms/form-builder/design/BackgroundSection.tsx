@@ -9,14 +9,21 @@ import { X } from "lucide-react";
 
 interface BackgroundSectionProps {
   form: UseFormReturn<any>;
+  onBackgroundImageUpload: (file: File) => Promise<void>;
   onWebsiteBackgroundImageUpload: (file: File) => Promise<void>;
 }
 
 export function BackgroundSection({ 
   form, 
+  onBackgroundImageUpload,
   onWebsiteBackgroundImageUpload 
 }: BackgroundSectionProps) {
   const formData = form.watch();
+
+  const handleRemoveBackgroundImage = () => {
+    form.setValue("background_image_url", null);
+    form.setValue("background_image_style", "cover");
+  };
 
   const handleRemoveWebsiteBackgroundImage = () => {
     form.setValue("website_background_image_url", null);
@@ -37,6 +44,66 @@ export function BackgroundSection({
             value={formData.background_color}
             onChange={(value) => form.setValue("background_color", value)}
           />
+
+          <div className="space-y-4">
+            <Label>Form Background Image</Label>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) onBackgroundImageUpload(file);
+              }}
+            />
+            {formData.background_image_url && (
+              <div className="mt-2 space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>Background Image Style</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRemoveBackgroundImage}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Remove Image
+                  </Button>
+                </div>
+                <RadioGroup
+                  value={formData.background_image_style || "cover"}
+                  onValueChange={(value) => form.setValue("background_image_style", value)}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="cover" id="cover" />
+                    <Label htmlFor="cover">Cover</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="contain" id="contain" />
+                    <Label htmlFor="contain">Contain</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="repeat" id="repeat" />
+                    <Label htmlFor="repeat">Mosaic (Repeat)</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <Label>Form Background Opacity</Label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={formData.background_opacity || 100}
+              onChange={(e) => form.setValue("background_opacity", parseInt(e.target.value))}
+              className="w-full"
+            />
+            <div className="text-sm text-muted-foreground text-right">
+              {formData.background_opacity || 100}%
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="website" className="space-y-6">

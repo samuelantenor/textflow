@@ -11,7 +11,6 @@ interface FormFieldsProps {
     fontFamily?: string;
     inputBackgroundColor?: string;
     showBorder?: boolean;
-    inputTextColor?: string;
   };
 }
 
@@ -43,7 +42,6 @@ export function FormFields({ fields, formData, onFieldChange, customization }: F
               fontFamily: customization?.fontFamily,
               inputBackgroundColor: customization?.inputBackgroundColor,
               showBorder: customization?.showBorder,
-              inputTextColor: customization?.inputTextColor,
             }}
           />
         </div>

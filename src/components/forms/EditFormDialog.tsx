@@ -1,16 +1,28 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { FormTabs } from "./form-builder/FormTabs";
-import { FormActions } from "./form-builder/FormActions";
-import { CustomForm } from "./types";
+import { Loader2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FormFieldsTab } from "./form-builder/FormFieldsTab";
+import { FormDesignTab } from "./form-builder/FormDesignTab";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface EditFormDialogProps {
-  form: CustomForm;
+  form: {
+    id: string;
+    title: string;
+    description: string | null;
+    fields: any[];
+    group_id: string;
+    background_color?: string;
+    font_family?: string;
+    logo_url?: string;
+    primary_color?: string;
+  };
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -19,26 +31,36 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("fields");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const form = useForm({
     defaultValues: {
-      title: initialForm.title,
-      description: initialForm.description || "",
-      fields: initialForm.fields,
-      group_id: initialForm.group_id,
-      background_color: initialForm.background_color || "#FFFFFF",
-      font_family: initialForm.font_family || "Inter",
-      logo_url: initialForm.logo_url || "",
-      primary_color: initialForm.primary_color || "#ea384c",
-      submit_button_color: initialForm.submit_button_color || "#ea384c",
-      input_background_color: initialForm.input_background_color || "#FFFFFF",
-      show_border: initialForm.show_border,
-      website_background_color: initialForm.website_background_color || "#FFFFFF",
-      website_background_gradient: initialForm.website_background_gradient || "",
-      website_background_image_url: initialForm.website_background_image_url || "",
-      website_background_style: initialForm.website_background_style || "color",
+      title: "",
+      description: "",
+      fields: [],
+      group_id: "",
+      background_color: "#FFFFFF",
+      font_family: "Inter",
+      logo_url: null,
+      primary_color: "#ea384c",
     },
   });
+
+  // Reset form values when initialForm changes or dialog opens
+  useEffect(() => {
+    if (open && initialForm) {
+      form.reset({
+        title: initialForm.title,
+        description: initialForm.description || "",
+        fields: initialForm.fields,
+        group_id: initialForm.group_id || "",
+        background_color: initialForm.background_color || "#FFFFFF",
+        font_family: initialForm.font_family || "Inter",
+        logo_url: initialForm.logo_url,
+        primary_color: initialForm.primary_color || "#ea384c",
+      });
+    }
+  }, [initialForm, open, form]);
 
   const handleLogoUpload = async (file: File) => {
     try {
@@ -81,17 +103,12 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
           font_family: data.font_family,
           logo_url: data.logo_url,
           primary_color: data.primary_color,
-          submit_button_color: data.submit_button_color,
-          input_background_color: data.input_background_color,
-          show_border: data.show_border,
-          website_background_color: data.website_background_color,
-          website_background_gradient: data.website_background_gradient,
-          website_background_image_url: data.website_background_image_url,
-          website_background_style: data.website_background_style,
         })
         .eq('id', initialForm.id);
 
       if (error) throw error;
+
+      await queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
 
       toast({
         title: "Success",
@@ -111,25 +128,51 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     }
   };
 
+  // Reset active tab when dialog opens/closes
+  useEffect(() => {
+    if (!open) {
+      setActiveTab("fields");
+    }
+  }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[1200px] h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Edit Form</DialogTitle>
+          <DialogTitle>Edit Form: {initialForm.title}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden">
-            <FormTabs
-              form={form}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              handleLogoUpload={handleLogoUpload}
-              formId={initialForm.id}
-            />
-            <FormActions
-              isLoading={isLoading}
-              onCancel={() => onOpenChange(false)}
-            />
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+              <TabsList className="mb-4">
+                <TabsTrigger value="fields">Form Fields</TabsTrigger>
+                <TabsTrigger value="design">Design</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="fields" className="flex-1 overflow-hidden">
+                <FormFieldsTab form={form} />
+              </TabsContent>
+
+              <TabsContent value="design" className="flex-1 overflow-hidden">
+                <FormDesignTab form={form} handleLogoUpload={handleLogoUpload} formId={initialForm.id} />
+              </TabsContent>
+            </Tabs>
+
+            <div className="flex justify-end space-x-4 pt-4 sticky bottom-0 bg-background p-4 border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Save Changes
+              </Button>
+            </div>
           </form>
         </Form>
       </DialogContent>

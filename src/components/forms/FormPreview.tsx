@@ -18,7 +18,9 @@ interface FormPreviewProps {
     fontFamily?: string;
     logoUrl?: string;
     primaryColor?: string;
-    submitButtonColor?: string;
+    backgroundImageUrl?: string;
+    backgroundImageStyle?: 'cover' | 'contain' | 'repeat';
+    backgroundOpacity?: number;
     inputBackgroundColor?: string;
     showBorder?: boolean;
     websiteBackgroundColor?: string;
@@ -48,6 +50,15 @@ export function FormPreview({ title, description, fields, customization }: FormP
     position: 'relative',
   };
 
+  if (customization?.backgroundImageUrl) {
+    Object.assign(formBackgroundStyle, {
+      backgroundImage: `url(${customization.backgroundImageUrl})`,
+      backgroundSize: customization.backgroundImageStyle === 'repeat' ? 'auto' : customization.backgroundImageStyle,
+      backgroundRepeat: customization.backgroundImageStyle === 'repeat' ? 'repeat' : 'no-repeat',
+      backgroundPosition: 'center',
+    });
+  }
+
   return (
     <div className="h-full">
       <div className="flex items-center gap-2 mb-4 text-muted-foreground">
@@ -59,6 +70,15 @@ export function FormPreview({ title, description, fields, customization }: FormP
           className="p-6 bg-card/50 backdrop-blur-sm max-w-2xl mx-auto"
           style={formBackgroundStyle}
         >
+          {customization?.backgroundImageUrl && (
+            <div 
+              className="absolute inset-0 z-0"
+              style={{
+                backgroundColor: customization.backgroundColor,
+                opacity: (customization.backgroundOpacity || 100) / 100,
+              }}
+            />
+          )}
           <FormPreviewContent
             title={title}
             description={description}
