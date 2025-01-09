@@ -52,6 +52,29 @@ export const FormsOverview = () => {
     };
   }, [queryClient]);
 
+  // Fetch fresh data when edit dialog is opened
+  const handleEdit = async (form: CustomForm) => {
+    try {
+      const { data, error } = await supabase
+        .from('custom_forms')
+        .select('*')
+        .eq('id', form.id)
+        .single();
+
+      if (error) throw error;
+
+      setSelectedForm(data);
+      setEditDialogOpen(true);
+    } catch (error) {
+      console.error('Error fetching form:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load form data. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleShare = (form: CustomForm) => {
     setSelectedForm(form);
     setShareDialogOpen(true);
@@ -60,11 +83,6 @@ export const FormsOverview = () => {
   const handleViewSubmissions = (form: CustomForm) => {
     setSelectedForm(form);
     setSubmissionsDialogOpen(true);
-  };
-
-  const handleEdit = (form: CustomForm) => {
-    setSelectedForm(form);
-    setEditDialogOpen(true);
   };
 
   const handleDelete = (form: CustomForm) => {
