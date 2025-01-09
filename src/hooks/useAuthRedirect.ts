@@ -17,6 +17,23 @@ export const useAuthRedirect = () => {
     
     setIsLoading(true);
     try {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profileError || !profile) {
+        console.log("User profile not found, signing out...");
+        await supabase.auth.signOut();
+        toast({
+          variant: "destructive",
+          title: "Account not found",
+          description: "Your account no longer exists. Please create a new account.",
+        });
+        return;
+      }
+
       const { data: subscription, error } = await supabase
         .from('subscriptions')
         .select('*')
@@ -38,7 +55,18 @@ export const useAuthRedirect = () => {
         });
       }
 
-      navigate("/dashboard", { replace: true });
+      // Only navigate if we still have a valid session
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (currentSession) {
+        navigate("/dashboard", { replace: true });
+      } else {
+        // If session is no longer valid, show error
+        toast({
+          variant: "destructive",
+          title: "Session Expired",
+          description: "Please sign in again.",
+        });
+      }
     } catch (error) {
       console.error("Error checking user status:", error);
       toast({
