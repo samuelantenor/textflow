@@ -15,7 +15,7 @@ const COLORS = {
 const StatsDisplay = () => {
   const { toast } = useToast();
 
-  // Set up realtime subscription with proper error handling
+  // Set up realtime subscription
   useEffect(() => {
     const channel = supabase
       .channel('message_logs_changes')
@@ -43,10 +43,6 @@ const StatsDisplay = () => {
             variant: "destructive",
           });
         }
-        if (status === 'TIMED_OUT') {
-          console.error('Connection timed out. Retrying...');
-          // Channel will automatically attempt to reconnect
-        }
       });
 
     return () => {
@@ -54,16 +50,19 @@ const StatsDisplay = () => {
     };
   }, [toast]);
 
-  const { data: analytics } = useQuery({
+  const { data: analytics, isLoading } = useQuery({
     queryKey: ['campaign-analytics-summary'],
     queryFn: async () => {
-      // Get all message logs for the user, regardless of campaign status
+      // Get all message logs for the user
       const { data: messageLogs, error: messageLogsError } = await supabase
         .from('message_logs')
-        .select('status, created_at')
-        .order('created_at', { ascending: false });
+        .select('status, created_at, campaign_id')
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
 
-      if (messageLogsError) throw messageLogsError;
+      if (messageLogsError) {
+        console.error('Error fetching message logs:', messageLogsError);
+        throw messageLogsError;
+      }
       
       // Calculate delivery metrics
       const totalMessages = messageLogs?.length || 0;
