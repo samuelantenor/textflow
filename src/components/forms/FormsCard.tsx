@@ -1,69 +1,94 @@
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { FileText, Pencil, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FormBuilder } from "./FormBuilder";
+import { ShareFormDialog } from "./ShareFormDialog";
+import { ViewSubmissionsDialog } from "./view/ViewSubmissionsDialog";
+import { EditFormDialog } from "./EditFormDialog";
+import { useToast } from "@/hooks/use-toast";
 import { CustomForm } from "./types";
+import { FormsList } from "./FormsList";
+import { supabase } from "@/integrations/supabase/client";
 
-interface FormsCardProps {
-  form: CustomForm;
-  onShare: (form: CustomForm) => void;
-  onViewSubmissions: (form: CustomForm) => void;
-  onEdit: (form: CustomForm) => void;
-  onDelete: (form: CustomForm) => void;
-}
+export const FormsOverview = () => {
+  const [selectedForm, setSelectedForm] = useState<CustomForm | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const { forms, groups, isLoadingForms, queryClient } = useFormsData();
 
-export const FormsCard = ({ 
-  form, 
-  onShare, 
-  onViewSubmissions, 
-  onEdit, 
-  onDelete 
-}: FormsCardProps) => {
+  useEffect(() => {
+    const channel = supabase.channel("custom_forms_changes").on("postgres_changes", {
+      event: "*",
+      schema: "public",
+      table: "custom_forms",
+    }, () => queryClient.invalidateQueries({ queryKey: ["custom-forms"] })).subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [queryClient]);
+
+  const handleEdit = async (form: CustomForm) => {
+    try {
+      const { data, error } = await supabase.from("custom_forms").select("*").eq("id", form.id).single();
+      if (error) throw error;
+
+      setSelectedForm(data);
+      setEditDialogOpen(true);
+    } catch {
+      toast({ title: "Error", description: "Failed to load form data.", variant: "destructive" });
+    }
+  };
+
+  const handleShare = (form: CustomForm) => {
+    setSelectedForm(form);
+    setShareDialogOpen(true);
+  };
+
+  const handleViewSubmissions = (form: CustomForm) => {
+    setSelectedForm(form);
+    // Logic for handling submissions dialog
+  };
+
+  const handleDelete = async (form: CustomForm) => {
+    try {
+      await supabase.from("custom_forms").delete().eq("id", form.id);
+      toast({ title: "Success", description: "Form deleted successfully." });
+      queryClient.invalidateQueries({ queryKey: ["custom-forms"] });
+    } catch {
+      toast({ title: "Error", description: "Failed to delete form.", variant: "destructive" });
+    }
+  };
+
+  if (!groups?.length) {
+    return (
+      <div className="space-y-8">
+        <h2 className="text-2xl font-bold">Forms</h2>
+        <Card className="p-12 text-center space-y-4 mt-4">
+          <p className="text-muted-foreground">You need to create a contact group before you can create a form.</p>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <Card key={form.id} className="p-6 space-y-4">
-      <div>
-        <h3 className="font-semibold text-lg">{form.title}</h3>
-        {form.description && (
-          <p className="text-sm text-muted-foreground">{form.description}</p>
-        )}
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Forms</h2>
+        <FormBuilder groupId={groups[0].id} />
       </div>
-      <div className="text-sm text-muted-foreground">
-        Group: {form.campaign_groups?.name || "No group selected"}
-      </div>
-      <div className="text-sm text-muted-foreground">
-        Fields: {form.fields.length}
-      </div>
-      <div className="flex items-center gap-2 flex-wrap">
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onViewSubmissions(form)}
-        >
-          View Submissions
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onShare(form)}
-        >
-          Share Form
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onEdit(form)}
-        >
-          <Pencil className="w-4 h-4 mr-2" />
-          Edit
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onDelete(form)}
-        >
-          <Trash2 className="w-4 h-4 mr-2" />
-          Delete
-        </Button>
-      </div>
-    </Card>
+      <FormsList
+        forms={forms}
+        isLoading={isLoadingForms}
+        onEdit={handleEdit}
+        onShare={handleShare}
+        onDelete={handleDelete}
+        onViewSubmissions={handleViewSubmissions}
+      />
+      {selectedForm && (
+        <>
+          <ShareFormDialog form={selectedForm} open={shareDialogOpen} onOpenChange={setShareDialogOpen} />
+          <EditFormDialog form={selectedForm} open={editDialogOpen} onOpenChange={setEditDialogOpen} />
+        </>
+      )}
+    </div>
   );
 };
