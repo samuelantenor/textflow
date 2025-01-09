@@ -77,6 +77,11 @@ export function FormFieldsTab({ form }: FormFieldsTabProps) {
             fontFamily: formData.font_family,
             logoUrl: formData.logo_url,
             primaryColor: formData.primary_color,
+            backgroundImageUrl: formData.background_image_url,
+            backgroundImageStyle: formData.background_image_style,
+            backgroundOpacity: formData.background_opacity,
+            inputBackgroundColor: formData.input_background_color,
+            showBorder: formData.show_border,
           }}
         />
       </ScrollArea>
