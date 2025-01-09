@@ -59,7 +59,11 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   useEffect(() => {
     if (open) {
       const fetchForm = async () => {
-        const { data, error } = await supabase.from("custom_forms").select("*").eq("id", initialForm.id).single();
+        const { data, error } = await supabase
+          .from("custom_forms")
+          .select("*")
+          .eq("id", initialForm.id)
+          .single();
         if (!error && data) {
           form.reset(data);
         }
@@ -67,6 +71,31 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       fetchForm();
     }
   }, [open, initialForm.id, form]);
+
+  const handleLogoUpload = async (file: File) => {
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("landing_page_assets")
+        .upload(fileName, file);
+      if (uploadError) throw new Error("File upload failed");
+
+      const { data: publicUrlData, error: urlError } = supabase.storage
+        .from("landing_page_assets")
+        .getPublicUrl(fileName);
+      if (urlError || !publicUrlData) throw new Error("Failed to fetch public URL");
+
+      form.setValue("logo_url", publicUrlData.publicUrl);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const onSubmit = async (data: any) => {
     try {
