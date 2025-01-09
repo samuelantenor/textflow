@@ -6,9 +6,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FormFieldsTab } from "./form-builder/FormFieldsTab";
-import { FormDesignTab } from "./form-builder/FormDesignTab";
 import { useQueryClient } from "@tanstack/react-query";
 
 // Store last customization settings in memory
@@ -17,6 +14,7 @@ let lastCustomizationSettings = {
   font_family: "Inter",
   logo_url: null,
   primary_color: "#ea384c",
+  submit_button_color: "#ea384c",
   background_image_url: null,
   background_image_style: "cover",
   input_background_color: "#FFFFFF",
@@ -38,9 +36,9 @@ interface EditFormDialogProps {
     font_family?: string;
     logo_url?: string;
     primary_color?: string;
+    submit_button_color?: string;
     background_image_url?: string;
     background_image_style?: string;
-    background_opacity?: number;
     input_background_color?: string;
     show_border?: boolean;
     website_background_color?: string;
@@ -54,7 +52,6 @@ interface EditFormDialogProps {
 
 export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFormDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("fields");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -82,6 +79,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
         font_family: initialForm.font_family || lastCustomizationSettings.font_family,
         logo_url: initialForm.logo_url || lastCustomizationSettings.logo_url,
         primary_color: initialForm.primary_color || lastCustomizationSettings.primary_color,
+        submit_button_color: initialForm.submit_button_color || lastCustomizationSettings.submit_button_color,
         background_image_url: initialForm.background_image_url || lastCustomizationSettings.background_image_url,
         background_image_style: initialForm.background_image_style || lastCustomizationSettings.background_image_style,
         input_background_color: initialForm.input_background_color || lastCustomizationSettings.input_background_color,
@@ -95,32 +93,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     }
   }, [initialForm, open, form]);
 
-  const handleLogoUpload = async (file: File) => {
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from("landing_page_assets")
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("landing_page_assets")
-        .getPublicUrl(fileName);
-      
-      form.setValue("logo_url", publicUrl);
-    } catch (error) {
-      console.error("Error uploading logo:", error);
-      toast({
-        title: "Error",
-        description: "Failed to upload logo. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
   const onSubmit = async (data: any) => {
     try {
       setIsLoading(true);
@@ -131,6 +103,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
         font_family: data.font_family,
         logo_url: data.logo_url,
         primary_color: data.primary_color,
+        submit_button_color: data.submit_button_color,
         background_image_url: data.background_image_url,
         background_image_style: data.background_image_style,
         input_background_color: data.input_background_color,
@@ -174,13 +147,6 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     }
   };
 
-  // Reset active tab when dialog opens/closes
-  useEffect(() => {
-    if (!open) {
-      setActiveTab("fields");
-    }
-  }, [open]);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[1200px] h-[90vh] flex flex-col">
@@ -189,21 +155,14 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList className="mb-4">
-                <TabsTrigger value="fields">Form Fields</TabsTrigger>
-                <TabsTrigger value="design">Design</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="fields" className="flex-1 overflow-hidden">
-                <FormFieldsTab form={form} />
-              </TabsContent>
-
-              <TabsContent value="design" className="flex-1 overflow-hidden">
-                <FormDesignTab form={form} handleLogoUpload={handleLogoUpload} formId={initialForm.id} />
-              </TabsContent>
-            </Tabs>
-
+            <div className="flex flex-col space-y-4">
+              <label>Submit Button Color</label>
+              <input
+                type="color"
+                {...form.register("submit_button_color")}
+                className="w-full h-10 border rounded"
+              />
+            </div>
             <div className="flex justify-end space-x-4 pt-4 sticky bottom-0 bg-background p-4 border-t">
               <Button
                 type="button"
