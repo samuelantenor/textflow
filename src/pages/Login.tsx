@@ -13,6 +13,7 @@ const Login = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [view, setView] = useState<'sign_in' | 'update_password'>('sign_in');
 
   useEffect(() => {
     const checkUserAndRedirect = async (session) => {
@@ -86,8 +87,7 @@ const Login = () => {
       // Check if we're in a password reset flow
       const hash = window.location.hash;
       if (hash && hash.includes('#access_token') && hash.includes('type=recovery')) {
-        // Don't redirect automatically, let the user reset their password
-        setAuthError(null);
+        setView('update_password');
         return;
       }
       
@@ -102,16 +102,16 @@ const Login = () => {
       console.log("Auth state changed:", event);
       
       if (event === 'PASSWORD_RECOVERY') {
-        // Don't redirect, let the user reset their password
+        setView('update_password');
         setAuthError(null);
       } else if (event === 'SIGNED_IN' && session) {
         // Only redirect if it's not a password recovery flow
-        const hash = window.location.hash;
-        if (!hash.includes('type=recovery')) {
+        if (view !== 'update_password') {
           checkUserAndRedirect(session);
         }
       } else if (event === 'SIGNED_OUT') {
         setAuthError(null);
+        setView('sign_in');
       } else if (event === 'USER_UPDATED') {
         setAuthError(null);
         // After password is updated, redirect to dashboard
@@ -120,11 +120,8 @@ const Login = () => {
         }
       } else if (event === 'INITIAL_SESSION') {
         // Handle initial session load
-        if (session) {
-          const hash = window.location.hash;
-          if (!hash.includes('type=recovery')) {
-            checkUserAndRedirect(session);
-          }
+        if (session && view !== 'update_password') {
+          checkUserAndRedirect(session);
         }
       }
     });
@@ -132,7 +129,7 @@ const Login = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, toast]);
+  }, [navigate, toast, view]);
 
   if (isLoading) {
     return (
@@ -149,8 +146,14 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold">Welcome to FlowText</h1>
-          <p className="text-muted-foreground mt-2">Sign in to manage your campaigns</p>
+          <h1 className="text-3xl font-bold">
+            {view === 'update_password' ? 'Reset Your Password' : 'Welcome to FlowText'}
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            {view === 'update_password' 
+              ? 'Please enter your new password below'
+              : 'Sign in to manage your campaigns'}
+          </p>
         </div>
         {authError && (
           <Alert variant="destructive" className="mb-4">
@@ -160,6 +163,7 @@ const Login = () => {
         <div className="bg-card p-6 rounded-lg shadow-lg border">
           <Auth
             supabaseClient={supabase}
+            view={view}
             appearance={{ 
               theme: ThemeSupa,
               variables: {
