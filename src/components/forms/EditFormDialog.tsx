@@ -7,6 +7,12 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Store last customization settings in memory
 let lastCustomizationSettings = {
@@ -54,6 +60,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState("general");
   
   const form = useForm({
     defaultValues: {
@@ -68,13 +75,11 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   // Reset form values when initialForm changes or dialog opens
   useEffect(() => {
     if (open && initialForm) {
-      // Merge initial form data with last customization settings
       const formValues = {
         title: initialForm.title,
         description: initialForm.description || "",
         fields: initialForm.fields,
         group_id: initialForm.group_id || "",
-        // Use last customization settings as fallback
         background_color: initialForm.background_color || lastCustomizationSettings.background_color,
         font_family: initialForm.font_family || lastCustomizationSettings.font_family,
         logo_url: initialForm.logo_url || lastCustomizationSettings.logo_url,
@@ -147,6 +152,35 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     }
   };
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from("landing_page_assets")
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("landing_page_assets")
+        .getPublicUrl(fileName);
+      
+      form.setValue("logo_url", publicUrl);
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      toast({
+        title: "Error",
+        description: "Failed to upload logo. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[1200px] h-[90vh] flex flex-col">
@@ -155,14 +189,118 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden">
-            <div className="flex flex-col space-y-4">
-              <label>Submit Button Color</label>
-              <input
-                type="color"
-                {...form.register("submit_button_color")}
-                className="w-full h-10 border rounded"
-              />
-            </div>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList>
+                <TabsTrigger value="general">General</TabsTrigger>
+                <TabsTrigger value="design">Design</TabsTrigger>
+                <TabsTrigger value="background">Background</TabsTrigger>
+              </TabsList>
+
+              <ScrollArea className="flex-1 px-1">
+                <TabsContent value="general" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Form Title</Label>
+                      <Input {...form.register("title")} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Input {...form.register("description")} />
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="design" className="space-y-6 mt-4">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Primary Color</Label>
+                      <Input
+                        type="color"
+                        {...form.register("primary_color")}
+                        className="h-10"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Submit Button Color</Label>
+                      <Input
+                        type="color"
+                        {...form.register("submit_button_color")}
+                        className="h-10"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Font Family</Label>
+                      <Select
+                        value={form.watch("font_family")}
+                        onValueChange={(value) => form.setValue("font_family", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a font" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Inter">Inter</SelectItem>
+                          <SelectItem value="Arial">Arial</SelectItem>
+                          <SelectItem value="Helvetica">Helvetica</SelectItem>
+                          <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Logo</Label>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                      />
+                      {form.watch("logo_url") && (
+                        <img
+                          src={form.watch("logo_url")}
+                          alt="Form logo"
+                          className="h-20 object-contain"
+                        />
+                      )}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="background" className="space-y-6 mt-4">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Form Background Color</Label>
+                      <Input
+                        type="color"
+                        {...form.register("background_color")}
+                        className="h-10"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Input Background Color</Label>
+                      <Input
+                        type="color"
+                        {...form.register("input_background_color")}
+                        className="h-10"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Show Input Borders</Label>
+                      <Switch
+                        checked={form.watch("show_border")}
+                        onCheckedChange={(checked) => form.setValue("show_border", checked)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Website Background Color</Label>
+                      <Input
+                        type="color"
+                        {...form.register("website_background_color")}
+                        className="h-10"
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+              </ScrollArea>
+            </Tabs>
+
             <div className="flex justify-end space-x-4 pt-4 sticky bottom-0 bg-background p-4 border-t">
               <Button
                 type="button"
