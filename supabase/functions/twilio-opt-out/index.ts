@@ -6,6 +6,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Helper function to normalize phone numbers by removing "+" prefix
+const normalizePhoneNumber = (phoneNumber: string) => {
+  return phoneNumber.replace(/^\+/, '');
+}
+
 serve(async (req) => {
   console.log('Received opt-out webhook request:', req.method);
 
@@ -51,18 +56,23 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // First, find all contacts with this phone number and their associated groups
+    // Normalize the incoming phone number
+    const normalizedFromNumber = normalizePhoneNumber(fromNumber);
+    console.log('Searching for normalized phone number:', normalizedFromNumber);
+
+    // Find all contacts with this phone number and their associated groups
     const { data: contactsWithGroups, error: contactsError } = await supabaseClient
       .from('contacts')
       .select(`
         id,
         group_id,
+        phone_number,
         campaign_groups!inner (
           user_id,
           name
         )
       `)
-      .eq('phone_number', fromNumber);
+      .filter('phone_number', 'ilike', `%${normalizedFromNumber}`);
 
     if (contactsError) {
       console.error('Error finding contacts:', contactsError);
