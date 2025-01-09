@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { FormLoader } from "@/components/forms/view/FormLoader";
 import { FormError } from "@/components/forms/view/FormError";
-import { FormFields } from "@/components/forms/view/FormFields";
+import { ViewFormContent } from "@/components/forms/view/ViewFormContent";
 import { useFormData } from "@/hooks/forms/useFormData";
 
 export default function ViewForm() {
@@ -34,7 +34,6 @@ export default function ViewForm() {
       return;
     }
 
-    // Find the phone number field in the form data
     const phoneField = form.fields.find(field => 
       field.label.toLowerCase().includes('phone') || 
       field.label.toLowerCase().includes('mobile')
@@ -65,7 +64,7 @@ export default function ViewForm() {
         .eq('phone_number', phoneNumber)
         .single();
 
-      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 means no rows returned
+      if (checkError && checkError.code !== 'PGRST116') {
         throw checkError;
       }
 
@@ -79,7 +78,6 @@ export default function ViewForm() {
         return;
       }
 
-      // If we get here, the phone number is not a duplicate
       const { data: contactData, error: contactError } = await supabase
         .from('contacts')
         .insert({
@@ -90,14 +88,8 @@ export default function ViewForm() {
         .select()
         .single();
 
-      if (contactError) {
-        console.error('Contact creation error:', contactError);
-        throw contactError;
-      }
+      if (contactError) throw contactError;
 
-      console.log('Contact created successfully:', contactData);
-
-      // Create the form submission
       const { error: submissionError } = await supabase
         .from('form_submissions')
         .insert({
@@ -105,22 +97,15 @@ export default function ViewForm() {
           data: formData,
         });
 
-      if (submissionError) {
-        console.error('Form submission error:', submissionError);
-        throw submissionError;
-      }
-
-      console.log('Form submission created successfully');
+      if (submissionError) throw submissionError;
 
       toast({
         title: "Success",
         description: "Form submitted successfully",
       });
 
-      // Reset form
       setFormData({});
       
-      // Reset form fields
       const formElements = document.querySelectorAll('input, textarea, select');
       formElements.forEach((element: any) => {
         if (element.type !== 'submit') {
@@ -148,65 +133,49 @@ export default function ViewForm() {
     return <FormError />;
   }
 
+  const backgroundStyle = {
+    backgroundColor: form.background_color || '#FFFFFF',
+    fontFamily: form.font_family || 'Inter',
+  };
+
+  if (form.background_image_url) {
+    Object.assign(backgroundStyle, {
+      backgroundImage: `url(${form.background_image_url})`,
+      backgroundSize: form.background_image_style === 'repeat' ? 'auto' : form.background_image_style,
+      backgroundRepeat: form.background_image_style === 'repeat' ? 'repeat' : 'no-repeat',
+      backgroundPosition: 'center',
+    });
+  }
+
   return (
     <div 
       className="min-h-screen py-12 px-4"
-      style={{
-        backgroundColor: form.background_color || '#FFFFFF',
-        fontFamily: form.font_family || 'Inter',
-      }}
+      style={backgroundStyle}
     >
       <Card 
-        className="max-w-2xl mx-auto p-6"
+        className="max-w-2xl mx-auto p-6 relative overflow-hidden"
         style={{
           backgroundColor: form.background_color || '#FFFFFF',
         }}
       >
-        {form.logo_url && (
-          <div className="flex justify-center mb-6">
-            <img 
-              src={form.logo_url} 
-              alt="Form logo" 
-              className="max-h-20 object-contain"
-            />
-          </div>
-        )}
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div>
-            <h1 
-              className="text-2xl font-bold mb-2"
-              style={{ color: form.primary_color }}
-            >
-              {form.title}
-            </h1>
-            {form.description && (
-              <p className="text-muted-foreground">{form.description}</p>
-            )}
-          </div>
-
-          <FormFields
-            fields={form.fields}
-            formData={formData}
-            onFieldChange={(fieldName, value) => {
-              setFormData(prev => ({ ...prev, [fieldName]: value }));
-            }}
-            customization={{
-              primaryColor: form.primary_color,
+        {form.background_image_url && (
+          <div 
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundColor: form.background_color,
+              opacity: (form.background_opacity || 100) / 100,
             }}
           />
-
-          <Button 
-            type="submit" 
-            className="w-full"
-            disabled={submitting}
-            style={{
-              backgroundColor: form.primary_color,
-              borderColor: form.primary_color,
-            }}
-          >
-            {submitting ? "Submitting..." : "Submit"}
-          </Button>
-        </form>
+        )}
+        <ViewFormContent
+          form={form}
+          formData={formData}
+          onFieldChange={(fieldName, value) => {
+            setFormData(prev => ({ ...prev, [fieldName]: value }));
+          }}
+          onSubmit={handleSubmit}
+          submitting={submitting}
+        />
       </Card>
     </div>
   );
