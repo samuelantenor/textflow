@@ -10,7 +10,10 @@ export const useAuthRedirect = () => {
   const [authError, setAuthError] = useState<string | null>(null);
 
   const checkUserAndRedirect = async (session) => {
-    if (!session) return;
+    if (!session) {
+      setIsLoading(false);
+      return;
+    }
     
     setIsLoading(true);
     try {
@@ -52,7 +55,18 @@ export const useAuthRedirect = () => {
         });
       }
 
-      navigate("/dashboard", { replace: true });
+      // Only navigate if we still have a valid session
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (currentSession) {
+        navigate("/dashboard", { replace: true });
+      } else {
+        // If session is no longer valid, show error
+        toast({
+          variant: "destructive",
+          title: "Session Expired",
+          description: "Please sign in again.",
+        });
+      }
     } catch (error) {
       console.error("Error checking user status:", error);
       toast({
