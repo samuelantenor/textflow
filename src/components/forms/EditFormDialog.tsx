@@ -11,20 +11,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { FormGeneralSection } from "./form-builder/general/FormGeneralSection";
 import { FormDesignSection } from "./form-builder/design/FormDesignSection";
 import { FormBackgroundSection } from "./form-builder/background/FormBackgroundSection";
+import { FormData } from "./types";
+import { CustomForm } from "@/types/form";
 
 interface EditFormDialogProps {
-  form: {
-    id: string;
-    title: string;
-    description: string | null;
-    fields: any[];
-    group_id: string;
-    background_color?: string;
-    font_family?: string;
-    logo_url?: string;
-    primary_color?: string;
-    submit_button_color?: string;
-  };
+  form: CustomForm;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -34,7 +25,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   const [activeTab, setActiveTab] = useState("general");
   const { toast } = useToast();
   
-  const form = useForm({
+  const form = useForm<FormData>({
     defaultValues: {
       title: initialForm.title,
       description: initialForm.description || "",
@@ -126,7 +117,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     }
   };
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: FormData) => {
     try {
       setIsLoading(true);
 

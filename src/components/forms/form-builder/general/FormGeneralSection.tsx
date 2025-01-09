@@ -2,9 +2,10 @@ import { UseFormReturn } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { FormData } from "../../types";
 
 interface FormGeneralSectionProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<FormData>;
 }
 
 export function FormGeneralSection({ form }: FormGeneralSectionProps) {

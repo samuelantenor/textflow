@@ -1,9 +1,10 @@
 import { UseFormReturn } from "react-hook-form";
+import { FormData } from "../../types";
 import { BackgroundSection } from "../design/BackgroundSection";
 import { InputStyleSection } from "../design/InputStyleSection";
 
 interface FormBackgroundSectionProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<FormData>;
   onBackgroundImageUpload: (file: File) => Promise<void>;
   onWebsiteBackgroundImageUpload: (file: File) => Promise<void>;
 }

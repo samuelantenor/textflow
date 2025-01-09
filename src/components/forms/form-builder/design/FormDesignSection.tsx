@@ -1,10 +1,13 @@
 import { UseFormReturn } from "react-hook-form";
+import { FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { FormData } from "../../types";
 import { ColorPicker } from "./ColorPicker";
 import { FontSection } from "./FontSection";
 import { LogoSection } from "./LogoSection";
 
 interface FormDesignSectionProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<FormData>;
   onLogoUpload: (file: File) => Promise<void>;
 }
 
