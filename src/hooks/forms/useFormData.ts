@@ -38,8 +38,10 @@ export function useFormData(): UseFormDataReturn {
     return fields.every(field => 
       typeof field === 'object' && 
       field !== null && 
+      'id' in field &&
       'type' in field && 
-      'label' in field
+      'label' in field &&
+      'required' in field
     );
   };
 
@@ -58,26 +60,7 @@ export function useFormData(): UseFormDataReturn {
         throw new Error('Invalid form fields format');
       }
 
-      const formData: FormResponse = {
-        id: formResponse.id,
-        title: formResponse.title,
-        description: formResponse.description,
-        fields: formResponse.fields as FormField[],
-        user_id: formResponse.user_id,
-        group_id: formResponse.group_id,
-        is_active: formResponse.is_active,
-        background_color: formResponse.background_color,
-        font_family: formResponse.font_family,
-        logo_url: formResponse.logo_url,
-        primary_color: formResponse.primary_color,
-        background_image_url: formResponse.background_image_url,
-        background_image_style: formResponse.background_image_style,
-        background_opacity: formResponse.background_opacity,
-        input_background_color: formResponse.input_background_color,
-        show_border: formResponse.show_border,
-      };
-
-      setForm(formData);
+      setForm(formResponse as FormResponse);
     } catch (error) {
       console.error('Error fetching form:', error);
       toast({

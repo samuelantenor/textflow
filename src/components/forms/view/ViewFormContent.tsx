@@ -1,22 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { FormFieldRenderer } from "../FormFieldRenderer";
+import { FormField } from "@/types/form";
 
 interface ViewFormContentProps {
   form: {
     title: string;
     description?: string;
-    fields: Array<{
-      type: string;
-      label: string;
-      required: boolean;
-      placeholder?: string;
-      options?: string[];
-      description?: string;
-    }>;
+    fields: FormField[];
     logo_url?: string;
     primary_color?: string;
     input_background_color?: string;
     show_border?: boolean;
+    font_family?: string;
   };
   formData: Record<string, any>;
   onFieldChange: (fieldName: string, value: any) => void;
@@ -49,8 +44,8 @@ export function ViewFormContent({ form, formData, onFieldChange, onSubmit, submi
       </div>
 
       <div className="space-y-6">
-        {form.fields.map((field, index) => (
-          <div key={`field-${index}`} className="space-y-2">
+        {form.fields.map((field) => (
+          <div key={field.id} className="space-y-2">
             <FormFieldRenderer
               field={field}
               value={formData[field.label]}
