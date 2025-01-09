@@ -22,6 +22,7 @@ interface ViewContactsDialogProps {
 export function ViewContactsDialog({ group, open, onOpenChange }: ViewContactsDialogProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingContact, setEditingContact] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -40,10 +41,16 @@ export function ViewContactsDialog({ group, open, onOpenChange }: ViewContactsDi
   });
 
   const handleDelete = async (contactId: string) => {
+    if (!confirm("Are you sure you want to delete this contact? This action cannot be undone.")) {
+      return;
+    }
+
     try {
+      setIsDeleting(true);
       const { error } = await supabase
         .from('contacts')
         .delete()
+        .eq('group_id', group.id)  // Add this line to satisfy RLS policy
         .eq('id', contactId);
 
       if (error) throw error;
@@ -52,13 +59,19 @@ export function ViewContactsDialog({ group, open, onOpenChange }: ViewContactsDi
         title: "Success",
         description: "Contact deleted successfully",
       });
+      
+      // Invalidate both contacts and campaign-groups queries
       queryClient.invalidateQueries({ queryKey: ['contacts', group.id] });
+      queryClient.invalidateQueries({ queryKey: ['campaign-groups'] });
     } catch (error) {
+      console.error('Error deleting contact:', error);
       toast({
         title: "Error",
         description: "Failed to delete contact",
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -119,6 +132,7 @@ export function ViewContactsDialog({ group, open, onOpenChange }: ViewContactsDi
                             variant="ghost"
                             size="icon"
                             onClick={() => handleDelete(contact.id)}
+                            disabled={isDeleting}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
