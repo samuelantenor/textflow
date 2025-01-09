@@ -57,48 +57,16 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
   });
 
   useEffect(() => {
-    if (open && initialForm) {
-      const currentValues = form.getValues();
-      const hasChanges = Object.keys(currentValues).some(
-        (key) => currentValues[key] !== initialForm[key]
-      );
-
-      if (hasChanges) {
-        form.reset({
-          title: initialForm.title,
-          description: initialForm.description || "",
-          fields: initialForm.fields || [],
-          group_id: initialForm.group_id,
-          background_color: initialForm.background_color || "#FFFFFF",
-          font_family: initialForm.font_family || "Inter",
-          logo_url: initialForm.logo_url,
-          primary_color: initialForm.primary_color || "#ea384c",
-          background_image_url: initialForm.background_image_url,
-          background_image_style: initialForm.background_image_style || "cover",
-          background_opacity: initialForm.background_opacity || 100,
-          input_background_color: initialForm.input_background_color || "#FFFFFF",
-          show_border: initialForm.show_border ?? true,
-        });
-      }
+    if (open) {
+      const fetchForm = async () => {
+        const { data, error } = await supabase.from("custom_forms").select("*").eq("id", initialForm.id).single();
+        if (!error && data) {
+          form.reset(data);
+        }
+      };
+      fetchForm();
     }
-  }, [initialForm, open, form]);
-
-  const handleLogoUpload = async (file: File) => {
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage.from("landing_page_assets").upload(fileName, file);
-      if (uploadError) throw new Error("File upload failed");
-
-      const { data: publicUrlData, error: urlError } = supabase.storage.from("landing_page_assets").getPublicUrl(fileName);
-      if (urlError || !publicUrlData) throw new Error("Failed to fetch public URL");
-
-      form.setValue("logo_url", publicUrlData.publicUrl);
-    } catch (error) {
-      toast({ title: "Error", description: (error as Error).message, variant: "destructive" });
-    }
-  };
+  }, [open, initialForm.id, form]);
 
   const onSubmit = async (data: any) => {
     try {
