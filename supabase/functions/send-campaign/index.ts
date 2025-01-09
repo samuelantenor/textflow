@@ -23,7 +23,7 @@ serve(async (req) => {
     // First, get the campaign details
     const { data: campaign, error: campaignError } = await supabaseClient
       .from('campaigns')
-      .select('*')
+      .select('*, user_id')  // Make sure to select user_id
       .eq('id', campaignId)
       .maybeSingle()
 
@@ -96,8 +96,8 @@ serve(async (req) => {
         const result = await response.json()
         console.log('Twilio response:', result)
 
-        // Log the message
-        await supabaseClient
+        // Log the message with user_id
+        const { error: logError } = await supabaseClient
           .from('message_logs')
           .insert({
             campaign_id: campaignId,
@@ -105,7 +105,13 @@ serve(async (req) => {
             twilio_message_sid: result.sid,
             status: result.status,
             error_message: result.error_message,
+            user_id: campaign.user_id  // Add the user_id from the campaign
           })
+
+        if (logError) {
+          console.error('Error creating message log:', logError)
+          throw logError
+        }
 
         return result
       } catch (error) {
