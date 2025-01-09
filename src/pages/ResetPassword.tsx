@@ -4,31 +4,47 @@ import UpdatePasswordForm from "@/components/auth/UpdatePasswordForm";
 import LoadingState from "@/components/auth/LoadingState";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from "@/hooks/use-toast";
 
 const ResetPassword = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Check if we have a recovery token in the URL
-    const hash = window.location.hash;
-    if (!hash || !hash.includes('access_token')) {
-      setError('Invalid or expired reset link');
-      setLoading(false);
-      return;
-    }
+    const handlePasswordReset = async () => {
+      try {
+        // Get the session to check if we're authenticated
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) throw sessionError;
 
-    // Verify the session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error || !session) {
-        setError('Invalid or expired reset link. Please request a new password reset.');
+        // If no session, check if we have a recovery token in the URL
+        if (!session) {
+          const hash = window.location.hash;
+          if (!hash || !hash.includes('access_token')) {
+            setError('Invalid or expired reset link. Please request a new password reset.');
+            toast({
+              variant: "destructive",
+              title: "Invalid Reset Link",
+              description: "The password reset link is invalid or has expired. Please request a new one.",
+            });
+            setTimeout(() => navigate('/login'), 3000);
+            return;
+          }
+        }
+
         setLoading(false);
-        return;
+      } catch (error: any) {
+        console.error('Error in password reset:', error);
+        setError(error.message);
+        setLoading(false);
       }
-      setLoading(false);
-    });
-  }, [navigate]);
+    };
+
+    handlePasswordReset();
+  }, [navigate, toast]);
 
   if (loading) {
     return <LoadingState />;

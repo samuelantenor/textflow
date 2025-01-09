@@ -4,14 +4,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
+import { useNavigate } from 'react-router-dom';
 
 const UpdatePasswordForm = () => {
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Passwords don't match",
+        description: "Please make sure both passwords match.",
+      });
+      return;
+    }
+
     if (password.length < 6) {
       toast({
         variant: "destructive",
@@ -35,7 +48,9 @@ const UpdatePasswordForm = () => {
         description: "Your password has been successfully updated. Please sign in with your new password.",
       });
       
-      // The USER_UPDATED event will trigger in Login.tsx and handle the sign out
+      // Sign out and redirect to login
+      await supabase.auth.signOut();
+      navigate('/login');
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -57,6 +72,18 @@ const UpdatePasswordForm = () => {
           placeholder="Enter new password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
+          minLength={6}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="confirmPassword">Confirm Password</Label>
+        <Input
+          id="confirmPassword"
+          type="password"
+          placeholder="Confirm new password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           required
           minLength={6}
         />
