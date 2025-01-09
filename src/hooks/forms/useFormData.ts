@@ -50,6 +50,9 @@ export function useFormData(): UseFormDataReturn {
 
   const fetchForm = async (formId: string) => {
     try {
+      setLoading(true);
+      console.log('Fetching form with ID:', formId);
+
       const { data: formResponse, error: formError } = await supabase
         .from('custom_forms')
         .select(`
@@ -73,8 +76,15 @@ export function useFormData(): UseFormDataReturn {
         .eq('id', formId)
         .single();
 
-      if (formError) throw formError;
-      if (!formResponse) throw new Error('Form not found');
+      if (formError) {
+        console.error('Error fetching form:', formError);
+        throw formError;
+      }
+
+      if (!formResponse) {
+        console.error('Form not found');
+        throw new Error('Form not found');
+      }
 
       // Ensure fields is an array and validate its structure
       const fields = Array.isArray(formResponse.fields) ? formResponse.fields : [];
@@ -113,7 +123,7 @@ export function useFormData(): UseFormDataReturn {
       console.error('Error fetching form:', error);
       toast({
         title: "Error",
-        description: "Failed to load form",
+        description: "Failed to load form. Please check if the form exists and is active.",
         variant: "destructive",
       });
     } finally {
