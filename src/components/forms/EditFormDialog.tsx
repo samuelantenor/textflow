@@ -34,31 +34,11 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       input_background_color: initialForm.input_background_color || "#FFFFFF",
       show_border: initialForm.show_border,
       website_background_color: initialForm.website_background_color || "#FFFFFF",
-      website_background_gradient: initialForm.website_background_gradient,
-      website_background_image_url: initialForm.website_background_image_url,
+      website_background_gradient: initialForm.website_background_gradient || "",
+      website_background_image_url: initialForm.website_background_image_url || "",
       website_background_style: initialForm.website_background_style || "color",
     },
   });
-
-  useEffect(() => {
-    form.reset({
-      title: initialForm.title,
-      description: initialForm.description || "",
-      fields: initialForm.fields,
-      group_id: initialForm.group_id,
-      background_color: initialForm.background_color || "#FFFFFF",
-      font_family: initialForm.font_family || "Inter",
-      logo_url: initialForm.logo_url || "",
-      primary_color: initialForm.primary_color || "#ea384c",
-      submit_button_color: initialForm.submit_button_color || "#ea384c",
-      input_background_color: initialForm.input_background_color || "#FFFFFF",
-      show_border: initialForm.show_border,
-      website_background_color: initialForm.website_background_color || "#FFFFFF",
-      website_background_gradient: initialForm.website_background_gradient,
-      website_background_image_url: initialForm.website_background_image_url,
-      website_background_style: initialForm.website_background_style || "color",
-    });
-  }, [initialForm.id]);
 
   const handleLogoUpload = async (file: File) => {
     try {
