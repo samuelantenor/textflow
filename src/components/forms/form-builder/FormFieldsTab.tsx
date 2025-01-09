@@ -78,8 +78,6 @@ export function FormFieldsTab({ form }: FormFieldsTabProps) {
             logoUrl: formData.logo_url,
             primaryColor: formData.primary_color,
             submitButtonColor: formData.submit_button_color,
-            backgroundImageUrl: formData.background_image_url,
-            backgroundImageStyle: formData.background_image_style,
             inputBackgroundColor: formData.input_background_color,
             showBorder: formData.show_border,
             websiteBackgroundColor: formData.website_background_color,
