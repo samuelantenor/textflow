@@ -25,10 +25,10 @@ enabled = true
 [realtime]
 enabled = true
 
-[[edge_functions]]
+[[functions]]
 name = "send-welcome-email"
 verify_jwt = true
 
-[[edge_functions]]
+[[functions]]
 name = "handle-new-user"
 verify_jwt = true
