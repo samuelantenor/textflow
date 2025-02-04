@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { CampaignFormFields } from "./CampaignFormFields";
 import { Campaign, CampaignFormData } from "@/types/campaign";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface EditCampaignDialogProps {
   campaign: Campaign;
@@ -105,31 +106,43 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
-        <DialogHeader>
-          <DialogTitle>Edit Campaign</DialogTitle>
+      <DialogContent className="w-[95vw] max-w-2xl h-[95vh] md:h-auto md:max-h-[85vh] p-0">
+        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6">
+          <DialogTitle className="text-xl">Edit Campaign</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <CampaignFormFields form={form} showAllFields={true} />
-            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-4">
+        
+        <ScrollArea className="px-4 sm:px-6 flex-1 h-[calc(95vh-8rem)] md:h-auto">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <CampaignFormFields form={form} showAllFields={true} />
+            </form>
+          </Form>
+        </ScrollArea>
+
+        <div className="mt-6 border-t border-gray-800/50">
+          <div className="px-4 sm:px-6 py-4 sm:py-5 bg-black/50 backdrop-blur-sm">
+            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto order-1 sm:order-none"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+              <Button 
+                onClick={form.handleSubmit(onSubmit)}
+                disabled={isLoading}
+                className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600"
+              >
                 {isLoading && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 Save Changes
               </Button>
             </div>
-          </form>
-        </Form>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
