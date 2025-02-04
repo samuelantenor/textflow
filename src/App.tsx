@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from './components/Layout/MainLayout';
 import Login from './pages/Login';
+import SignUp from './pages/SignUp';
 import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Billing from './pages/Billing';
@@ -27,6 +28,7 @@ const layoutRoutes = [
 const publicRoutes = [
   { path: '/', element: <LandingPage /> },
   { path: '/login', element: <Login /> },
+  { path: '/signup', element: <SignUp /> },
   { path: '/reset-password', element: <ResetPassword /> },
   { path: '/pricing', element: <Pricing /> },
 ];
