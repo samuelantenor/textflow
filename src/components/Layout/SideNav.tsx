@@ -87,17 +87,17 @@ export function SideNav() {
   };
 
   return (
-    <div className="flex h-screen w-64 flex-col fixed left-0 top-0 bg-black border-r border-gray-800">
-      <div className="flex h-16 items-center px-4 border-b border-gray-800">
-        <Link to="/dashboard" className="flex items-center gap-2">
-          <MessageSquare className="h-6 w-6 text-red-500 fill-current" />
-          <span className="text-xl font-semibold text-white">FlowText</span>
+    <div className="flex h-screen w-64 flex-col fixed left-0 top-0 bg-gradient-to-b from-black to-gray-900 border-r border-gray-800/50 backdrop-blur-xl animate-fade-in">
+      <div className="flex h-16 items-center px-6 border-b border-gray-800/50">
+        <Link to="/dashboard" className="flex items-center gap-2 group">
+          <MessageSquare className="h-6 w-6 text-primary-500 fill-current transition-transform group-hover:scale-110" />
+          <span className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">FlowText</span>
         </Link>
       </div>
-      <nav className="flex-1 space-y-1 px-2 py-4">
+      <nav className="flex-1 space-y-1 px-3 py-6">
         {/* Main Navigation */}
         <div className="space-y-1">
-          {navigation.map((item) => {
+          {navigation.map((item, index) => {
             const isActive = isRouteActive(item.href);
             const Icon = item.icon;
             
@@ -106,22 +106,30 @@ export function SideNav() {
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                  'flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 animate-fade-in',
+                  'hover:bg-white/5 relative group',
                   isActive
-                    ? 'bg-gray-900 text-white'
-                    : 'text-gray-400 hover:bg-gray-900 hover:text-white'
+                    ? 'bg-primary-500/10 text-primary-500'
+                    : 'text-gray-400 hover:text-white'
                 )}
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                <Icon className="mr-3 h-5 w-5" />
+                <Icon className={cn(
+                  "mr-3 h-5 w-5 transition-transform group-hover:scale-110",
+                  isActive && "text-primary-500"
+                )} />
                 {item.name}
+                {isActive && (
+                  <div className="absolute inset-y-0 left-0 w-1 bg-primary-500 rounded-r-full" />
+                )}
               </Link>
             );
           })}
         </div>
 
         {/* Account Navigation */}
-        <div className="mt-8 pt-8 border-t border-gray-800">
-          {accountNavigation.map((item) => {
+        <div className="mt-8 pt-8 border-t border-gray-800/50">
+          {accountNavigation.map((item, index) => {
             const isActive = isRouteActive(item.href);
             const Icon = item.icon;
             
@@ -130,14 +138,22 @@ export function SideNav() {
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                  'flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 animate-fade-in',
+                  'hover:bg-white/5 relative group',
                   isActive
-                    ? 'bg-gray-900 text-white'
-                    : 'text-gray-400 hover:bg-gray-900 hover:text-white'
+                    ? 'bg-primary-500/10 text-primary-500'
+                    : 'text-gray-400 hover:text-white'
                 )}
+                style={{ animationDelay: `${(index + navigation.length) * 100}ms` }}
               >
-                <Icon className="mr-3 h-5 w-5" />
+                <Icon className={cn(
+                  "mr-3 h-5 w-5 transition-transform group-hover:scale-110",
+                  isActive && "text-primary-500"
+                )} />
                 {item.name}
+                {isActive && (
+                  <div className="absolute inset-y-0 left-0 w-1 bg-primary-500 rounded-r-full" />
+                )}
               </Link>
             );
           })}
@@ -145,9 +161,11 @@ export function SideNav() {
           {/* Logout Button */}
           <button
             onClick={handleSignOut}
-            className="flex items-center px-3 py-2 mt-2 text-sm font-medium rounded-md transition-colors w-full text-red-500 hover:bg-gray-900 hover:text-red-400"
+            className="flex items-center px-3 py-2.5 mt-2 text-sm font-medium rounded-lg transition-all duration-200 w-full
+              text-red-500 hover:bg-red-500/10 hover:text-red-400 group animate-fade-in"
+            style={{ animationDelay: `${(navigation.length + accountNavigation.length) * 100}ms` }}
           >
-            <LogOut className="mr-3 h-5 w-5" />
+            <LogOut className="mr-3 h-5 w-5 transition-transform group-hover:scale-110" />
             Log out
           </button>
         </div>
