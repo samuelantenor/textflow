@@ -24,10 +24,10 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { userId, email }: WelcomeEmailPayload = await req.json();
-    console.log("Sending welcome email to:", email);
+    console.log("Sending welcome email to:", email, "for user:", userId);
 
     const emailResponse = await resend.emails.send({
-      from: "FlowText <onboarding@resend.dev>",
+      from: "FlowText <no-reply@tnormarketing.com>",
       to: [email],
       subject: "Welcome to FlowText! 🎉",
       html: `
