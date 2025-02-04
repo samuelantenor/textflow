@@ -1,29 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GroupList } from "@/components/groups/GroupList";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
+import { GroupList } from "@/components/groups/GroupList";
 import { FormsOverview } from "@/components/forms/FormsOverview";
 import { PhoneNumbersList } from "@/components/phone-numbers/PhoneNumbersList";
 import { CampaignList } from "@/components/campaigns/CampaignList";
-import { useQuery } from "@tanstack/react-query";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("overview");
-
-  // Set initial tab from URL parameter
-  useEffect(() => {
-    const tab = searchParams.get("tab");
-    if (tab) {
-      setActiveTab(tab);
-    }
-  }, [searchParams]);
 
   // Check authentication
   useEffect(() => {
@@ -45,41 +34,32 @@ const Dashboard = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  // Get current tab from URL
+  const currentTab = searchParams.get("tab") || "overview";
+
+  // Render content based on current tab
+  const renderContent = () => {
+    switch (currentTab) {
+      case "overview":
+        return <DashboardOverview />;
+      case "campaigns":
+        return <CampaignList />;
+      case "groups":
+        return <GroupList />;
+      case "forms":
+        return <FormsOverview />;
+      case "phone-numbers":
+        return <PhoneNumbersList />;
+      default:
+        return <DashboardOverview />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader />
-      
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="flex flex-wrap gap-2 h-auto">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-              <TabsTrigger value="groups">Groups</TabsTrigger>
-              <TabsTrigger value="forms">Forms</TabsTrigger>
-              <TabsTrigger value="phone-numbers">Phone Numbers</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview">
-              <DashboardOverview setActiveTab={setActiveTab} />
-            </TabsContent>
-
-            <TabsContent value="campaigns">
-              <CampaignList />
-            </TabsContent>
-
-            <TabsContent value="groups">
-              <GroupList />
-            </TabsContent>
-
-            <TabsContent value="forms">
-              <FormsOverview />
-            </TabsContent>
-
-            <TabsContent value="phone-numbers">
-              <PhoneNumbersList />
-            </TabsContent>
-          </Tabs>
+      <main className="pl-64">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {renderContent()}
         </div>
       </main>
     </div>
