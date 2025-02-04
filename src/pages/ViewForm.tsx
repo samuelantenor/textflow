@@ -111,15 +111,23 @@ export default function ViewForm() {
   };
 
   if (loading) {
-    return <FormLoader />;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <FormLoader />
+      </div>
+    );
   }
 
   if (!form) {
-    return <FormError />;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <FormError />
+      </div>
+    );
   }
 
   const backgroundStyle = {
-    backgroundColor: form.background_color || '#FFFFFF',
+    backgroundColor: form.background_color || '#000000',
     fontFamily: form.font_family || 'Inter',
   };
 
@@ -134,14 +142,11 @@ export default function ViewForm() {
 
   return (
     <div 
-      className="min-h-screen py-12 px-4"
+      className="min-h-screen w-full flex items-center justify-center py-12 px-4"
       style={backgroundStyle}
     >
       <Card 
-        className="max-w-2xl mx-auto p-6 relative overflow-hidden"
-        style={{
-          backgroundColor: form.background_color || '#FFFFFF',
-        }}
+        className="w-full max-w-2xl mx-auto p-6 sm:p-8 relative overflow-hidden bg-black/80 backdrop-blur-sm border-gray-800/50"
       >
         {form.background_image_url && (
           <div 
@@ -152,15 +157,17 @@ export default function ViewForm() {
             }}
           />
         )}
-        <ViewFormContent
-          form={form}
-          formData={formData}
-          onFieldChange={(fieldName, value) => {
-            setFormData(prev => ({ ...prev, [fieldName]: value }));
-          }}
-          onSubmit={handleSubmit}
-          submitting={submitting}
-        />
+        <div className="relative z-10">
+          <ViewFormContent
+            form={form}
+            formData={formData}
+            onFieldChange={(fieldName, value) => {
+              setFormData(prev => ({ ...prev, [fieldName]: value }));
+            }}
+            onSubmit={handleSubmit}
+            submitting={submitting}
+          />
+        </div>
       </Card>
     </div>
   );
