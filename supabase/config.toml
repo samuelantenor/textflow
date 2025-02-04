@@ -25,10 +25,9 @@ enabled = true
 [realtime]
 enabled = true
 
-[[functions]]
+[functions]
 [functions.send-welcome-email]
 verify_jwt = true
 
-[[functions]]
 [functions.handle-new-user]
 verify_jwt = true
