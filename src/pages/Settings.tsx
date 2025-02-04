@@ -1,9 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -106,22 +104,13 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader />
-      
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-8">
+        <div className="mb-6">
           <h1 className="text-2xl font-bold">Settings</h1>
         </div>
 
         <div className="space-y-6">
-          <div className="bg-card rounded-lg p-6">
+          <div className="bg-card rounded-lg p-6 bg-black/20">
             <h2 className="text-lg font-semibold mb-6">Account Settings</h2>
             
             <Form {...form}>

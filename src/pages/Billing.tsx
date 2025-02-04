@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { BillingOverview } from "@/components/billing/BillingOverview";
 import { UsageStats } from "@/components/billing/UsageStats";
@@ -93,24 +92,14 @@ const Billing = () => {
   return (
     <>
       <div className="min-h-screen bg-background">
-        <DashboardHeader />
-        
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-8">
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate(-1)}
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <h1 className="text-2xl font-bold">Billing & Subscription</h1>
-            </div>
+            <h1 className="text-2xl font-bold">Billing & Subscription</h1>
             <Button 
               onClick={handleManageSubscription}
               disabled={isLoading}
               variant="outline"
+              className="bg-black/20"
             >
               <Settings className="mr-2 h-4 w-4" />
               Manage Subscription
