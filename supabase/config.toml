@@ -21,14 +21,14 @@ enabled = true
 
 [auth]
 enabled = true
-port = 54325
 
 [realtime]
 enabled = true
 
-[edge-functions]
-[edge-functions.send-welcome-email]
-verify-jwt = true
+[[edge_functions]]
+name = "send-welcome-email"
+verify_jwt = true
 
-[edge-functions.handle-new-user]
-verify-jwt = true
+[[edge_functions]]
+name = "handle-new-user"
+verify_jwt = true
