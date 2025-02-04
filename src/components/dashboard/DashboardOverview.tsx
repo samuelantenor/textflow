@@ -9,8 +9,32 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, Users, FileText, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export const DashboardOverview = () => {
+  const [userName, setUserName] = useState<string>("");
+  const [greeting, setGreeting] = useState<string>("");
+
+  useEffect(() => {
+    // Set greeting based on time of day
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Good morning");
+    else if (hour < 18) setGreeting("Good afternoon");
+    else setGreeting("Good evening");
+
+    // Get user's name
+    const getUserName = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.user_metadata?.full_name) {
+        setUserName(user.user_metadata.full_name);
+      } else if (user?.email) {
+        setUserName(user.email.split('@')[0]);
+      }
+    };
+
+    getUserName();
+  }, []);
+
   // Fetch recent campaigns
   const { data: recentCampaigns, isLoading: isLoadingCampaigns } = useQuery({
     queryKey: ['recent-campaigns'],
@@ -48,16 +72,29 @@ export const DashboardOverview = () => {
 
   return (
     <div className="space-y-8 p-8 max-w-[1600px] mx-auto animate-fade-in">
-      {/* Header Section */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
-          Dashboard Overview
-        </h1>
-        <Button asChild className="bg-primary-500 hover:bg-primary-600 text-white">
-          <Link to="/dashboard?tab=campaigns" className="flex items-center gap-2">
-            New Campaign <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
+      {/* Welcome Section */}
+      <div className="relative overflow-hidden rounded-xl border border-gray-800/50 bg-gradient-to-r from-black/50 to-gray-900/50 p-6">
+        <div className="relative z-10">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-semibold flex flex-wrap items-baseline gap-x-2">
+              <span className="text-white">{greeting},</span>
+              <span className="text-primary-500">{userName}</span>
+            </h1>
+            <p className="text-gray-400">Welcome to your dashboard!</p>
+          </div>
+          <div className="mt-4 flex gap-3">
+            <Button asChild className="bg-primary-500 hover:bg-primary-600">
+              <Link to="/dashboard?tab=campaigns" className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" />
+                Create Campaign
+              </Link>
+            </Button>
+            
+          </div>
+        </div>
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] transform translate-x-1/3 -translate-y-1/3">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-transparent rounded-full blur-3xl" />
+        </div>
       </div>
 
       {/* Analytics Overview */}
