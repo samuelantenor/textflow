@@ -73,7 +73,7 @@ export default function LandingPage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <h1 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600 mb-6">
+              <h1 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-300 mb-6">
                 Welcome to TextFlow
               </h1>
             </motion.div>
@@ -82,7 +82,7 @@ export default function LandingPage() {
             </p>
             <div className="flex gap-4 justify-center">
               <Link to="/signup">
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 rounded-lg text-lg group">
+                <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-6 rounded-lg text-lg group">
                   Get Started
                   <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
@@ -98,7 +98,7 @@ export default function LandingPage() {
 
         {/* Animated Floating Elements */}
         <motion.div
-          className="absolute top-40 left-10 w-20 h-20 bg-purple-500/10 rounded-full blur-xl"
+          className="absolute top-40 left-10 w-20 h-20 bg-red-500/10 rounded-full blur-xl"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.5, 0.8, 0.5]
@@ -110,7 +110,7 @@ export default function LandingPage() {
           }}
         />
         <motion.div
-          className="absolute bottom-20 right-10 w-32 h-32 bg-pink-500/10 rounded-full blur-xl"
+          className="absolute bottom-20 right-10 w-32 h-32 bg-red-400/10 rounded-full blur-xl"
           animate={{
             scale: [1, 1.3, 1],
             opacity: [0.5, 0.7, 0.5]
@@ -142,7 +142,7 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <h3 className="text-4xl font-bold text-purple-400 mb-2">{stat.number}</h3>
+                <h3 className="text-4xl font-bold text-red-400 mb-2">{stat.number}</h3>
                 <p className="text-gray-400">{stat.label}</p>
               </motion.div>
             ))}
@@ -164,29 +164,29 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             <motion.div 
-              className="p-6 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 hover:border-purple-500/50 transition-colors"
+              className="p-6 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 hover:border-red-500/50 transition-colors"
               whileHover={{ y: -5 }}
               transition={{ duration: 0.2 }}
             >
-              <Shield className="w-12 h-12 text-purple-500 mb-4" />
+              <Shield className="w-12 h-12 text-red-500 mb-4" />
               <h3 className="text-xl font-semibold text-white mb-2">Your data, your rules</h3>
               <p className="text-gray-400">End-to-end encryption ensures your messages stay private and secure.</p>
             </motion.div>
             <motion.div 
-              className="p-6 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 hover:border-purple-500/50 transition-colors"
+              className="p-6 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 hover:border-red-500/50 transition-colors"
               whileHover={{ y: -5 }}
               transition={{ duration: 0.2 }}
             >
-              <Lock className="w-12 h-12 text-purple-500 mb-4" />
+              <Lock className="w-12 h-12 text-red-500 mb-4" />
               <h3 className="text-xl font-semibold text-white mb-2">Security by design</h3>
               <p className="text-gray-400">Built with privacy-first principles and state-of-the-art security.</p>
             </motion.div>
             <motion.div 
-              className="p-6 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 hover:border-purple-500/50 transition-colors"
+              className="p-6 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 hover:border-red-500/50 transition-colors"
               whileHover={{ y: -5 }}
               transition={{ duration: 0.2 }}
             >
-              <Users className="w-12 h-12 text-purple-500 mb-4" />
+              <Users className="w-12 h-12 text-red-500 mb-4" />
               <h3 className="text-xl font-semibold text-white mb-2">Community driven</h3>
               <p className="text-gray-400">Join thousands of users who value their privacy and freedom.</p>
             </motion.div>
@@ -211,7 +211,7 @@ export default function LandingPage() {
               <motion.div
                 key={index}
                 className={`p-6 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border ${
-                  plan.popular ? 'border-purple-500' : 'border-gray-800'
+                  plan.popular ? 'border-red-500' : 'border-gray-800'
                 } relative`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -221,7 +221,7 @@ export default function LandingPage() {
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="bg-purple-600 text-white px-3 py-1 rounded-full text-sm">Most Popular</span>
+                    <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm">Most Popular</span>
                   </div>
                 )}
                 <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
@@ -232,14 +232,14 @@ export default function LandingPage() {
                 <ul className="space-y-3 mb-6">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-center text-gray-300">
-                      <Check className="w-5 h-5 text-purple-500 mr-2" />
+                      <Check className="w-5 h-5 text-red-500 mr-2" />
                       {feature}
                     </li>
                   ))}
                 </ul>
                 <Link to="/signup" className="block">
                   <Button className={`w-full ${
-                    plan.popular ? 'bg-purple-600 hover:bg-purple-700' : 'bg-gray-800 hover:bg-gray-700'
+                    plan.popular ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-800 hover:bg-gray-700'
                   } text-white py-4 rounded-lg`}>
                     Get Started
                   </Button>
@@ -285,7 +285,7 @@ export default function LandingPage() {
             Start your journey to privacy-first communication.
           </p>
           <Link to="/signup">
-            <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 rounded-lg text-lg group">
+            <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-6 rounded-lg text-lg group">
               Start Messaging Securely
               <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
