@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { MainLayout } from './components/Layout/MainLayout';
 import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
@@ -9,20 +10,41 @@ import ViewForm from './pages/ViewForm';
 import CreateCampaign from './pages/CreateCampaign';
 import Pricing from './pages/Pricing';
 
+// Routes that should use the main layout
+const layoutRoutes = [
+  { path: '/dashboard', element: <Dashboard /> },
+  { path: '/billing', element: <Billing /> },
+  { path: '/profile', element: <Profile /> },
+  { path: '/settings', element: <Settings /> },
+  { path: '/forms/:id', element: <ViewForm /> },
+  { path: '/campaigns/create', element: <CreateCampaign /> },
+];
+
+// Auth routes that don't use the main layout
+const authRoutes = [
+  { path: '/', element: <Login /> },
+  { path: '/login', element: <Login /> },
+  { path: '/reset-password', element: <ResetPassword /> },
+  { path: '/pricing', element: <Pricing /> },
+];
+
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/billing" element={<Billing />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/forms/:id" element={<ViewForm />} />
-        <Route path="/campaigns/create" element={<CreateCampaign />} />
-        <Route path="/pricing" element={<Pricing />} />
+        {/* Auth routes without layout */}
+        {authRoutes.map(({ path, element }) => (
+          <Route key={path} path={path} element={element} />
+        ))}
+        
+        {/* Routes with MainLayout */}
+        {layoutRoutes.map(({ path, element }) => (
+          <Route
+            key={path}
+            path={path}
+            element={<MainLayout>{element}</MainLayout>}
+          />
+        ))}
       </Routes>
     </Router>
   );
