@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from './components/Layout/MainLayout';
 import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
@@ -9,6 +9,9 @@ import Settings from './pages/Settings';
 import ViewForm from './pages/ViewForm';
 import CreateCampaign from './pages/CreateCampaign';
 import Pricing from './pages/Pricing';
+import LandingPage from './app/page';
+import { useEffect, useState } from 'react';
+import { supabase } from './integrations/supabase/client';
 
 // Routes that should use the main layout
 const layoutRoutes = [
@@ -20,29 +23,71 @@ const layoutRoutes = [
   { path: '/campaigns/create', element: <CreateCampaign /> },
 ];
 
-// Auth routes that don't use the main layout
-const authRoutes = [
-  { path: '/', element: <Login /> },
+// Public routes that don't require auth
+const publicRoutes = [
+  { path: '/', element: <LandingPage /> },
   { path: '/login', element: <Login /> },
   { path: '/reset-password', element: <ResetPassword /> },
   { path: '/pricing', element: <Pricing /> },
 ];
 
 function App() {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; // You might want to add a proper loading screen here
+  }
+
   return (
     <Router>
       <Routes>
-        {/* Auth routes without layout */}
-        {authRoutes.map(({ path, element }) => (
-          <Route key={path} path={path} element={element} />
+        {/* Public routes */}
+        {publicRoutes.map(({ path, element }) => (
+          <Route 
+            key={path} 
+            path={path} 
+            element={
+              // If user is authenticated and tries to access public routes except landing page,
+              // redirect to dashboard
+              session && path !== '/' ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                element
+              )
+            } 
+          />
         ))}
         
-        {/* Routes with MainLayout */}
+        {/* Protected routes with MainLayout */}
         {layoutRoutes.map(({ path, element }) => (
           <Route
             key={path}
             path={path}
-            element={<MainLayout>{element}</MainLayout>}
+            element={
+              session ? (
+                <MainLayout>{element}</MainLayout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
           />
         ))}
       </Routes>
