@@ -9,6 +9,8 @@ serve(async (req) => {
   const { record } = await req.json();
 
   try {
+    console.log("Handling new user registration:", record.id);
+    
     // Send welcome email
     const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-welcome-email`, {
       method: 'POST',
@@ -25,6 +27,8 @@ serve(async (req) => {
     if (!emailResponse.ok) {
       throw new Error(`Failed to send welcome email: ${emailResponse.statusText}`);
     }
+
+    console.log("Welcome email sent successfully for user:", record.id);
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { 'Content-Type': 'application/json' },
