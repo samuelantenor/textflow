@@ -26,9 +26,9 @@ enabled = true
 enabled = true
 
 [[functions]]
-name = "send-welcome-email"
+[functions.send-welcome-email]
 verify_jwt = true
 
 [[functions]]
-name = "handle-new-user"
+[functions.handle-new-user]
 verify_jwt = true
