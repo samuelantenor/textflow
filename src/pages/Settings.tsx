@@ -117,6 +117,7 @@ const Settings = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
+          <h1 className="text-2xl font-bold">Settings</h1>
         </div>
 
         <div className="space-y-6">
