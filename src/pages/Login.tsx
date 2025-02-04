@@ -12,6 +12,7 @@ import UpdatePasswordForm from "@/components/auth/UpdatePasswordForm";
 const Login = () => {
   const { isLoading, authError, setAuthError, checkUserAndRedirect } = useAuthRedirect();
   const [view, setView] = useState<'sign_in' | 'forgot_password' | 'update_password'>('sign_in');
+  const [isSettingUp, setIsSettingUp] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -68,7 +69,21 @@ const Login = () => {
         if (hash && hash.includes('type=recovery')) {
           setView('update_password');
         } else if (session) {
-          checkUserAndRedirect(session);
+          setIsSettingUp(true);
+          try {
+            // Wait for welcome email to be sent
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            await checkUserAndRedirect(session);
+          } catch (error) {
+            console.error('Error during account setup:', error);
+            toast({
+              variant: "destructive",
+              title: "Setup Error",
+              description: "There was an error setting up your account. Please try again.",
+            });
+          } finally {
+            setIsSettingUp(false);
+          }
         }
       } else if (event === 'SIGNED_OUT') {
         setAuthError(null);
@@ -90,7 +105,7 @@ const Login = () => {
     };
   }, [checkUserAndRedirect, setAuthError, toast]);
 
-  if (isLoading) {
+  if (isLoading || isSettingUp) {
     return <LoadingState />;
   }
 
