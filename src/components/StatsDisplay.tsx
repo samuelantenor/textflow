@@ -1,9 +1,10 @@
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, CheckCircle, XCircle, Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const COLORS = {
   delivered: "#22c55e",  // green
@@ -84,58 +85,93 @@ const StatsDisplay = () => {
   });
 
   if (error) {
-    console.error('Query error:', error);
     return (
-      <div className="p-4 text-center text-red-500">
+      <div className="p-6 text-center text-red-500 bg-red-500/10 rounded-xl border border-red-500/20">
         Error loading analytics. Please try refreshing the page.
       </div>
     );
   }
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <Card className="campaign-card p-6 hover:scale-[1.02] transition-transform duration-200">
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-full bg-primary/10">
-            <MessageSquare className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground font-medium">Delivery Rate</p>
-            <div className="flex items-baseline">
-              <h3 className="text-2xl font-bold">{analytics?.delivery_rate || 0}</h3>
-              <span className="text-sm text-muted-foreground ml-1">%</span>
-            </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Total Messages: {analytics?.total_messages || 0}
-            </p>
-          </div>
-        </div>
-      </Card>
+  const stats = [
+    {
+      title: "Delivery Rate",
+      value: analytics?.delivery_rate || 0,
+      unit: "%",
+      icon: CheckCircle,
+      color: "text-green-500",
+      bgColor: "bg-green-500/10",
+      borderColor: "border-green-500/20",
+      description: `${analytics?.total_messages || 0} total messages`
+    },
+    {
+      title: "Failed Messages",
+      value: analytics?.status_counts?.failed || 0,
+      icon: XCircle,
+      color: "text-red-500",
+      bgColor: "bg-red-500/10",
+      borderColor: "border-red-500/20",
+      description: "Messages that failed to send"
+    },
+    {
+      title: "Pending Messages",
+      value: analytics?.status_counts?.pending || 0,
+      icon: Clock,
+      color: "text-amber-500",
+      bgColor: "bg-amber-500/10",
+      borderColor: "border-amber-500/20",
+      description: "Messages in queue"
+    },
+    {
+      title: "Total Messages",
+      value: analytics?.total_messages || 0,
+      icon: MessageSquare,
+      color: "text-primary-500",
+      bgColor: "bg-primary-500/10",
+      borderColor: "border-primary-500/20",
+      description: "All time messages sent"
+    }
+  ];
 
-      <Card className="campaign-card p-6 hover:scale-[1.02] transition-transform duration-200">
-        <h3 className="text-lg font-semibold mb-4">Message Status Distribution</h3>
-        <div className="w-full h-[200px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={analytics?.chart_data || []}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {analytics?.chart_data?.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </Card>
+  return (
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      {stats.map((stat, index) => (
+        <Card
+          key={stat.title}
+          className={cn(
+            "relative overflow-hidden transition-all duration-300",
+            "hover:shadow-lg hover:scale-[1.02]",
+            "border-gray-800/50 bg-gray-900/50 backdrop-blur-sm",
+            stat.borderColor
+          )}
+        >
+          <div className={cn(
+            "absolute top-0 right-0 w-32 h-32 transform translate-x-8 translate-y-[-50%] rounded-full blur-3xl opacity-20",
+            stat.bgColor
+          )} />
+          
+          <div className="relative p-6">
+            <div className="flex items-center gap-4">
+              <div className={cn("p-3 rounded-xl", stat.bgColor)}>
+                <stat.icon className={cn("w-6 h-6", stat.color)} />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-gray-400 font-medium">{stat.title}</p>
+                <div className="flex items-baseline gap-1">
+                  <h3 className={cn("text-2xl font-bold mt-1", stat.color)}>
+                    {stat.value}
+                  </h3>
+                  {stat.unit && (
+                    <span className="text-sm text-gray-500">{stat.unit}</span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  {stat.description}
+                </p>
+              </div>
+            </div>
+          </div>
+        </Card>
+      ))}
     </div>
   );
 };
