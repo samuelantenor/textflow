@@ -1,13 +1,12 @@
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import AuthContainer from "@/components/auth/AuthContainer";
-import LoadingState from "@/components/auth/LoadingState";
+import { motion } from "framer-motion";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useToast } from "@/hooks/use-toast";
+import { AuthForm } from "@/components/auth/AuthForm";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 import UpdatePasswordForm from "@/components/auth/UpdatePasswordForm";
+import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const { isLoading, authError, setAuthError, checkUserAndRedirect } = useAuthRedirect();
@@ -29,7 +28,6 @@ const Login = () => {
         description: "The reset link has expired. Please request a new password reset.",
       });
       setView('sign_in');
-      // Clean up the URL
       window.history.replaceState({}, document.title, window.location.pathname);
       return;
     }
@@ -40,8 +38,7 @@ const Login = () => {
       setView('update_password');
       return;
     }
-    
-    // Check current session on mount
+
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
         console.error("Error checking session:", error.message);
@@ -49,30 +46,22 @@ const Login = () => {
         return;
       }
       
-      // Only redirect to dashboard if we're not in password reset flow
       if (session && view !== 'update_password') {
-        console.log("Found existing session, checking user status...");
         checkUserAndRedirect(session);
       }
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event);
-      
       if (event === 'PASSWORD_RECOVERY') {
         setView('update_password');
         setAuthError(null);
       } else if (event === 'SIGNED_IN') {
-        // If it's a recovery flow, don't redirect
-        const hash = window.location.hash;
         if (hash && hash.includes('type=recovery')) {
           setView('update_password');
         } else if (session) {
           setIsSettingUp(true);
           try {
-            // Wait for welcome email to be sent
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            await new Promise(resolve => setTimeout(resolve, 1000));
             await checkUserAndRedirect(session);
           } catch (error) {
             console.error('Error during account setup:', error);
@@ -90,7 +79,6 @@ const Login = () => {
         setView('sign_in');
       } else if (event === 'USER_UPDATED') {
         setAuthError(null);
-        // After password is updated, sign out the user
         await supabase.auth.signOut();
         toast({
           title: "Password Updated",
@@ -106,81 +94,115 @@ const Login = () => {
   }, [checkUserAndRedirect, setAuthError, toast]);
 
   if (isLoading || isSettingUp) {
-    return <LoadingState />;
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-white text-center"
+        >
+          <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg">Setting up your account...</p>
+        </motion.div>
+      </div>
+    );
   }
 
-  const getContent = () => {
-    switch (view) {
-      case 'forgot_password':
-        return (
-          <AuthContainer
-            title="Reset Password"
-            description="Enter your email to receive a password reset link"
-            error={authError}
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 flex flex-col items-center justify-center px-4">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md"
+      >
+        <div className="text-center mb-8">
+          <motion.h1
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-300"
           >
-            <ForgotPasswordForm onBack={() => setView('sign_in')} />
-          </AuthContainer>
-        );
-      case 'update_password':
-        return (
-          <AuthContainer
-            title="Set New Password"
-            description="Enter your new password"
-            error={authError}
+            Welcome Back
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-gray-400 mt-2"
           >
-            <UpdatePasswordForm />
-          </AuthContainer>
-        );
-      default:
-        return (
-          <AuthContainer
-            title="Welcome to FlowText"
-            description="Sign in to manage your campaigns"
-            error={authError}
-          >
-            <Auth
-              supabaseClient={supabase}
-              view="sign_in"
-              appearance={{ 
-                theme: ThemeSupa,
-                variables: {
-                  default: {
-                    colors: {
-                      brand: '#000000',
-                      brandAccent: '#666666',
-                      inputText: '#ffffff',
-                      inputBackground: '#1a1a1a',
-                      inputPlaceholder: '#666666',
-                    },
-                  },
-                },
-                className: {
-                  input: 'text-white',
-                  label: 'text-white',
-                },
-              }}
-              theme="dark"
-              providers={[]}
-              localization={{
-                variables: {
-                  sign_in: {
-                    email_label: 'Email',
-                    password_label: 'Password',
-                    button_label: 'Sign In',
-                    password_input_placeholder: 'Your password',
-                    email_input_placeholder: 'Your email',
-                    link_text: "Don't have an account? Sign up",
-                  },
-                },
-              }}
-              redirectTo={`${window.location.origin}/dashboard`}
-            />
-          </AuthContainer>
-        );
-    }
-  };
+            Sign in to continue to TextFlow
+          </motion.p>
+        </div>
 
-  return getContent();
+        {authError && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6 text-red-500 text-sm text-center"
+          >
+            {authError}
+          </motion.div>
+        )}
+
+        {view === 'forgot_password' ? (
+          <ForgotPasswordForm onBack={() => setView('sign_in')} />
+        ) : view === 'update_password' ? (
+          <UpdatePasswordForm />
+        ) : (
+          <>
+            <AuthForm
+              mode="sign_in"
+              showToggle={false}
+            />
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="text-center mt-6 space-y-4"
+            >
+              <button
+                onClick={() => setView('forgot_password')}
+                className="text-gray-400 hover:text-white text-sm block w-full"
+              >
+                Forgot your password?
+              </button>
+              <p className="text-gray-400">
+                Don't have an account?{' '}
+                <Link to="/signup" className="text-red-400 hover:text-red-300">
+                  Sign up
+                </Link>
+              </p>
+            </motion.div>
+          </>
+        )}
+      </motion.div>
+
+      {/* Animated Background Elements */}
+      <motion.div
+        className="fixed top-40 left-10 w-20 h-20 bg-red-500/10 rounded-full blur-xl"
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.5, 0.8, 0.5]
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      <motion.div
+        className="fixed bottom-20 right-10 w-32 h-32 bg-red-400/10 rounded-full blur-xl"
+        animate={{
+          scale: [1, 1.3, 1],
+          opacity: [0.5, 0.7, 0.5]
+        }}
+        transition={{
+          duration: 5,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+    </div>
+  );
 };
 
 export default Login;
