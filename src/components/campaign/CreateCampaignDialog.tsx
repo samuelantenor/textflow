@@ -10,6 +10,8 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import type { CampaignFormData } from "@/types/campaign";
 import { useQuery } from "@tanstack/react-query";
+import { CampaignFormFields } from "./CampaignFormFields";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function CreateCampaignDialog() {
   const [open, setOpen] = useState(false);
@@ -100,48 +102,49 @@ export function CreateCampaignDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button disabled={isAtCampaignLimit}>
+        <Button className="bg-primary-500 hover:bg-primary-600">
           <Plus className="w-4 h-4 mr-2" />
           New Campaign
-          {isAtCampaignLimit && " (Limit Reached)"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Create New Campaign</DialogTitle>
+      
+      <DialogContent className="w-[95vw] max-w-2xl h-[95vh] md:h-auto md:max-h-[85vh] p-0">
+        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6">
+          <DialogTitle className="text-xl">Create New Campaign</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Campaign Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter campaign name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex justify-end space-x-4 pt-4">
+        
+        <ScrollArea className="px-4 sm:px-6 flex-1 h-[calc(95vh-8rem)] md:h-auto">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <CampaignFormFields form={form} showAllFields={true} />
+            </form>
+          </Form>
+        </ScrollArea>
+
+        <div className="mt-6 border-t border-gray-800/50">
+          <div className="px-4 sm:px-6 py-4 sm:py-5 bg-black/50 backdrop-blur-sm">
+            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
+                className="w-full sm:w-auto order-1 sm:order-none"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading || isAtCampaignLimit}>
+              <Button 
+                onClick={form.handleSubmit(onSubmit)}
+                disabled={isLoading}
+                className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600"
+              >
                 {isLoading && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 Create Campaign
               </Button>
             </div>
-          </form>
-        </Form>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
