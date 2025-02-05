@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { formatDate } from "@/utils/dateUtils";
 import { MoreVertical, Trash, Edit, Send, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -148,14 +148,14 @@ export function CampaignListItem({ campaign }: CampaignListItemProps) {
         {campaign.scheduled_for && (
           <Badge variant="outline" className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
-            {format(new Date(campaign.scheduled_for), "MMM d, yyyy")}
+            {formatDate(campaign.scheduled_for)}
           </Badge>
         )}
       </div>
 
       <div className="flex justify-between items-center pt-2">
         <span className="text-sm text-muted-foreground">
-          Created {format(new Date(campaign.created_at), "MMM d, yyyy")}
+          Created {formatDate(campaign.created_at)}
         </span>
         {campaign.status === 'draft' && (
           <Button 

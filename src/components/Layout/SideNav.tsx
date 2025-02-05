@@ -19,19 +19,6 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
 
-const navigation = [
-  { name: 'Overview', href: '/dashboard?tab=overview', icon: LayoutDashboard },
-  { name: 'Campaigns', href: '/dashboard?tab=campaigns', icon: MessageSquare },
-  { name: 'Groups', href: '/dashboard?tab=groups', icon: Users },
-  { name: 'Forms', href: '/dashboard?tab=forms', icon: FileText },
-  { name: 'Phone Numbers', href: '/dashboard?tab=phone-numbers', icon: Phone },
-];
-
-const accountNavigation = [
-  { name: 'Billing', href: '/billing', icon: Receipt },
-  { name: 'Settings', href: '/settings', icon: Settings },
-];
-
 interface SideNavProps {
   className?: string;
 }
@@ -41,7 +28,20 @@ export function SideNav({ className }: SideNavProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation(['navigation']);
+
+  const navigation = [
+    { name: t('main.overview'), href: '/dashboard?tab=overview', icon: LayoutDashboard },
+    { name: t('main.campaigns'), href: '/dashboard?tab=campaigns', icon: MessageSquare },
+    { name: t('main.groups'), href: '/dashboard?tab=groups', icon: Users },
+    { name: t('main.forms'), href: '/dashboard?tab=forms', icon: FileText },
+    { name: t('main.phoneNumbers'), href: '/dashboard?tab=phone-numbers', icon: Phone },
+  ];
+
+  const accountNavigation = [
+    { name: t('account.billing'), href: '/billing', icon: Receipt },
+    { name: t('account.settings'), href: '/settings', icon: Settings },
+  ];
 
   // Close menu when route changes
   useEffect(() => {
@@ -88,13 +88,13 @@ export function SideNav({ className }: SideNavProps) {
         
         toast({
           variant: "destructive",
-          title: "Error signing out",
+          title: t('auth.signOut.error.title'),
           description: signOutError.message,
         });
       } else {
         toast({
-          title: "Signed out successfully",
-          description: "You have been logged out of your account.",
+          title: t('auth.signOut.success.title'),
+          description: t('auth.signOut.success.description'),
         });
       }
 
@@ -104,8 +104,8 @@ export function SideNav({ className }: SideNavProps) {
       navigate(`/${i18n.language}/login`, { replace: true });
       toast({
         variant: "destructive",
-        title: "Error signing out",
-        description: "An unexpected error occurred, but you've been redirected to the login page.",
+        title: t('auth.signOut.error.title'),
+        description: t('auth.signOut.error.description'),
       });
     }
   };
@@ -174,7 +174,7 @@ export function SideNav({ className }: SideNavProps) {
           <Link to={`/${i18n.language}/dashboard`} className="flex items-center gap-2 group">
             <MessageSquare className="h-6 w-6 text-primary-500 fill-current transition-transform group-hover:scale-110" />
             <span className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              FlowText
+              {t('brand.name')}
             </span>
           </Link>
         </div>
@@ -248,10 +248,10 @@ export function SideNav({ className }: SideNavProps) {
               onClick={handleSignOut}
               className="flex items-center px-3 py-2.5 mt-2 text-sm font-medium rounded-lg transition-all duration-200 w-full
                 text-red-500 hover:bg-red-500/10 hover:text-red-400 group animate-fade-in"
-              style={{ animationDelay: `${(navigation.length + accountNavigation.length) * 100}ms` }}
+              style={{ animationDelay: `${(accountNavigation.length + navigation.length) * 100}ms` }}
             >
               <LogOut className="mr-3 h-5 w-5 transition-transform group-hover:scale-110" />
-              Log out
+              {t('auth.signOut.button')}
             </button>
           </div>
         </nav>

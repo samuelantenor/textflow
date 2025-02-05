@@ -1,0 +1,29 @@
+{
+  "title": "Paramètres",
+  "account": {
+    "title": "Paramètres du compte",
+    "email": "E-mail",
+    "fullName": "Nom complet",
+    "saveChanges": "Enregistrer les modifications"
+  },
+  "language": {
+    "title": "Paramètres de langue",
+    "current": "Langue actuelle",
+    "select": "Sélectionner la langue",
+    "languages": {
+      "en": "Anglais",
+      "fr": "Français"
+    }
+  },
+  "messages": {
+    "updateSuccess": {
+      "title": "Paramètres mis à jour",
+      "description": "Vos paramètres de compte ont été mis à jour avec succès."
+    },
+    "updateError": {
+      "title": "Erreur",
+      "description": "Échec de la mise à jour des paramètres. Veuillez réessayer."
+    },
+    "loading": "Chargement..."
+  }
+} 

@@ -23,7 +23,8 @@
     "update": "Mettre à jour",
     "send": "Envoyer",
     "back": "Retour",
-    "viewAll": "Voir tout"
+    "viewAll": "Voir tout",
+    "contactUs": "Contactez-nous"
   },
   "forms": {
     "email": "Email",
@@ -51,5 +52,18 @@
     "saving": "Enregistrement...",
     "sending": "Envoi...",
     "processing": "Traitement..."
+  },
+  "date": {
+    "format": {
+      "full": "{{day}} {{month}} {{year}}"
+    }
+  },
+  "payment": {
+    "status": {
+      "completed": "terminé"
+    },
+    "method": {
+      "card": "carte"
+    }
   }
 } 

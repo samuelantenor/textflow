@@ -1,0 +1,29 @@
+{
+  "main": {
+    "overview": "Aperçu",
+    "campaigns": "Campagnes",
+    "groups": "Groupes",
+    "forms": "Formulaires",
+    "phoneNumbers": "Numéros de téléphone"
+  },
+  "account": {
+    "billing": "Facturation",
+    "settings": "Paramètres"
+  },
+  "auth": {
+    "signOut": {
+      "button": "Se déconnecter",
+      "success": {
+        "title": "Déconnexion réussie",
+        "description": "Vous avez été déconnecté de votre compte."
+      },
+      "error": {
+        "title": "Erreur de déconnexion",
+        "description": "Une erreur inattendue s'est produite, mais vous avez été redirigé vers la page de connexion."
+      }
+    }
+  },
+  "brand": {
+    "name": "FlowText"
+  }
+} 

@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Receipt } from "lucide-react";
-import { format } from "date-fns";
+import { formatDate } from "@/utils/dateUtils";
+import { useTranslation } from "react-i18next";
 
 export const PaymentHistory = () => {
+  const { t } = useTranslation(['billing']);
   const { data: payments, isLoading } = useQuery({
     queryKey: ['payment_history'],
     queryFn: async () => {
@@ -24,7 +26,7 @@ export const PaymentHistory = () => {
   if (isLoading) {
     return (
       <div className="bg-card rounded-lg p-6">
-        <h2 className="text-lg font-semibold mb-6">Payment History</h2>
+        <h2 className="text-lg font-semibold mb-6">{t('payments.title')}</h2>
         <div className="animate-pulse space-y-4">
           <div className="h-12 bg-muted rounded"></div>
           <div className="h-12 bg-muted rounded"></div>
@@ -36,10 +38,10 @@ export const PaymentHistory = () => {
   if (!payments?.length) {
     return (
       <div className="bg-card rounded-lg p-6">
-        <h2 className="text-lg font-semibold mb-6">Payment History</h2>
+        <h2 className="text-lg font-semibold mb-6">{t('payments.title')}</h2>
         <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
           <Receipt className="h-12 w-12 mb-4" />
-          <p>No payment history available</p>
+          <p>{t('payments.noPayments')}</p>
         </div>
       </div>
     );
@@ -47,7 +49,7 @@ export const PaymentHistory = () => {
 
   return (
     <div className="bg-card rounded-lg p-6">
-      <h2 className="text-lg font-semibold mb-6">Payment History</h2>
+      <h2 className="text-lg font-semibold mb-6">{t('payments.title')}</h2>
       <div className="space-y-4">
         {payments.map((payment) => (
           <div
@@ -59,7 +61,7 @@ export const PaymentHistory = () => {
                 {payment.amount} {payment.currency}
               </p>
               <p className="text-sm text-muted-foreground">
-                {format(new Date(payment.payment_date), 'PPP')}
+                {formatDate(payment.payment_date)}
               </p>
             </div>
             <div className="text-right">

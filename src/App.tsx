@@ -32,7 +32,7 @@ const publicRoutes = [
   { path: 'login', element: <Login /> },
   { path: 'signup', element: <SignUp /> },
   { path: 'reset-password', element: <ResetPassword /> },
-  { path: 'pricing', element: <Pricing /> },
+  { path: 'pricing', element: <Pricing />, allowAuthenticated: true },
 ];
 
 // Language redirect component
@@ -85,12 +85,12 @@ function App() {
         {['en', 'fr'].map((lang) => (
           <Route key={lang} path={`/${lang}`} element={null}>
             {/* Public routes */}
-            {publicRoutes.map(({ path, element }) => (
+            {publicRoutes.map(({ path, element, allowAuthenticated }) => (
               <Route
                 key={path}
                 path={path}
                 element={
-                  session && path !== '' ? (
+                  session && path !== '' && !allowAuthenticated ? (
                     <Navigate to={`/${lang}/dashboard`} replace />
                   ) : (
                     element

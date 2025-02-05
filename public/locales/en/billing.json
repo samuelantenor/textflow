@@ -1,0 +1,29 @@
+{
+  "title": "Billing & Subscription",
+  "manageSubscription": "Manage Subscription",
+  "overview": {
+    "title": "Subscription Overview",
+    "plan": "Plan",
+    "status": "Status",
+    "monthlyMessageLimit": "Monthly Message Limit",
+    "campaignLimit": "Campaign Limit",
+    "upgradeMessage": "Upgrade to our paid plan to unlock unlimited campaigns and increased message limits!",
+    "subscribeNow": "Subscribe Now"
+  },
+  "usage": {
+    "title": "Usage Statistics",
+    "monthlyUsage": "Monthly Usage",
+    "messages": "messages",
+    "limitReached": "Monthly limit reached. Please upgrade your plan to send more messages.",
+    "billingCycle": "Billing cycle:",
+    "delivered": "Delivered",
+    "failed": "Failed"
+  },
+  "payments": {
+    "title": "Payment History",
+    "noPayments": "No payment history available"
+  },
+  "errors": {
+    "portalError": "Failed to open subscription management"
+  }
+} 

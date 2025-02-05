@@ -15,6 +15,32 @@
       "fields": "Champs du formulaire",
       "design": "Design"
     },
+    "fields": {
+      "addNew": "Ajouter un nouveau champ",
+      "type": "Type de champ",
+      "selectType": "Sélectionner le type de champ",
+      "label": "Libellé du champ",
+      "labelPlaceholder": "Entrez la question ou le libellé",
+      "description": "Description (optionnel)",
+      "descriptionPlaceholder": "Ajoutez un texte d'aide pour expliquer ce champ",
+      "placeholder": "Texte indicatif (optionnel)",
+      "placeholderPlaceholder": "Entrez le texte indicatif",
+      "options": "Options (une par ligne)",
+      "optionsPlaceholder": "Entrez les options, une par ligne",
+      "required": "Champ obligatoire",
+      "addButton": "Ajouter le champ",
+      "types": {
+        "text": "Texte",
+        "textarea": "Texte long",
+        "email": "Email",
+        "phone": "Téléphone",
+        "number": "Nombre",
+        "date": "Date",
+        "checkbox": "Case à cocher",
+        "radio": "Choix multiple",
+        "select": "Liste déroulante"
+      }
+    },
     "form": {
       "title": {
         "label": "Titre du formulaire",
@@ -114,5 +140,63 @@
   "view": {
     "submit": "Envoyer",
     "submitting": "Envoi en cours..."
+  },
+  "phoneNumbers": {
+    "title": "Mes numéros de téléphone",
+    "loading": "Chargement des numéros de téléphone...",
+    "add": {
+      "button": "Ajouter un numéro",
+      "title": "Ajouter un numéro de téléphone",
+      "description": "Ajoutez un numéro de téléphone que vous avez reçu de Twilio pour envoyer des messages.",
+      "defaultNumber": "Votre numéro de téléphone par défaut est :",
+      "label": "Numéro de téléphone",
+      "placeholder": "+1234567890",
+      "success": "Votre numéro de téléphone a été ajouté avec succès.",
+      "error": "Échec de l'ajout du numéro de téléphone. Veuillez réessayer."
+    },
+    "edit": {
+      "title": "Modifier le numéro de téléphone",
+      "description": "Mettre à jour les détails de votre numéro de téléphone.",
+      "button": "Modifier",
+      "saveButton": "Enregistrer les modifications",
+      "success": "Votre numéro de téléphone a été mis à jour avec succès.",
+      "error": "Échec de la mise à jour du numéro de téléphone. Veuillez réessayer."
+    },
+    "delete": {
+      "title": "Êtes-vous absolument sûr ?",
+      "description": "Cette action ne peut pas être annulée. Cela supprimera définitivement le numéro de téléphone de votre compte.",
+      "button": "Supprimer",
+      "confirmButton": "Supprimer",
+      "success": "Votre numéro de téléphone a été supprimé avec succès.",
+      "error": "Échec de la suppression du numéro de téléphone. Veuillez réessayer."
+    },
+    "buy": {
+      "button": "Acheter un nouveau numéro",
+      "title": "Demander un nouveau numéro de téléphone",
+      "description": "Remplissez ce formulaire pour demander un nouveau numéro de téléphone. Nous vous recontacterons avec les détails.",
+      "region": "Choisir la région du numéro",
+      "monthlyFee": "Frais mensuels : 5$/mois",
+      "upgradeRequired": "Passez à un forfait payant pour acheter des numéros de téléphone",
+      "buttons": {
+        "processing": "Traitement en cours...",
+        "payNow": "Payer maintenant",
+        "upgradeRequired": "Mise à niveau requise"
+      },
+      "errors": {
+        "selectCountry": "Veuillez sélectionner un pays",
+        "subscriptionRequired": "Veuillez passer à un forfait payant pour acheter des numéros de téléphone.",
+        "checkoutError": "Échec du démarrage du processus de paiement"
+      }
+    },
+    "field": {
+      "fromNumber": "Numéro d'expéditeur",
+      "placeholder": "Sélectionnez un numéro pour l'envoi",
+      "noNumbers": "Aucun numéro de téléphone disponible"
+    },
+    "common": {
+      "cancel": "Annuler",
+      "addedOn": "Ajouté le {{date}}",
+      "noNumbers": "Aucun numéro de téléphone ajouté pour le moment."
+    }
   }
 } 

@@ -12,10 +12,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { Loader2, Plus, Phone } from "lucide-react";
 import { BuyPhoneNumberForm } from "./BuyPhoneNumberForm";
 import { usePhoneNumberPaymentSuccess } from "@/hooks/usePhoneNumberPaymentSuccess";
+import { useTranslation } from "react-i18next";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export function PhoneNumbersList() {
+  const { t } = useTranslation("forms");
   const [isAddingNumber, setIsAddingNumber] = useState(false);
   const [isEditingNumber, setIsEditingNumber] = useState(false);
   const [selectedNumber, setSelectedNumber] = useState<any>(null);
@@ -71,8 +73,7 @@ export function PhoneNumbersList() {
       if (error) throw error;
 
       toast({
-        title: "Phone number added",
-        description: "Your phone number has been added successfully.",
+        description: t("phoneNumbers.add.success")
       });
 
       setIsAddingNumber(false);
@@ -81,42 +82,50 @@ export function PhoneNumbersList() {
     } catch (error) {
       console.error("Error adding phone number:", error);
       toast({
-        title: "Error",
-        description: "Failed to add phone number. Please try again.",
         variant: "destructive",
+        description: t("phoneNumbers.add.error")
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const updatePhoneNumber = async (id: string, newNumber: string) => {
+    const { error } = await supabase
+      .from('phone_numbers')
+      .update({ phone_number: newNumber })
+      .eq('id', id);
+
+    if (error) throw error;
+  };
+
+  const deletePhoneNumber = async (id: string) => {
+    const { error } = await supabase
+      .from('phone_numbers')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  };
+
   const handleEditNumber = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedNumber) return;
+
     setIsSubmitting(true);
-
     try {
-      const { error } = await supabase
-        .from('phone_numbers')
-        .update({ phone_number: newNumber })
-        .eq('id', selectedNumber.id);
-
-      if (error) throw error;
-
+      await updatePhoneNumber(selectedNumber.id, newNumber);
       toast({
-        title: "Phone number updated",
-        description: "Your phone number has been updated successfully.",
+        description: t("phoneNumbers.edit.success")
       });
-
       setIsEditingNumber(false);
-      setNewNumber("");
       setSelectedNumber(null);
+      setNewNumber("");
       refetch();
     } catch (error) {
-      console.error("Error updating phone number:", error);
       toast({
-        title: "Error",
-        description: "Failed to update phone number. Please try again.",
         variant: "destructive",
+        description: t("phoneNumbers.edit.error")
       });
     } finally {
       setIsSubmitting(false);
@@ -124,53 +133,45 @@ export function PhoneNumbersList() {
   };
 
   const handleDelete = async () => {
+    if (!selectedNumber) return;
+
     try {
-      const { error } = await supabase
-        .from('phone_numbers')
-        .delete()
-        .eq('id', selectedNumber.id);
-
-      if (error) throw error;
-
+      await deletePhoneNumber(selectedNumber.id);
       toast({
-        title: "Phone number deleted",
-        description: "Your phone number has been deleted successfully.",
+        description: t("phoneNumbers.delete.success")
       });
-
       setDeleteDialogOpen(false);
       setSelectedNumber(null);
       refetch();
     } catch (error) {
-      console.error("Error deleting phone number:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete phone number. Please try again.",
         variant: "destructive",
+        description: t("phoneNumbers.delete.error")
       });
     }
   };
 
   if (isLoading) {
-    return <div>Loading phone numbers...</div>;
+    return <div>{t("phoneNumbers.loading")}</div>;
   }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">My Phone Numbers</h2>
+        <h2 className="text-2xl font-bold">{t("phoneNumbers.title")}</h2>
         <div className="space-x-2">
           <Dialog open={isAddingNumber} onOpenChange={setIsAddingNumber}>
             <DialogTrigger asChild>
               <Button variant="outline">
                 <Plus className="w-4 h-4 mr-2" />
-                Add Number
+                {t("phoneNumbers.add.button")}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add Phone Number</DialogTitle>
+                <DialogTitle>{t("phoneNumbers.add.title")}</DialogTitle>
                 <DialogDescription>
-                  Add a phone number you've received from Twilio to use for sending messages.
+                  {t("phoneNumbers.add.description")}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAddNumber} className="space-y-4">
@@ -183,16 +184,16 @@ export function PhoneNumbersList() {
                     </div>
                     <div className="ml-3">
                       <p className="text-sm text-yellow-700">
-                        Your default phone number is: <span className="font-medium">15146125967</span>
+                        {t("phoneNumbers.add.defaultNumber")} <span className="font-medium">15146125967</span>
                       </p>
                     </div>
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="phone_number">Phone Number</Label>
+                  <Label htmlFor="phone_number">{t("phoneNumbers.add.label")}</Label>
                   <Input
                     id="phone_number"
-                    placeholder="+1234567890"
+                    placeholder={t("phoneNumbers.add.placeholder")}
                     value={newNumber}
                     onChange={(e) => setNewNumber(e.target.value)}
                     required
@@ -210,7 +211,7 @@ export function PhoneNumbersList() {
                     {isSubmitting && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
-                    Add Number
+                    {t("phoneNumbers.add.button")}
                   </Button>
                 </div>
               </form>
@@ -221,14 +222,14 @@ export function PhoneNumbersList() {
             <DialogTrigger asChild>
               <Button>
                 <Phone className="w-4 h-4 mr-2" />
-                Buy New Number
+                {t("phoneNumbers.buy.button")}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle>Request a New Phone Number</DialogTitle>
+                <DialogTitle>{t("phoneNumbers.buy.title")}</DialogTitle>
                 <DialogDescription>
-                  Fill out this form to request a new phone number. We'll get back to you with the details.
+                  {t("phoneNumbers.buy.description")}
                 </DialogDescription>
               </DialogHeader>
               <BuyPhoneNumberForm />
@@ -248,7 +249,9 @@ export function PhoneNumbersList() {
               <div>
                 <p className="font-medium">{number.phone_number}</p>
                 <p className="text-sm text-muted-foreground">
-                  Added on {new Date(number.created_at).toLocaleDateString()}
+                  {t("phoneNumbers.common.addedOn", { 
+                    date: new Date(number.created_at).toLocaleDateString() 
+                  })}
                 </p>
               </div>
             </div>
@@ -262,7 +265,7 @@ export function PhoneNumbersList() {
                   setIsEditingNumber(true);
                 }}
               >
-                Edit
+                {t("phoneNumbers.edit.button")}
               </Button>
               <Button 
                 variant="destructive" 
@@ -272,7 +275,7 @@ export function PhoneNumbersList() {
                   setDeleteDialogOpen(true);
                 }}
               >
-                Delete
+                {t("phoneNumbers.delete.button")}
               </Button>
             </div>
           </div>
@@ -280,7 +283,7 @@ export function PhoneNumbersList() {
 
         {phoneNumbers?.length === 0 && (
           <div className="text-center p-8 border rounded-lg">
-            <p className="text-muted-foreground">No phone numbers added yet.</p>
+            <p className="text-muted-foreground">{t("phoneNumbers.common.noNumbers")}</p>
           </div>
         )}
       </div>
@@ -289,17 +292,17 @@ export function PhoneNumbersList() {
       <Dialog open={isEditingNumber} onOpenChange={setIsEditingNumber}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Phone Number</DialogTitle>
+            <DialogTitle>{t("phoneNumbers.edit.title")}</DialogTitle>
             <DialogDescription>
-              Update your phone number details.
+              {t("phoneNumbers.edit.description")}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEditNumber} className="space-y-4">
             <div>
-              <Label htmlFor="edit_phone_number">Phone Number</Label>
+              <Label htmlFor="edit_phone_number">{t("phoneNumbers.add.label")}</Label>
               <Input
                 id="edit_phone_number"
-                placeholder="+1234567890"
+                placeholder={t("phoneNumbers.add.placeholder")}
                 value={newNumber}
                 onChange={(e) => setNewNumber(e.target.value)}
                 required
@@ -315,13 +318,13 @@ export function PhoneNumbersList() {
                   setNewNumber("");
                 }}
               >
-                Cancel
+                {t("phoneNumbers.common.cancel")}
               </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Save Changes
+                {t("phoneNumbers.edit.saveButton")}
               </Button>
             </div>
           </form>
@@ -332,10 +335,9 @@ export function PhoneNumbersList() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t("phoneNumbers.delete.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the phone number
-              from your account.
+              {t("phoneNumbers.delete.description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -343,13 +345,13 @@ export function PhoneNumbersList() {
               setDeleteDialogOpen(false);
               setSelectedNumber(null);
             }}>
-              Cancel
+              {t("phoneNumbers.common.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t("phoneNumbers.delete.confirmButton")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

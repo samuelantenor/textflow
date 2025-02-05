@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import {
   Form,
   FormControl,
@@ -14,6 +14,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 
 interface AccountSettingsForm {
@@ -24,6 +31,7 @@ interface AccountSettingsForm {
 const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t, i18n } = useTranslation(['settings']);
 
   // Fetch user profile data
   const { data: profile, isLoading } = useQuery({
@@ -65,11 +73,11 @@ const Settings = () => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        navigate("/login");
+        navigate(`/${i18n.language}/login`);
       }
     };
     checkAuth();
-  }, [navigate]);
+  }, [navigate, i18n.language]);
 
   const onSubmit = async (data: AccountSettingsForm) => {
     try {
@@ -86,32 +94,41 @@ const Settings = () => {
       if (error) throw error;
 
       toast({
-        title: "Settings updated",
-        description: "Your account settings have been updated successfully.",
+        title: t('messages.updateSuccess.title'),
+        description: t('messages.updateSuccess.description'),
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update settings. Please try again.",
+        title: t('messages.updateError.title'),
+        description: t('messages.updateError.description'),
         variant: "destructive",
       });
     }
   };
 
+  const handleLanguageChange = (newLanguage: string) => {
+    i18n.changeLanguage(newLanguage);
+    // Update the URL to reflect the new language
+    const currentPath = window.location.pathname;
+    const newPath = currentPath.replace(/^\/(en|fr)/, `/${newLanguage}`);
+    navigate(newPath);
+  };
+
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>{t('messages.loading')}</div>;
   }
 
   return (
     <div className="min-h-screen bg-background">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">Settings</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
         </div>
 
         <div className="space-y-6">
+          {/* Account Settings */}
           <div className="bg-card rounded-lg p-6 bg-black/20">
-            <h2 className="text-lg font-semibold mb-6">Account Settings</h2>
+            <h2 className="text-lg font-semibold mb-6">{t('account.title')}</h2>
             
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -120,7 +137,7 @@ const Settings = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{t('account.email')}</FormLabel>
                       <FormControl>
                         <Input {...field} disabled type="email" />
                       </FormControl>
@@ -134,7 +151,7 @@ const Settings = () => {
                   name="full_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel>{t('account.fullName')}</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -144,10 +161,39 @@ const Settings = () => {
                 />
 
                 <Button type="submit">
-                  Save Changes
+                  {t('account.saveChanges')}
                 </Button>
               </form>
             </Form>
+          </div>
+
+          {/* Language Settings */}
+          <div className="bg-card rounded-lg p-6 bg-black/20">
+            <h2 className="text-lg font-semibold mb-6">{t('language.title')}</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">
+                  {t('language.select')}
+                </label>
+                <Select
+                  value={i18n.language}
+                  onValueChange={handleLanguageChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t('language.select')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">
+                      {t('language.languages.en')}
+                    </SelectItem>
+                    <SelectItem value="fr">
+                      {t('language.languages.fr')}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
         </div>
       </main>

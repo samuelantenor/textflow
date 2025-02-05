@@ -15,6 +15,32 @@
       "fields": "Form Fields",
       "design": "Design"
     },
+    "fields": {
+      "addNew": "Add New Field",
+      "type": "Field Type",
+      "selectType": "Select field type",
+      "label": "Field Label",
+      "labelPlaceholder": "Enter question or label",
+      "description": "Description (optional)",
+      "descriptionPlaceholder": "Add helper text to explain this field",
+      "placeholder": "Placeholder (optional)",
+      "placeholderPlaceholder": "Enter placeholder text",
+      "options": "Options (one per line)",
+      "optionsPlaceholder": "Enter options, one per line",
+      "required": "Required field",
+      "addButton": "Add Field",
+      "types": {
+        "text": "Text",
+        "textarea": "Long Text",
+        "email": "Email",
+        "phone": "Phone",
+        "number": "Number",
+        "date": "Date",
+        "checkbox": "Checkbox",
+        "radio": "Multiple Choice",
+        "select": "Dropdown"
+      }
+    },
     "form": {
       "title": {
         "label": "Form Title",
@@ -114,5 +140,63 @@
   "view": {
     "submit": "Submit",
     "submitting": "Submitting..."
+  },
+  "phoneNumbers": {
+    "title": "My Phone Numbers",
+    "loading": "Loading phone numbers...",
+    "add": {
+      "button": "Add Number",
+      "title": "Add Phone Number",
+      "description": "Add a phone number you've received from Twilio to use for sending messages.",
+      "defaultNumber": "Your default phone number is:",
+      "label": "Phone Number",
+      "placeholder": "+1234567890",
+      "success": "Your phone number has been added successfully.",
+      "error": "Failed to add phone number. Please try again."
+    },
+    "edit": {
+      "title": "Edit Phone Number",
+      "description": "Update your phone number details.",
+      "button": "Edit",
+      "saveButton": "Save Changes",
+      "success": "Your phone number has been updated successfully.",
+      "error": "Failed to update phone number. Please try again."
+    },
+    "delete": {
+      "title": "Are you absolutely sure?",
+      "description": "This action cannot be undone. This will permanently delete the phone number from your account.",
+      "button": "Delete",
+      "confirmButton": "Delete",
+      "success": "Your phone number has been deleted successfully.",
+      "error": "Failed to delete phone number. Please try again."
+    },
+    "buy": {
+      "button": "Buy New Number",
+      "title": "Request a New Phone Number",
+      "description": "Fill out this form to request a new phone number. We'll get back to you with the details.",
+      "region": "Choose Region Number",
+      "monthlyFee": "Monthly fee: $5/month",
+      "upgradeRequired": "Upgrade to a paid plan to buy phone numbers",
+      "buttons": {
+        "processing": "Processing...",
+        "payNow": "Pay Now",
+        "upgradeRequired": "Upgrade Required"
+      },
+      "errors": {
+        "selectCountry": "Please select a country",
+        "subscriptionRequired": "Please upgrade to a paid plan to buy phone numbers.",
+        "checkoutError": "Failed to start checkout process"
+      }
+    },
+    "field": {
+      "fromNumber": "From Number",
+      "placeholder": "Select a number to send from",
+      "noNumbers": "No phone numbers available"
+    },
+    "common": {
+      "cancel": "Cancel",
+      "addedOn": "Added on {{date}}",
+      "noNumbers": "No phone numbers added yet."
+    }
   }
 } 

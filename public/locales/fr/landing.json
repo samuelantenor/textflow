@@ -65,7 +65,7 @@
     "plans": {
       "starter": {
         "name": "Débutant",
-        "price": "29€",
+        "price": "$30",
         "period": "par mois",
         "features": [
           "Jusqu'à 1 000 SMS/mois",
@@ -76,7 +76,7 @@
       },
       "professional": {
         "name": "Professionnel",
-        "price": "99€",
+        "price": "$120",
         "period": "par mois",
         "popular": "Plus populaire",
         "features": [

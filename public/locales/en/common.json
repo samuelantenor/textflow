@@ -23,7 +23,8 @@
     "update": "Update",
     "send": "Send",
     "back": "Back",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "contactUs": "Contact Us"
   },
   "forms": {
     "email": "Email",
@@ -51,5 +52,18 @@
     "saving": "Saving...",
     "sending": "Sending...",
     "processing": "Processing..."
+  },
+  "date": {
+    "format": {
+      "full": "{{month}} {{day}}, {{year}}"
+    }
+  },
+  "payment": {
+    "status": {
+      "completed": "completed"
+    },
+    "method": {
+      "card": "card"
+    }
   }
 } 

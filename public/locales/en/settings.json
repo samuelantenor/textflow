@@ -1,0 +1,29 @@
+{
+  "title": "Settings",
+  "account": {
+    "title": "Account Settings",
+    "email": "Email",
+    "fullName": "Full Name",
+    "saveChanges": "Save Changes"
+  },
+  "language": {
+    "title": "Language Settings",
+    "current": "Current Language",
+    "select": "Select Language",
+    "languages": {
+      "en": "English",
+      "fr": "French"
+    }
+  },
+  "messages": {
+    "updateSuccess": {
+      "title": "Settings updated",
+      "description": "Your account settings have been updated successfully."
+    },
+    "updateError": {
+      "title": "Error",
+      "description": "Failed to update settings. Please try again."
+    },
+    "loading": "Loading..."
+  }
+} 

@@ -6,8 +6,10 @@ import "react-phone-input-2/lib/style.css";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 export const BuyPhoneNumberForm = () => {
+  const { t } = useTranslation("forms");
   const [isLoading, setIsLoading] = useState(false);
   const [country, setCountry] = useState("");
   const { toast } = useToast();
@@ -37,7 +39,7 @@ export const BuyPhoneNumberForm = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please select a country",
+        description: t("phoneNumbers.buy.errors.selectCountry"),
       });
       return;
     }
@@ -46,7 +48,7 @@ export const BuyPhoneNumberForm = () => {
       toast({
         variant: "destructive",
         title: "Subscription Required",
-        description: "Please upgrade to a paid plan to buy phone numbers.",
+        description: t("phoneNumbers.buy.errors.subscriptionRequired"),
       });
       return;
     }
@@ -85,7 +87,7 @@ export const BuyPhoneNumberForm = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to start checkout process",
+        description: t("phoneNumbers.buy.errors.checkoutError"),
       });
     } finally {
       setIsLoading(false);
@@ -95,7 +97,7 @@ export const BuyPhoneNumberForm = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
-        <Label>Choose Region Number</Label>
+        <Label>{t("phoneNumbers.buy.region")}</Label>
         <PhoneInput
           country={"us"}
           enableSearch
@@ -114,11 +116,11 @@ export const BuyPhoneNumberForm = () => {
 
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">
-          Monthly fee: $5/month
+          {t("phoneNumbers.buy.monthlyFee")}
         </p>
         {!canBuyPhoneNumbers && (
           <p className="text-sm text-yellow-600">
-            Upgrade to a paid plan to buy phone numbers
+            {t("phoneNumbers.buy.upgradeRequired")}
           </p>
         )}
       </div>
@@ -128,7 +130,9 @@ export const BuyPhoneNumberForm = () => {
         className="w-full" 
         disabled={isLoading || !canBuyPhoneNumbers}
       >
-        {isLoading ? "Processing..." : canBuyPhoneNumbers ? "Pay Now" : "Upgrade Required"}
+        {isLoading ? t("phoneNumbers.buy.buttons.processing") : 
+          canBuyPhoneNumbers ? t("phoneNumbers.buy.buttons.payNow") : 
+          t("phoneNumbers.buy.buttons.upgradeRequired")}
       </Button>
     </form>
   );

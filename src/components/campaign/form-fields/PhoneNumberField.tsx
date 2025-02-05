@@ -5,12 +5,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CampaignFormData } from "@/types/campaign";
 import { Phone } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface PhoneNumberFieldProps {
   form: UseFormReturn<CampaignFormData>;
 }
 
 export function PhoneNumberField({ form }: PhoneNumberFieldProps) {
+  const { t } = useTranslation("forms");
   const { data: phoneNumbers, isLoading } = useQuery({
     queryKey: ['phone-numbers'],
     queryFn: async () => {
@@ -31,11 +33,11 @@ export function PhoneNumberField({ form }: PhoneNumberFieldProps) {
       name="from_number"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>From Number</FormLabel>
+          <FormLabel>{t("phoneNumbers.field.fromNumber")}</FormLabel>
           <Select onValueChange={field.onChange} value={field.value || ""}>
             <FormControl>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a number to send from">
+                <SelectValue placeholder={t("phoneNumbers.field.placeholder")}>
                   {field.value && (
                     <div className="flex items-center">
                       <Phone className="w-4 h-4 mr-2" />
@@ -58,7 +60,7 @@ export function PhoneNumberField({ form }: PhoneNumberFieldProps) {
               ))}
               {(!phoneNumbers || phoneNumbers.length === 0) && (
                 <SelectItem value="no-numbers" disabled>
-                  No phone numbers available
+                  {t("phoneNumbers.field.noNumbers")}
                 </SelectItem>
               )}
             </SelectContent>

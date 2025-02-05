@@ -1,0 +1,29 @@
+{
+  "title": "Facturation & Abonnement",
+  "manageSubscription": "Gérer l'abonnement",
+  "overview": {
+    "title": "Aperçu de l'abonnement",
+    "plan": "Forfait",
+    "status": "Statut",
+    "monthlyMessageLimit": "Limite mensuelle de messages",
+    "campaignLimit": "Limite de campagnes",
+    "upgradeMessage": "Passez à notre forfait payant pour débloquer les campagnes illimitées et augmenter vos limites de messages !",
+    "subscribeNow": "S'abonner maintenant"
+  },
+  "usage": {
+    "title": "Statistiques d'utilisation",
+    "monthlyUsage": "Utilisation mensuelle",
+    "messages": "messages",
+    "limitReached": "Limite mensuelle atteinte. Veuillez mettre à niveau votre forfait pour envoyer plus de messages.",
+    "billingCycle": "Cycle de facturation :",
+    "delivered": "Livrés",
+    "failed": "Échoués"
+  },
+  "payments": {
+    "title": "Historique des paiements",
+    "noPayments": "Aucun historique de paiement disponible"
+  },
+  "errors": {
+    "portalError": "Échec de l'ouverture de la gestion des abonnements"
+  }
+} 
