@@ -9,12 +9,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { EditCampaignDialog } from "../campaign/EditCampaignDialog";
 import { CampaignAnalyticsDialog } from "./CampaignAnalyticsDialog";
+import { useTranslation } from "react-i18next";
 
 interface CampaignCardProps {
   campaign: Campaign;
 }
 
 export function CampaignCard({ campaign }: CampaignCardProps) {
+  const { t } = useTranslation('dashboard');
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -51,15 +53,15 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
       if (campaignError) throw campaignError;
 
       toast({
-        title: "Success",
-        description: "Campaign deleted successfully",
+        title: t('common:success'),
+        description: t('recentCampaigns.actions.deleteSuccess'),
       });
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
     } catch (error) {
       console.error('Error deleting campaign:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete campaign",
+        title: t('common:error'),
+        description: t('recentCampaigns.actions.deleteError'),
         variant: "destructive",
       });
     } finally {
@@ -80,14 +82,14 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
       
       toast({
-        title: "Success",
-        description: "Campaign sent successfully",
+        title: t('common:success'),
+        description: t('recentCampaigns.actions.sendSuccess'),
       });
     } catch (error) {
       console.error('Error sending campaign:', error);
       toast({
-        title: "Error",
-        description: "Failed to send campaign",
+        title: t('common:error'),
+        description: t('recentCampaigns.actions.sendError'),
         variant: "destructive",
       });
     } finally {
@@ -102,7 +104,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
           <div>
             <CardTitle className="text-xl">{campaign.name}</CardTitle>
             <CardDescription className="mt-2">
-              Created on {new Date(campaign.created_at).toLocaleDateString()}
+              {t('recentCampaigns.table.created')} {new Date(campaign.created_at).toLocaleDateString()}
             </CardDescription>
           </div>
           <Badge
@@ -115,7 +117,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
                 : "bg-muted"
             }
           >
-            {campaign.status}
+            {t(`recentCampaigns.status.${campaign.status}`)}
           </Badge>
         </div>
       </CardHeader>
@@ -136,7 +138,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
               ) : (
                 <Send className="h-4 w-4 mr-2" />
               )}
-              Send
+              {t('recentCampaigns.actions.send')}
             </Button>
           )}
           {campaign.status === 'sent' && (
@@ -146,7 +148,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
               onClick={() => setShowAnalyticsDialog(true)}
             >
               <BarChart className="h-4 w-4 mr-2" />
-              Analytics
+              {t('recentCampaigns.actions.analytics')}
             </Button>
           )}
           <Button

@@ -1,40 +1,69 @@
-import { useState } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Label } from "@/components/ui/label";
+import { useTranslation } from "react-i18next";
 
 interface ForgotPasswordFormProps {
   onBack: () => void;
 }
 
+const formSchema = z.object({
+  email: z.string().email(),
+});
+
 const ForgotPasswordForm = ({ onBack }: ForgotPasswordFormProps) => {
-  const [email, setEmail] = useState('');
+  const { t } = useTranslation(['auth']);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
 
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
-      if (error) throw error;
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: t('auth:forgotPassword.errors.emailNotFound'),
+          description: error.message,
+        });
+        return;
+      }
 
       toast({
-        title: "Reset link sent",
-        description: "Check your email for the password reset link",
+        title: t('auth:forgotPassword.success'),
+        description: t('auth:forgotPassword.successDescription'),
       });
-      onBack(); // Return to login view
-    } catch (error: any) {
+      onBack();
+    } catch (error) {
+      console.error("Error resetting password:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to send reset link",
+        title: t('auth:forgotPassword.errors.generic'),
+        description: t('auth:forgotPassword.errors.tryAgain'),
       });
     } finally {
       setIsLoading(false);
@@ -42,27 +71,52 @@ const ForgotPasswordForm = ({ onBack }: ForgotPasswordFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <h2 className="text-2xl font-semibold text-white">
+          {t('auth:forgotPassword.title')}
+        </h2>
+        <p className="text-sm text-gray-400">
+          {t('auth:forgotPassword.subtitle')}
+        </p>
       </div>
-      <div className="flex flex-col gap-2">
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Sending..." : "Send Reset Link"}
-        </Button>
-        <Button type="button" variant="outline" onClick={onBack}>
-          Back to Login
-        </Button>
-      </div>
-    </form>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('auth:forgotPassword.emailLabel')}</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={t('auth:forgotPassword.emailPlaceholder')}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex flex-col space-y-4">
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? t('auth:loading.sending') : t('auth:forgotPassword.sendButton')}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onBack}
+              className="text-gray-400 hover:text-white"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              {t('auth:forgotPassword.backToLogin')}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 };
 

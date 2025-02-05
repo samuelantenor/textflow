@@ -6,9 +6,11 @@ import { Plus, Users } from "lucide-react";
 import { CreateGroupDialog } from "./CreateGroupDialog";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 
 export function GroupList() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const { t } = useTranslation(['groups']);
 
   const { data: groups, isLoading } = useQuery({
     queryKey: ['campaign-groups'],
@@ -34,10 +36,10 @@ export function GroupList() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Contact Groups</h2>
+        <h2 className="text-2xl font-bold">{t('list.title')}</h2>
         <Button onClick={() => setIsCreateOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          New Group
+          {t('create.button')}
         </Button>
       </div>
       
@@ -45,14 +47,14 @@ export function GroupList() {
         <Card className="p-12 text-center space-y-4">
           <Users className="w-12 h-12 text-muted-foreground mx-auto" />
           <div>
-            <h3 className="text-lg font-semibold">No Contact Groups</h3>
+            <h3 className="text-lg font-semibold">{t('list.empty.title')}</h3>
             <p className="text-muted-foreground">
-              Create your first group to start organizing your contacts.
+              {t('list.empty.description')}
             </p>
           </div>
           <Button onClick={() => setIsCreateOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            Create First Group
+            {t('create.firstGroup')}
           </Button>
         </Card>
       ) : (

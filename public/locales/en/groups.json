@@ -1,0 +1,91 @@
+{
+  "list": {
+    "title": "Contact Groups",
+    "empty": {
+      "title": "No Contact Groups",
+      "description": "Create your first group to start organizing your contacts."
+    },
+    "loading": "Loading groups..."
+  },
+  "create": {
+    "title": "Create New Group",
+    "button": "New Group",
+    "firstGroup": "Create First Group",
+    "success": "Group created successfully",
+    "error": "Failed to create group",
+    "placeholder": "VIP Customers"
+  },
+  "edit": {
+    "title": "Edit Group",
+    "success": "Group updated successfully",
+    "error": "Failed to update group",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes"
+  },
+  "delete": {
+    "confirm": "Are you sure you want to delete this group? This action cannot be undone.",
+    "success": "Group deleted successfully",
+    "error": "Failed to delete group"
+  },
+  "contacts": {
+    "count": "{{count}} contacts",
+    "view": {
+      "title": "View Contacts",
+      "search": "Search contacts...",
+      "empty": "No contacts found",
+      "loading": "Loading..."
+    },
+    "add": {
+      "title": "Add New Contact",
+      "button": "Add Contact",
+      "adding": "Adding...",
+      "success": "Contact added successfully",
+      "error": "Failed to add contact"
+    },
+    "import": {
+      "title": "Import Contacts",
+      "instructions": {
+        "title": "Upload a CSV file with contacts. The file should have two columns:",
+        "name": "Name (optional)",
+        "phone": "Phone Number (required, format: +1234567890)"
+      },
+      "success": "Contacts imported successfully",
+      "error": "Failed to import contacts"
+    },
+    "delete": {
+      "confirm": "Are you sure you want to delete this contact? This action cannot be undone.",
+      "success": "Contact deleted successfully",
+      "error": "Failed to delete contact"
+    }
+  },
+  "form": {
+    "name": {
+      "label": "Group Name",
+      "placeholder": "Enter group name"
+    },
+    "contact": {
+      "name": {
+        "label": "Name",
+        "placeholder": "John Doe"
+      },
+      "phone": {
+        "label": "Phone Number",
+        "placeholder": "+1234567890"
+      }
+    }
+  },
+  "actions": {
+    "title": "Actions",
+    "view": "View",
+    "add": "Add",
+    "import": "Import",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "create": "Create"
+  },
+  "errors": {
+    "auth": "User not authenticated"
+  },
+  "created": "Created {{date}}"
+} 

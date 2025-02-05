@@ -1,0 +1,91 @@
+{
+  "list": {
+    "title": "Groupes de contacts",
+    "empty": {
+      "title": "Aucun groupe de contacts",
+      "description": "Créez votre premier groupe pour commencer à organiser vos contacts."
+    },
+    "loading": "Chargement des groupes..."
+  },
+  "create": {
+    "title": "Créer un nouveau groupe",
+    "button": "Nouveau groupe",
+    "firstGroup": "Créer le premier groupe",
+    "success": "Groupe créé avec succès",
+    "error": "Échec de la création du groupe",
+    "placeholder": "Clients VIP"
+  },
+  "edit": {
+    "title": "Modifier le groupe",
+    "success": "Groupe mis à jour avec succès",
+    "error": "Échec de la mise à jour du groupe",
+    "saving": "Enregistrement...",
+    "saveChanges": "Enregistrer les modifications"
+  },
+  "delete": {
+    "confirm": "Êtes-vous sûr de vouloir supprimer ce groupe ? Cette action ne peut pas être annulée.",
+    "success": "Groupe supprimé avec succès",
+    "error": "Échec de la suppression du groupe"
+  },
+  "contacts": {
+    "count": "{{count}} contacts",
+    "view": {
+      "title": "Voir les contacts",
+      "search": "Rechercher des contacts...",
+      "empty": "Aucun contact trouvé",
+      "loading": "Chargement..."
+    },
+    "add": {
+      "title": "Ajouter un nouveau contact",
+      "button": "Ajouter un contact",
+      "adding": "Ajout en cours...",
+      "success": "Contact ajouté avec succès",
+      "error": "Échec de l'ajout du contact"
+    },
+    "import": {
+      "title": "Importer des contacts",
+      "instructions": {
+        "title": "Téléchargez un fichier CSV avec les contacts. Le fichier doit avoir deux colonnes :",
+        "name": "Nom (optionnel)",
+        "phone": "Numéro de téléphone (requis, format : +1234567890)"
+      },
+      "success": "Contacts importés avec succès",
+      "error": "Échec de l'importation des contacts"
+    },
+    "delete": {
+      "confirm": "Êtes-vous sûr de vouloir supprimer ce contact ? Cette action ne peut pas être annulée.",
+      "success": "Contact supprimé avec succès",
+      "error": "Échec de la suppression du contact"
+    }
+  },
+  "form": {
+    "name": {
+      "label": "Nom du groupe",
+      "placeholder": "Entrez le nom du groupe"
+    },
+    "contact": {
+      "name": {
+        "label": "Nom",
+        "placeholder": "Jean Dupont"
+      },
+      "phone": {
+        "label": "Numéro de téléphone",
+        "placeholder": "+1234567890"
+      }
+    }
+  },
+  "actions": {
+    "title": "Actions",
+    "view": "Voir",
+    "add": "Ajouter",
+    "import": "Importer",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "cancel": "Annuler",
+    "create": "Créer"
+  },
+  "errors": {
+    "auth": "Utilisateur non authentifié"
+  },
+  "created": "Créé le {{date}}"
+} 

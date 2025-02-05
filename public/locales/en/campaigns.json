@@ -1,0 +1,69 @@
+{
+  "create": {
+    "title": "Create New Campaign",
+    "subtitle": "Create a new campaign to send to your contacts",
+    "backToCampaigns": "Back to Campaigns",
+    "saveAsDraft": "Save as Draft",
+    "createCampaign": "Create Campaign",
+    "newCampaign": "New Campaign",
+    "campaignCreated": "Campaign created",
+    "savedAsDraft": "Your campaign has been saved as a draft"
+  },
+  "form": {
+    "name": {
+      "label": "Campaign Name",
+      "placeholder": "Enter campaign name"
+    },
+    "message": {
+      "label": "Message",
+      "placeholder": "Enter your message"
+    },
+    "group": {
+      "label": "Contact Group",
+      "placeholder": "Select a group"
+    },
+    "schedule": {
+      "label": "Schedule",
+      "date": "Date",
+      "time": "Time",
+      "placeholder": "Select date"
+    },
+    "media": {
+      "label": "Media",
+      "placeholder": "Upload media"
+    }
+  },
+  "list": {
+    "title": "Campaigns",
+    "empty": {
+      "title": "No campaigns yet",
+      "description": "Create your first campaign to start sending messages to your contacts"
+    },
+    "loading": "Loading campaigns..."
+  },
+  "errors": {
+    "create": "Failed to create campaign",
+    "delete": "Failed to delete campaign",
+    "send": "Failed to send campaign",
+    "update": "Failed to update campaign",
+    "limitReached": {
+      "title": "Campaign limit reached",
+      "description": "Please upgrade your plan to create more campaigns"
+    },
+    "auth": "User not authenticated"
+  },
+  "success": {
+    "created": "Campaign created successfully",
+    "deleted": "Campaign deleted successfully",
+    "sent": "Campaign sent successfully",
+    "updated": "Campaign updated successfully"
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "create": "Create",
+    "delete": "Delete",
+    "edit": "Edit",
+    "send": "Send",
+    "analytics": "Analytics"
+  }
+} 

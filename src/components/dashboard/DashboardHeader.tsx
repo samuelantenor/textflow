@@ -11,45 +11,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "react-i18next";
 
 export const DashboardHeader = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t, i18n } = useTranslation(['dashboard', 'common']);
 
   const handleSignOut = async () => {
     try {
-      const { error: signOutError } = await supabase.auth.signOut();
-      
-      if (signOutError) {
-        console.error('Error signing out:', signOutError);
-        // If it's a missing session error, we can just redirect to login
-        if (signOutError.message.includes('Auth session missing')) {
-          navigate("/login", { replace: true });
-          return;
-        }
-        
-        toast({
-          variant: "destructive",
-          title: "Error signing out",
-          description: signOutError.message,
-        });
-      } else {
-        toast({
-          title: "Signed out successfully",
-          description: "You have been logged out of your account.",
-        });
-      }
-
-      // Always redirect to login page
-      navigate("/login", { replace: true });
+      await supabase.auth.signOut();
+      navigate(`/${i18n.language}/login`);
     } catch (error) {
-      console.error('Unexpected error during sign out:', error);
-      // Ensure we redirect to login even if something unexpected happens
-      navigate("/login", { replace: true });
+      console.error('Error signing out:', error);
       toast({
         variant: "destructive",
-        title: "Error signing out",
-        description: "An unexpected error occurred, but you've been redirected to the login page.",
+        title: t('common:errors.generic'),
+        description: t('common:errors.tryAgain'),
       });
     }
   };
@@ -58,7 +36,7 @@ export const DashboardHeader = () => {
     <div className="border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/dashboard')}>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(`/${i18n.language}/dashboard`)}>
             <MessageSquare className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold">FlowText</h1>
           </div>
@@ -74,15 +52,15 @@ export const DashboardHeader = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Account</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('common:navigation.account')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/billing')}>
+              <DropdownMenuItem onClick={() => navigate(`/${i18n.language}/billing`)}>
                 <Receipt className="mr-2 h-4 w-4" />
-                Billing
+                {t('common:navigation.billing')}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/settings')}>
+              <DropdownMenuItem onClick={() => navigate(`/${i18n.language}/settings`)}>
                 <Settings className="mr-2 h-4 w-4" />
-                Settings
+                {t('common:navigation.settings')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
@@ -90,7 +68,7 @@ export const DashboardHeader = () => {
                 className="text-red-600"
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                Log out
+                {t('common:navigation.logout')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

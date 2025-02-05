@@ -7,6 +7,7 @@ import { EditGroupDialog } from "./EditGroupDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 interface GroupListItemProps {
   group: {
@@ -22,6 +23,7 @@ export function GroupListItem({ group }: GroupListItemProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation(['groups']);
 
   // Get the contact count from the array of counts
   const contactCount = Array.isArray(group.contacts) && group.contacts.length > 0
@@ -29,7 +31,7 @@ export function GroupListItem({ group }: GroupListItemProps) {
     : 0;
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this group? This action cannot be undone.")) {
+    if (!confirm(t('delete.confirm'))) {
       return;
     }
 
@@ -43,14 +45,14 @@ export function GroupListItem({ group }: GroupListItemProps) {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Group deleted successfully",
+        title: t('delete.success'),
+        description: t('delete.success'),
       });
       queryClient.invalidateQueries({ queryKey: ['campaign-groups'] });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete group",
+        title: t('delete.error'),
+        description: error instanceof Error ? error.message : t('delete.error'),
         variant: "destructive",
       });
     } finally {
@@ -64,7 +66,7 @@ export function GroupListItem({ group }: GroupListItemProps) {
         <div>
           <h3 className="text-lg font-semibold">{group.name}</h3>
           <p className="text-sm text-muted-foreground">
-            {contactCount} contacts
+            {t('contacts.count', { count: contactCount })}
           </p>
         </div>
         <div className="flex gap-2">
@@ -72,6 +74,7 @@ export function GroupListItem({ group }: GroupListItemProps) {
             variant="ghost" 
             size="icon" 
             onClick={() => setIsEditOpen(true)}
+            title={t('actions.edit')}
           >
             <Pencil className="h-4 w-4" />
           </Button>
@@ -80,6 +83,7 @@ export function GroupListItem({ group }: GroupListItemProps) {
             size="icon"
             onClick={handleDelete}
             disabled={isDeleting}
+            title={t('actions.delete')}
           >
             <Trash className="h-4 w-4 text-destructive" />
           </Button>
@@ -92,7 +96,7 @@ export function GroupListItem({ group }: GroupListItemProps) {
           onClick={() => setIsViewOpen(true)}
         >
           <Users className="h-4 w-4 mr-2" />
-          View Contacts
+          {t('actions.view')}
         </Button>
       </div>
       <ViewContactsDialog

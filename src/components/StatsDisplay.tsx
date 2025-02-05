@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const COLORS = {
   delivered: "#22c55e",  // green
@@ -13,6 +14,7 @@ const COLORS = {
 };
 
 const StatsDisplay = () => {
+  const { t } = useTranslation('dashboard');
   const { toast } = useToast();
 
   const { data: analytics, isLoading, error } = useQuery({
@@ -74,8 +76,8 @@ const StatsDisplay = () => {
       } catch (error) {
         console.error('Error in analytics query:', error);
         toast({
-          title: "Error loading analytics",
-          description: "There was a problem loading your campaign analytics. Please try again later.",
+          title: t('errors.loadingFailed'),
+          description: t('errors.campaignsFailed'),
           variant: "destructive",
         });
         throw error;
@@ -87,48 +89,48 @@ const StatsDisplay = () => {
   if (error) {
     return (
       <div className="p-6 text-center text-red-500 bg-red-500/10 rounded-xl border border-red-500/20">
-        Error loading analytics. Please try refreshing the page.
+        {t('errors.loadingFailed')}
       </div>
     );
   }
 
   const stats = [
     {
-      title: "Delivery Rate",
+      title: t('stats.deliveryRate.title'),
       value: analytics?.delivery_rate || 0,
       unit: "%",
       icon: CheckCircle,
       color: "text-green-500",
       bgColor: "bg-green-500/10",
       borderColor: "border-green-500/20",
-      description: `${analytics?.total_messages || 0} total messages`
+      description: t('stats.deliveryRate.description', { total: analytics?.total_messages || 0 })
     },
     {
-      title: "Failed Messages",
+      title: t('stats.failedMessages.title'),
       value: analytics?.status_counts?.failed || 0,
       icon: XCircle,
       color: "text-red-500",
       bgColor: "bg-red-500/10",
       borderColor: "border-red-500/20",
-      description: "Messages that failed to send"
+      description: t('stats.failedMessages.description')
     },
     {
-      title: "Pending Messages",
+      title: t('stats.pendingMessages.title'),
       value: analytics?.status_counts?.pending || 0,
       icon: Clock,
       color: "text-amber-500",
       bgColor: "bg-amber-500/10",
       borderColor: "border-amber-500/20",
-      description: "Messages in queue"
+      description: t('stats.pendingMessages.description')
     },
     {
-      title: "Total Messages",
+      title: t('stats.totalMessages.title'),
       value: analytics?.total_messages || 0,
       icon: MessageSquare,
       color: "text-primary-500",
       bgColor: "bg-primary-500/10",
       borderColor: "border-primary-500/20",
-      description: "All time messages sent"
+      description: t('stats.totalMessages.description')
     }
   ];
 

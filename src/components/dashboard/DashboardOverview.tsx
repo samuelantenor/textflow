@@ -10,18 +10,13 @@ import { MessageSquare, Users, FileText, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export const DashboardOverview = () => {
+  const { t, i18n } = useTranslation(['dashboard']);
   const [userName, setUserName] = useState<string>("");
-  const [greeting, setGreeting] = useState<string>("");
 
   useEffect(() => {
-    // Set greeting based on time of day
-    const hour = new Date().getHours();
-    if (hour < 12) setGreeting("Good morning");
-    else if (hour < 18) setGreeting("Good afternoon");
-    else setGreeting("Good evening");
-
     // Get user's name
     const getUserName = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -77,19 +72,18 @@ export const DashboardOverview = () => {
         <div className="relative z-10">
           <div className="space-y-1">
             <h1 className="text-3xl font-semibold flex flex-wrap items-baseline gap-x-2">
-              <span className="text-white">{greeting},</span>
+              <span className="text-white">{t('dashboard:welcome.greeting')},</span>
               <span className="text-primary-500">{userName}</span>
             </h1>
-            <p className="text-gray-400">Welcome to your dashboard!</p>
+            <p className="text-gray-400">{t('dashboard:welcome.description')}</p>
           </div>
           <div className="mt-4 flex gap-3">
             <Button asChild className="bg-primary-500 hover:bg-primary-600">
-              <Link to="/dashboard?tab=campaigns" className="flex items-center gap-2">
+              <Link to={`/${i18n.language}/campaigns/create`} className="flex items-center gap-2">
                 <MessageSquare className="h-4 w-4" />
-                Create Campaign
+                {t('dashboard:quickActions.newCampaign')}
               </Link>
             </Button>
-            
           </div>
         </div>
         <div className="absolute top-0 right-0 w-[300px] h-[300px] transform translate-x-1/3 -translate-y-1/3">
@@ -108,11 +102,11 @@ export const DashboardOverview = () => {
         <div className="lg:col-span-3 space-y-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-semibold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-              Recent Campaigns
+              {t('dashboard:recentCampaigns.title')}
             </h2>
             <Button variant="ghost" asChild className="text-gray-400 hover:text-white">
-              <Link to="/dashboard?tab=campaigns" className="flex items-center gap-2">
-                View All <ArrowRight className="h-4 w-4" />
+              <Link to={`/${i18n.language}/dashboard?tab=campaigns`} className="flex items-center gap-2">
+                {t('common:buttons.viewAll')} <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -128,8 +122,8 @@ export const DashboardOverview = () => {
               <Card className="p-8 text-center text-muted-foreground bg-gray-900/50 border-gray-800/50 rounded-xl backdrop-blur-sm
                 hover:shadow-glow transition-all duration-300">
                 <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-600" />
-                <p className="text-lg font-medium text-gray-400">No campaigns created yet</p>
-                <p className="text-gray-500 mt-2">Create your first campaign to get started</p>
+                <p className="text-lg font-medium text-gray-400">{t('dashboard:recentCampaigns.empty')}</p>
+                <p className="text-gray-500 mt-2">{t('dashboard:recentCampaigns.createFirst')}</p>
               </Card>
             ) : (
               recentCampaigns?.map((campaign) => (
@@ -143,11 +137,11 @@ export const DashboardOverview = () => {
         <div className="lg:col-span-2 space-y-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-semibold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-              Recent Submissions
+              {t('dashboard:recentSubmissions.title')}
             </h2>
             <Button variant="ghost" asChild className="text-gray-400 hover:text-white">
-              <Link to="/dashboard?tab=forms" className="flex items-center gap-2">
-                View All <ArrowRight className="h-4 w-4" />
+              <Link to={`/${i18n.language}/dashboard?tab=forms`} className="flex items-center gap-2">
+                {t('common:buttons.viewAll')} <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -164,8 +158,8 @@ export const DashboardOverview = () => {
               ) : recentSubmissions?.length === 0 ? (
                 <div className="p-8 text-center">
                   <FileText className="h-12 w-12 mx-auto mb-4 text-gray-600" />
-                  <p className="text-lg font-medium text-gray-400">No form submissions yet</p>
-                  <p className="text-gray-500 mt-2">Form submissions will appear here</p>
+                  <p className="text-lg font-medium text-gray-400">{t('dashboard:recentSubmissions.empty')}</p>
+                  <p className="text-gray-500 mt-2">{t('dashboard:recentSubmissions.description')}</p>
                 </div>
               ) : (
                 <div className="p-4 space-y-3">

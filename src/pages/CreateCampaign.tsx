@@ -8,12 +8,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { CampaignFormFields } from "@/components/campaign/CampaignFormFields";
 import type { CampaignFormData } from "@/types/campaign";
+import { useTranslation } from "react-i18next";
 
 const CreateCampaign = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const form = useForm<CampaignFormData>();
+  const { t, i18n } = useTranslation(['campaigns']);
 
   const onSubmit = async (data: CampaignFormData) => {
     try {
@@ -21,7 +23,7 @@ const CreateCampaign = () => {
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
-        throw new Error("User not authenticated");
+        throw new Error(t('errors.auth'));
       }
 
       const { error } = await supabase.from("campaigns").insert({
@@ -33,17 +35,17 @@ const CreateCampaign = () => {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Campaign created successfully",
+        title: t('success.created'),
+        description: t('create.savedAsDraft'),
       });
 
       // Refresh the page and redirect to dashboard with campaigns tab
-      window.location.href = "/dashboard?tab=campaigns";
+      navigate(`/${i18n.language}/dashboard?tab=campaigns`);
     } catch (error) {
       console.error("Error creating campaign:", error);
       toast({
-        title: "Error",
-        description: "Failed to create campaign",
+        title: t('errors.create'),
+        description: error instanceof Error ? error.message : t('errors.create'),
         variant: "destructive",
       });
     } finally {
@@ -57,17 +59,17 @@ const CreateCampaign = () => {
         <Button
           variant="ghost"
           className="mb-6"
-          onClick={() => navigate("/dashboard?tab=campaigns")}
+          onClick={() => navigate(`/${i18n.language}/dashboard?tab=campaigns`)}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Campaigns
+          {t('create.backToCampaigns')}
         </Button>
         
         <div className="space-y-6">
           <div>
-            <h1 className="text-2xl font-bold">Create New Campaign</h1>
+            <h1 className="text-2xl font-bold">{t('create.title')}</h1>
             <p className="text-muted-foreground">
-              Create a new campaign to send to your contacts.
+              {t('create.subtitle')}
             </p>
           </div>
 
@@ -78,15 +80,15 @@ const CreateCampaign = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate("/dashboard?tab=campaigns")}
+                  onClick={() => navigate(`/${i18n.language}/dashboard?tab=campaigns`)}
                 >
-                  Cancel
+                  {t('buttons.cancel')}
                 </Button>
                 <Button type="submit" disabled={isLoading}>
                   {isLoading && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  Create Campaign
+                  {t('create.createCampaign')}
                 </Button>
               </div>
             </form>

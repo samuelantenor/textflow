@@ -6,9 +6,12 @@ import { AuthForm } from "@/components/auth/AuthForm";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 import UpdatePasswordForm from "@/components/auth/UpdatePasswordForm";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const Login = () => {
+  const { t, i18n } = useTranslation(['auth']);
+  const navigate = useNavigate();
   const { isLoading, authError, setAuthError, checkUserAndRedirect } = useAuthRedirect();
   const [view, setView] = useState<'sign_in' | 'forgot_password' | 'update_password'>('sign_in');
   const [isSettingUp, setIsSettingUp] = useState(false);
@@ -24,8 +27,8 @@ const Login = () => {
       setAuthError(errorDescription.replace(/\+/g, ' '));
       toast({
         variant: "destructive",
-        title: "Password Reset Error",
-        description: "The reset link has expired. Please request a new password reset.",
+        title: t('auth:resetPassword.errors.invalidToken'),
+        description: t('auth:resetPassword.errors.emailNotFound'),
       });
       setView('sign_in');
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -67,8 +70,8 @@ const Login = () => {
             console.error('Error during account setup:', error);
             toast({
               variant: "destructive",
-              title: "Setup Error",
-              description: "There was an error setting up your account. Please try again.",
+              title: t('auth:login.errors.invalidCredentials'),
+              description: t('auth:login.errors.generic'),
             });
           } finally {
             setIsSettingUp(false);
@@ -81,8 +84,8 @@ const Login = () => {
         setAuthError(null);
         await supabase.auth.signOut();
         toast({
-          title: "Password Updated",
-          description: "Please sign in with your new password.",
+          title: t('auth:updatePassword.success'),
+          description: t('auth:login.subtitle'),
         });
         setView('sign_in');
       }
@@ -91,7 +94,7 @@ const Login = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [checkUserAndRedirect, setAuthError, toast]);
+  }, [checkUserAndRedirect, setAuthError, toast, t]);
 
   if (isLoading || isSettingUp) {
     return (
@@ -102,7 +105,7 @@ const Login = () => {
           className="text-white text-center"
         >
           <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg">Setting up your account...</p>
+          <p className="text-lg">{t('auth:login.loading')}</p>
         </motion.div>
       </div>
     );
@@ -121,7 +124,7 @@ const Login = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-300"
           >
-            Welcome Back
+            {t('auth:login.title')}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -129,7 +132,7 @@ const Login = () => {
             transition={{ delay: 0.2 }}
             className="text-gray-400 mt-2"
           >
-            Sign in to continue to TextFlow
+            {t('auth:login.subtitle')}
           </motion.p>
         </div>
 
@@ -163,12 +166,12 @@ const Login = () => {
                 onClick={() => setView('forgot_password')}
                 className="text-gray-400 hover:text-white text-sm block w-full"
               >
-                Forgot your password?
+                {t('auth:login.forgotPassword')}
               </button>
               <p className="text-gray-400">
-                Don't have an account?{' '}
-                <Link to="/signup" className="text-red-400 hover:text-red-300">
-                  Sign up
+                {t('auth:login.noAccount')}{' '}
+                <Link to={`/${i18n.language}/signup`} className="text-red-400 hover:text-red-300">
+                  {t('auth:login.signUpLink')}
                 </Link>
               </p>
             </motion.div>
@@ -203,6 +206,6 @@ const Login = () => {
       />
     </div>
   );
-};
+}
 
 export default Login;

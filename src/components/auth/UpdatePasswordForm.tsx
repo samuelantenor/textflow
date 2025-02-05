@@ -1,61 +1,68 @@
-import { useState } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Label } from "@/components/ui/label";
-import { useNavigate } from 'react-router-dom';
+import { useTranslation } from "react-i18next";
+
+const formSchema = z.object({
+  password: z.string().min(8),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
 const UpdatePasswordForm = () => {
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const { t } = useTranslation(['auth']);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (password !== confirmPassword) {
-      toast({
-        variant: "destructive",
-        title: "Passwords don't match",
-        description: "Please make sure both passwords match.",
-      });
-      return;
-    }
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-    if (password.length < 6) {
-      toast({
-        variant: "destructive",
-        title: "Invalid password",
-        description: "Password must be at least 6 characters long",
-      });
-      return;
-    }
-
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-
     try {
       const { error } = await supabase.auth.updateUser({
-        password: password
+        password: values.password,
       });
 
-      if (error) throw error;
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: t('auth:updatePassword.errors.generic'),
+          description: error.message,
+        });
+        return;
+      }
 
       toast({
-        title: "Password updated",
-        description: "Your password has been successfully updated. Please sign in with your new password.",
+        title: t('auth:updatePassword.success'),
+        description: t('auth:updatePassword.successDescription'),
       });
-      
-      // Sign out and redirect to login
-      await supabase.auth.signOut();
-      navigate('/login');
-    } catch (error: any) {
+    } catch (error) {
+      console.error("Error updating password:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to update password",
+        title: t('auth:updatePassword.errors.generic'),
+        description: t('auth:updatePassword.errors.tryAgain'),
       });
     } finally {
       setIsLoading(false);
@@ -63,35 +70,60 @@ const UpdatePasswordForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="password">New Password</Label>
-        <Input
-          id="password"
-          type="password"
-          placeholder="Enter new password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={6}
-        />
+        <h2 className="text-2xl font-semibold text-white">
+          {t('auth:updatePassword.title')}
+        </h2>
+        <p className="text-sm text-gray-400">
+          {t('auth:updatePassword.subtitle')}
+        </p>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirm Password</Label>
-        <Input
-          id="confirmPassword"
-          type="password"
-          placeholder="Confirm new password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-          minLength={6}
-        />
-      </div>
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Updating..." : "Update Password"}
-      </Button>
-    </form>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('auth:updatePassword.newPasswordLabel')}</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder={t('auth:updatePassword.newPasswordPlaceholder')}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('auth:updatePassword.confirmPasswordLabel')}</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder={t('auth:updatePassword.confirmPasswordPlaceholder')}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" disabled={isLoading} className="w-full">
+            {isLoading ? t('auth:loading.saving') : t('auth:updatePassword.updateButton')}
+          </Button>
+        </form>
+      </Form>
+    </div>
   );
 };
 

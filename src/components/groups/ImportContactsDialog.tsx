@@ -1,11 +1,11 @@
-import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FileUpload } from "@/components/ui/file-upload";
+import { ImportInstructions } from "./ImportInstructions";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { FileUpload } from "@/components/ui/file-upload";
-import { ImportInstructions } from "./ImportInstructions";
-import { processCSVContacts } from "@/utils/csvUtils";
+import { useTranslation } from "react-i18next";
 
 interface ImportContactsDialogProps {
   groupId: string;
@@ -17,6 +17,7 @@ export function ImportContactsDialog({ groupId, open, onOpenChange }: ImportCont
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation(['groups']);
 
   const handleFileUpload = async (file: File) => {
     setIsLoading(true);
@@ -40,7 +41,7 @@ export function ImportContactsDialog({ groupId, open, onOpenChange }: ImportCont
         if (error) throw error;
 
         toast({
-          title: "Success",
+          title: t('contacts.import.success'),
           description: `${contacts.length} contacts imported successfully`,
         });
         queryClient.invalidateQueries({ queryKey: ['contacts', groupId] });
@@ -48,8 +49,8 @@ export function ImportContactsDialog({ groupId, open, onOpenChange }: ImportCont
         onOpenChange(false);
       } catch (error) {
         toast({
-          title: "Error",
-          description: error instanceof Error ? error.message : "Failed to import contacts",
+          title: t('contacts.import.error'),
+          description: error instanceof Error ? error.message : t('contacts.import.error'),
           variant: "destructive",
         });
       } finally {
@@ -64,7 +65,7 @@ export function ImportContactsDialog({ groupId, open, onOpenChange }: ImportCont
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Import Contacts</DialogTitle>
+          <DialogTitle>{t('contacts.import.title')}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <ImportInstructions />

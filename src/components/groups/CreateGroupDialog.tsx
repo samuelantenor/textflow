@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 interface CreateGroupDialogProps {
   open: boolean;
@@ -17,6 +18,7 @@ export function CreateGroupDialog({ open, onOpenChange }: CreateGroupDialogProps
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation(['groups']);
   const form = useForm({
     defaultValues: {
       name: "",
@@ -29,7 +31,7 @@ export function CreateGroupDialog({ open, onOpenChange }: CreateGroupDialogProps
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        throw new Error("User not authenticated");
+        throw new Error(t('errors.auth'));
       }
 
       const { error } = await supabase
@@ -42,16 +44,16 @@ export function CreateGroupDialog({ open, onOpenChange }: CreateGroupDialogProps
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Group created successfully",
+        title: t('create.success'),
+        description: t('create.success'),
       });
       queryClient.invalidateQueries({ queryKey: ['campaign-groups'] });
       onOpenChange(false);
       form.reset();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to create group",
+        title: t('create.error'),
+        description: error instanceof Error ? error.message : t('create.error'),
         variant: "destructive",
       });
     } finally {
@@ -63,7 +65,7 @@ export function CreateGroupDialog({ open, onOpenChange }: CreateGroupDialogProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create New Group</DialogTitle>
+          <DialogTitle>{t('create.title')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -72,15 +74,15 @@ export function CreateGroupDialog({ open, onOpenChange }: CreateGroupDialogProps
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Group Name</FormLabel>
+                  <FormLabel>{t('form.name.label')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="VIP Customers" {...field} />
+                    <Input placeholder={t('form.name.placeholder')} {...field} />
                   </FormControl>
                 </FormItem>
               )}
             />
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating..." : "Create Group"}
+              {isLoading ? t('create.saving') : t('actions.create')}
             </Button>
           </form>
         </Form>

@@ -1,0 +1,55 @@
+{
+  "navigation": {
+    "features": "Features",
+    "solutions": "Solutions",
+    "resources": "Resources",
+    "pricing": "Pricing",
+    "business": "For Business",
+    "signIn": "Sign in",
+    "createAccount": "Create free account",
+    "account": "Account",
+    "billing": "Billing",
+    "settings": "Settings",
+    "logout": "Log out",
+    "dashboard": "Dashboard"
+  },
+  "buttons": {
+    "getStarted": "Get Started",
+    "learnMore": "Learn More",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "update": "Update",
+    "send": "Send",
+    "back": "Back",
+    "viewAll": "View All"
+  },
+  "forms": {
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "phoneNumber": "Phone Number",
+    "message": "Message",
+    "required": "Required"
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "invalidPhone": "Invalid phone number",
+    "generic": "Something went wrong",
+    "tryAgain": "Please try again"
+  },
+  "success": {
+    "saved": "Successfully saved",
+    "updated": "Successfully updated",
+    "deleted": "Successfully deleted",
+    "sent": "Successfully sent"
+  },
+  "loading": {
+    "default": "Loading...",
+    "saving": "Saving...",
+    "sending": "Sending...",
+    "processing": "Processing..."
+  }
+} 

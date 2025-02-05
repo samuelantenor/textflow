@@ -5,8 +5,10 @@ import { useToast } from "@/hooks/use-toast";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const SignUp = () => {
+  const { t, i18n } = useTranslation(['auth']);
   const { isLoading, authError, setAuthError, checkUserAndRedirect } = useAuthRedirect();
   const [isSettingUp, setIsSettingUp] = useState(false);
   const { toast } = useToast();
@@ -34,8 +36,8 @@ const SignUp = () => {
           console.error('Error during account setup:', error);
           toast({
             variant: "destructive",
-            title: "Setup Error",
-            description: "There was an error setting up your account. Please try again.",
+            title: t('auth:signup.errors.generic'),
+            description: t('auth:signup.errors.setupFailed'),
           });
         } finally {
           setIsSettingUp(false);
@@ -46,7 +48,7 @@ const SignUp = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [checkUserAndRedirect, setAuthError, toast]);
+  }, [checkUserAndRedirect, setAuthError, toast, t]);
 
   if (isLoading || isSettingUp) {
     return (
@@ -57,7 +59,7 @@ const SignUp = () => {
           className="text-white text-center"
         >
           <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg">Setting up your account...</p>
+          <p className="text-lg">{t('auth:signup.loading')}</p>
         </motion.div>
       </div>
     );
@@ -76,7 +78,7 @@ const SignUp = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-300"
           >
-            Create Your Account
+            {t('auth:signup.title')}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -84,7 +86,7 @@ const SignUp = () => {
             transition={{ delay: 0.2 }}
             className="text-gray-400 mt-2"
           >
-            Join TextFlow and start messaging securely
+            {t('auth:signup.subtitle')}
           </motion.p>
         </div>
 
@@ -111,9 +113,9 @@ const SignUp = () => {
           className="text-center mt-6"
         >
           <p className="text-gray-400">
-            Already have an account?{' '}
-            <Link to="/login" className="text-red-400 hover:text-red-300">
-              Sign in
+            {t('auth:signup.haveAccount')}{' '}
+            <Link to={`/${i18n.language}/login`} className="text-red-400 hover:text-red-300">
+              {t('auth:signup.signInLink')}
             </Link>
           </p>
         </motion.div>

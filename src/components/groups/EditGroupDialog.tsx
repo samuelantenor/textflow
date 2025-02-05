@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 interface EditGroupDialogProps {
   group: {
@@ -21,6 +22,7 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation(['groups']);
   const form = useForm({
     defaultValues: {
       name: group.name,
@@ -38,15 +40,15 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Group updated successfully",
+        title: t('edit.success'),
+        description: t('edit.success'),
       });
       queryClient.invalidateQueries({ queryKey: ['campaign-groups'] });
       onOpenChange(false);
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update group",
+        title: t('edit.error'),
+        description: error instanceof Error ? error.message : t('edit.error'),
         variant: "destructive",
       });
     } finally {
@@ -58,7 +60,7 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Group</DialogTitle>
+          <DialogTitle>{t('edit.title')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -67,15 +69,15 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Group Name</FormLabel>
+                  <FormLabel>{t('form.name.label')}</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} placeholder={t('form.name.placeholder')} />
                   </FormControl>
                 </FormItem>
               )}
             />
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Save Changes"}
+              {isLoading ? t('edit.saving') : t('edit.saveChanges')}
             </Button>
           </form>
         </Form>

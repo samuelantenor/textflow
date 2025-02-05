@@ -1,13 +1,20 @@
-import React from 'react';
-import { Loader2 } from 'lucide-react';
+import { motion } from "framer-motion";
 
-const LoadingState = () => {
+interface LoadingStateProps {
+  message?: string;
+}
+
+const LoadingState = ({ message = "Loading..." }: LoadingStateProps) => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
-      <div className="w-full max-w-md space-y-8 text-center">
-        <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-        <p className="text-muted-foreground">Setting up your account...</p>
-      </div>
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-white text-center"
+      >
+        <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-lg">{message}</p>
+      </motion.div>
     </div>
   );
 };

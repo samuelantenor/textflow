@@ -1,0 +1,108 @@
+{
+  "hero": {
+    "tagline": "Turn Texts into Sales with Powerful SMS Marketing",
+    "title": {
+      "welcome": "Welcome to FlowText",
+      "where": "where",
+      "engagement": "engagement and results",
+      "comeFirst": "come first"
+    },
+    "description": "FlowText is SMS marketing by default"
+  },
+  "features": {
+    "smsCampaigns": {
+      "title": "SMS Campaigns",
+      "description": "Send bulk messages with personalization"
+    },
+    "contactLists": {
+      "title": "Contact Lists",
+      "description": "Manage and segment your audience"
+    },
+    "analytics": {
+      "title": "Analytics",
+      "description": "Track and optimize performance"
+    },
+    "targeting": {
+      "title": "Targeting",
+      "description": "Reach the right audience"
+    }
+  },
+  "stats": {
+    "smsDelivered": {
+      "number": "10M+",
+      "label": "SMS Delivered"
+    },
+    "openRate": {
+      "number": "98%",
+      "label": "Open Rate"
+    },
+    "activeUsers": {
+      "number": "5K+",
+      "label": "Active Users"
+    },
+    "roi": {
+      "number": "2x",
+      "label": "Avg. ROI"
+    }
+  },
+  "mainFeatures": {
+    "bulkSms": {
+      "title": "Bulk SMS Campaigns",
+      "description": "Send personalized messages to thousands of customers with our powerful campaign builder."
+    },
+    "contactManagement": {
+      "title": "Contact Management",
+      "description": "Organize and segment your audience for targeted messaging and better engagement."
+    },
+    "advancedAnalytics": {
+      "title": "Advanced Analytics",
+      "description": "Track delivery rates, engagement, and ROI with detailed campaign reporting."
+    }
+  },
+  "pricing": {
+    "title": "Simple, Transparent Pricing",
+    "subtitle": "Choose the plan that best fits your messaging needs",
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "price": "$29",
+        "period": "per month",
+        "features": [
+          "Up to 1,000 SMS/month",
+          "Basic personalization",
+          "Contact list management",
+          "Email support"
+        ]
+      },
+      "professional": {
+        "name": "Professional",
+        "price": "$99",
+        "period": "per month",
+        "popular": "Most Popular",
+        "features": [
+          "Up to 10,000 SMS/month",
+          "Advanced personalization",
+          "List segmentation",
+          "Campaign analytics",
+          "Priority support"
+        ]
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "Custom",
+        "period": "per month",
+        "features": [
+          "Unlimited SMS",
+          "Custom integrations",
+          "Dedicated account manager",
+          "Advanced analytics",
+          "Custom features"
+        ]
+      }
+    }
+  },
+  "cta": {
+    "title": "Ready to transform your customer engagement?",
+    "description": "Join thousands of businesses using FlowText to drive growth through SMS marketing."
+  }
+} 

@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { EditContactDialog } from "./EditContactDialog";
 import { Pencil, Trash2, Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ViewContactsDialogProps {
   group: {
@@ -25,6 +26,7 @@ export function ViewContactsDialog({ group, open, onOpenChange }: ViewContactsDi
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation(['groups']);
 
   const { data: contacts, isLoading } = useQuery({
     queryKey: ['contacts', group.id],
@@ -41,7 +43,7 @@ export function ViewContactsDialog({ group, open, onOpenChange }: ViewContactsDi
   });
 
   const handleDelete = async (contactId: string) => {
-    if (!confirm("Are you sure you want to delete this contact? This action cannot be undone.")) {
+    if (!confirm(t('contacts.delete.confirm'))) {
       return;
     }
 
@@ -50,14 +52,14 @@ export function ViewContactsDialog({ group, open, onOpenChange }: ViewContactsDi
       const { error } = await supabase
         .from('contacts')
         .delete()
-        .eq('group_id', group.id)  // Add this line to satisfy RLS policy
+        .eq('group_id', group.id)
         .eq('id', contactId);
 
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Contact deleted successfully",
+        title: t('contacts.delete.success'),
+        description: t('contacts.delete.success'),
       });
       
       // Invalidate both contacts and campaign-groups queries
@@ -66,8 +68,8 @@ export function ViewContactsDialog({ group, open, onOpenChange }: ViewContactsDi
     } catch (error) {
       console.error('Error deleting contact:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete contact",
+        title: t('contacts.delete.error'),
+        description: error instanceof Error ? error.message : t('contacts.delete.error'),
         variant: "destructive",
       });
     } finally {
@@ -85,12 +87,12 @@ export function ViewContactsDialog({ group, open, onOpenChange }: ViewContactsDi
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>View Contacts</DialogTitle>
+            <DialogTitle>{t('contacts.view.title')}</DialogTitle>
           </DialogHeader>
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search contacts..."
+              placeholder={t('contacts.view.search')}
               className="pl-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -100,19 +102,19 @@ export function ViewContactsDialog({ group, open, onOpenChange }: ViewContactsDi
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Phone Number</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
+                  <TableHead>{t('form.contact.name.label')}</TableHead>
+                  <TableHead>{t('form.contact.phone.label')}</TableHead>
+                  <TableHead className="w-[100px]">{t('actions.title')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center">Loading...</TableCell>
+                    <TableCell colSpan={3} className="text-center">{t('contacts.view.loading')}</TableCell>
                   </TableRow>
                 ) : filteredContacts?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center">No contacts found</TableCell>
+                    <TableCell colSpan={3} className="text-center">{t('contacts.view.empty')}</TableCell>
                   </TableRow>
                 ) : (
                   filteredContacts?.map((contact) => (
@@ -125,6 +127,7 @@ export function ViewContactsDialog({ group, open, onOpenChange }: ViewContactsDi
                             variant="ghost"
                             size="icon"
                             onClick={() => setEditingContact(contact)}
+                            title={t('actions.edit')}
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -133,6 +136,7 @@ export function ViewContactsDialog({ group, open, onOpenChange }: ViewContactsDi
                             size="icon"
                             onClick={() => handleDelete(contact.id)}
                             disabled={isDeleting}
+                            title={t('actions.delete')}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
