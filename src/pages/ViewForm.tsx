@@ -20,7 +20,7 @@ export default function ViewForm() {
     if (id) {
       // Set session variable directly through SQL query
       const fetchData = async () => {
-        await supabase.from('_templates').select('*').limit(1).then(() => {
+        await supabase.from('custom_forms').select('id').limit(1).then(() => {
           fetchForm(id);
         });
       };
