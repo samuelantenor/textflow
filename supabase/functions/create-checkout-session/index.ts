@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from 'https://esm.sh/stripe@14.21.0';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { createClient } from 'https://esm.sh/@supabase_supabase-js@2.45.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -50,16 +50,23 @@ serve(async (req) => {
       customer_id = customers.data[0].id;
       console.log('Found existing customer:', customer_id);
       
-      // Check if already subscribed
-      const subscriptions = await stripe.subscriptions.list({
-        customer: customer_id,
-        status: 'active',
-        limit: 1
-      });
+      // Check current subscription plan type
+      const { data: subscriptionData, error: subError } = await supabaseClient
+        .from('subscriptions')
+        .select('plan_type')
+        .eq('user_id', user.id)
+        .single();
 
-      if (subscriptions.data.length > 0) {
-        throw new Error("Customer already has an active subscription");
+      if (subError) throw subError;
+
+      // Only block if trying to subscribe to the same plan type
+      const { priceId } = await req.json();
+      const requestedPlanType = priceId === 'price_1Qp2e8B4RWKZ2dNz9TmEjEM9' ? 'starter' : 'professional';
+      
+      if (subscriptionData.plan_type === requestedPlanType) {
+        throw new Error(`You are already subscribed to the ${requestedPlanType} plan`);
       }
+
     } else {
       // Create new customer
       console.log('Creating new customer...');
