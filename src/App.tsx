@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MainLayout } from './components/Layout/MainLayout';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
@@ -14,16 +13,6 @@ import Pricing from './pages/Pricing';
 import LandingPage from './app/page';
 import { useEffect, useState } from 'react';
 import { supabase } from './integrations/supabase/client';
-
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
 
 // Routes that should use the main layout
 const layoutRoutes = [
@@ -66,48 +55,45 @@ function App() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Loading...</div>; // You might want to add a proper loading screen here
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <Routes>
-          {/* Public routes */}
-          {publicRoutes.map(({ path, element }) => (
-            <Route
-              key={path}
-              path={path}
-              element={
-                session && (path === '/login' || path === '/signup' || path === '/reset-password') ? (
-                  <Navigate to="/dashboard" replace />
-                ) : (
-                  element
-                )
-              }
-            />
-          ))}
-          
-          {/* Protected routes */}
-          {layoutRoutes.map(({ path, element }) => (
-            <Route
-              key={path}
-              path={path}
-              element={
-                !session ? (
-                  <Navigate to="/login" replace />
-                ) : (
-                  <MainLayout>{element}</MainLayout>
-                )
-              }
-            />
-          ))}
-
-          {/* Catch all redirect */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
-    </QueryClientProvider>
+    <Router>
+      <Routes>
+        {/* Public routes */}
+        {publicRoutes.map(({ path, element }) => (
+          <Route 
+            key={path} 
+            path={path} 
+            element={
+              // If user is authenticated and tries to access public routes except landing page,
+              // redirect to dashboard
+              session && path !== '/' ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                element
+              )
+            } 
+          />
+        ))}
+        
+        {/* Protected routes with MainLayout */}
+        {layoutRoutes.map(({ path, element }) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              session ? (
+                <MainLayout>{element}</MainLayout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+        ))}
+      </Routes>
+    </Router>
   );
 }
 
