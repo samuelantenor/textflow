@@ -68,28 +68,21 @@ export default function ViewForm() {
       console.log("Checking for existing contact with group_id:", form.group_id, "and phone_number:", phoneNumber);
 
       // Check if phone number already exists in the group
-      const { data: existingContacts, error: checkError } = await supabase
+      const { data: existingContact, error: checkError } = await supabase
         .from('contacts')
-        .select('count')
+        .select('id')
         .eq('group_id', form.group_id)
-        .eq('phone_number', phoneNumber);
+        .eq('phone_number', phoneNumber)
+        .single();
 
       // Debugging: Log the response
-      console.log("Existing contact check response:", existingContacts, checkError);
+      console.log("Existing contact check response:", existingContact, checkError);
 
-      if (checkError) {
-        console.error('Error checking existing contacts:', checkError);
-        toast({
-          title: t("errors.title"),
-          description: t("errors.databaseError"),
-          variant: "destructive",
-        });
-        setSubmitting(false);
-        return;
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "not found" error
+        throw checkError;
       }
 
-      // Check if any contacts exist
-      if (existingContacts.length > 0) {
+      if (existingContact) {
         toast({
           title: t("submission.warning.title"),
           description: t("submission.warning.alreadyInGroup"),
@@ -112,11 +105,6 @@ export default function ViewForm() {
 
       if (contactError) {
         console.error('Error creating contact:', contactError);
-        toast({
-          title: t("errors.title"),
-          description: t("errors.contactCreationFailed"),
-          variant: "destructive",
-        });
         throw contactError;
       }
 
@@ -130,12 +118,21 @@ export default function ViewForm() {
 
       if (submissionError) {
         console.error('Error creating submission:', submissionError);
-        toast({
-          title: t("errors.title"),
-          description: t("errors.submissionFailed"),
-          variant: "destructive",
-        });
         throw submissionError;
+      }
+
+      // Send welcome message
+      const { error: welcomeError } = await supabase.functions.invoke('send-welcome-message', {
+        body: { 
+          phoneNumber,
+          formId: id,
+          language: i18n.language,
+        },
+      });
+
+      if (welcomeError) {
+        console.error('Error sending welcome message:', welcomeError);
+        // Don't throw here, we still want to show success for the form submission
       }
 
       // Show success message
@@ -143,6 +140,9 @@ export default function ViewForm() {
         title: t("submission.success.title"),
         description: t("submission.success.description"),
       });
+
+      // Set submitted state to true
+      setSubmitted(true);
 
       // Reset form
       setFormData({});
