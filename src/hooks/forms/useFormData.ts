@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FormField } from "@/types/form";
@@ -74,7 +75,7 @@ export function useFormData(): UseFormDataReturn {
           show_border
         `)
         .eq('id', formId)
-        .single();
+        .maybeSingle();
 
       if (formError) {
         console.error('Error fetching form:', formError);
@@ -83,7 +84,7 @@ export function useFormData(): UseFormDataReturn {
 
       if (!formResponse) {
         console.error('Form not found');
-        throw new Error('Form not found');
+        throw new Error('Form not found or is not active');
       }
 
       // Ensure fields is an array and validate its structure

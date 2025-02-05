@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +18,10 @@ export default function ViewForm() {
 
   useEffect(() => {
     if (id) {
-      fetchForm(id);
+      // Set the form ID in the database session for RLS
+      supabase.rpc('set_form_context', { form_id: id }).then(() => {
+        fetchForm(id);
+      });
     }
   }, [id]);
 
