@@ -12,16 +12,16 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabaseClient = createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-  );
-
   try {
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    );
+
+    console.log('Authenticating user...');
     const authHeader = req.headers.get('Authorization')!;
     const token = authHeader.replace('Bearer ', '');
     
-    console.log('Authenticating user...');
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
     
     if (authError || !user) {
@@ -50,20 +50,21 @@ serve(async (req) => {
       customer_id = customers.data[0].id;
       console.log('Found existing customer:', customer_id);
       
-      // Check current subscription plan type
+      // Check current subscription plan type using maybeSingle() instead of single()
       const { data: subscriptionData, error: subError } = await supabaseClient
         .from('subscriptions')
         .select('plan_type')
         .eq('user_id', user.id)
-        .single();
+        .eq('status', 'active')
+        .maybeSingle();
 
       if (subError) throw subError;
 
-      // Only block if trying to subscribe to the same plan type
       const { priceId } = await req.json();
       const requestedPlanType = priceId === 'price_1Qp2e8B4RWKZ2dNz9TmEjEM9' ? 'starter' : 'professional';
       
-      if (subscriptionData.plan_type === requestedPlanType) {
+      // Only block if subscription exists and trying to subscribe to the same plan type
+      if (subscriptionData?.plan_type === requestedPlanType) {
         throw new Error(`You are already subscribed to the ${requestedPlanType} plan`);
       }
 
