@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { CreditCard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -34,26 +35,7 @@ export const BillingOverview = ({ subscription }: BillingOverviewProps) => {
     <div className="bg-card rounded-lg p-6">
       <h2 className="text-lg font-semibold mb-6">{t('overview.title')}</h2>
       
-      {subscription && !isFreePlan ? (
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('overview.plan')}</span>
-            <span className="font-medium capitalize">{subscription.plan_type}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('overview.status')}</span>
-            <span className="font-medium capitalize">{subscription.status}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('overview.monthlyMessageLimit')}</span>
-            <span className="font-medium">{subscription.monthly_message_limit}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">{t('overview.campaignLimit')}</span>
-            <span className="font-medium">{subscription.campaign_limit}</span>
-          </div>
-        </div>
-      ) : (
+      {isFreePlan ? (
         <div className="flex flex-col items-center space-y-4">
           <p className="text-muted-foreground text-center">
             {t('overview.upgradeMessage')}
@@ -65,6 +47,25 @@ export const BillingOverview = ({ subscription }: BillingOverviewProps) => {
             <CreditCard className="mr-2 h-4 w-4" />
             {t('overview.subscribeNow')}
           </Button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">{t('overview.plan')}</span>
+            <span className="font-medium capitalize">{subscription?.plan_type}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">{t('overview.status')}</span>
+            <span className="font-medium capitalize">{subscription?.status}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">{t('overview.monthlyMessageLimit')}</span>
+            <span className="font-medium">{subscription?.monthly_message_limit}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">{t('overview.campaignLimit')}</span>
+            <span className="font-medium">{subscription?.campaign_limit}</span>
+          </div>
         </div>
       )}
     </div>
