@@ -21,7 +21,6 @@ export default function ViewForm() {
 
   useEffect(() => {
     if (id) {
-      // Set session variable directly through SQL query
       const fetchData = async () => {
         await supabase.from('custom_forms').select('id').limit(1).then(() => {
           fetchForm(id);
@@ -65,7 +64,29 @@ export default function ViewForm() {
 
     setSubmitting(true);
     try {
-      // Create the contact first
+      // Check for duplicate phone number in the group
+      const { data: existingContact, error: checkError } = await supabase
+        .from('contacts')
+        .select('id')
+        .eq('group_id', form.group_id)
+        .eq('phone_number', phoneNumber)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 means no rows returned
+        throw checkError;
+      }
+
+      if (existingContact) {
+        toast({
+          title: t("errors.title"),
+          description: t("errors.duplicatePhone"),
+          variant: "destructive",
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      // Create the contact
       const { data: contactData, error: contactError } = await supabase
         .from('contacts')
         .insert({
@@ -81,7 +102,7 @@ export default function ViewForm() {
         throw contactError;
       }
 
-      // Then create the form submission
+      // Create the form submission
       const { error: submissionError } = await supabase
         .from('form_submissions')
         .insert({

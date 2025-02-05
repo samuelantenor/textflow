@@ -225,6 +225,7 @@
     "title": "Error",
     "formConfiguration": "This form is not properly configured.",
     "phoneRequired": "Phone number is required",
-    "submissionFailed": "Failed to submit form. Please try again."
+    "submissionFailed": "Failed to submit form. Please try again.",
+    "duplicatePhone": "This phone number is already registered in this group."
   }
 }

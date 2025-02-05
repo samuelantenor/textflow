@@ -225,6 +225,7 @@
     "title": "Erreur",
     "formConfiguration": "Ce formulaire n'est pas configuré correctement.",
     "phoneRequired": "Le numéro de téléphone est requis",
-    "submissionFailed": "Échec de la soumission du formulaire. Veuillez réessayer."
+    "submissionFailed": "Échec de la soumission du formulaire. Veuillez réessayer.",
+    "duplicatePhone": "Ce numéro de téléphone est déjà enregistré dans ce groupe."
   }
 }
