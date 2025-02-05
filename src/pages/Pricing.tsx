@@ -28,6 +28,8 @@ const PricingPage = () => {
         return;
       }
 
+      console.log('Creating checkout session with priceId:', priceId); // Debug log
+
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: { priceId },
       });
@@ -55,7 +57,7 @@ const PricingPage = () => {
       price: t('pricing.plans.starter.price'),
       period: t('pricing.plans.starter.period'),
       features: t('pricing.plans.starter.features', { returnObjects: true }) as string[],
-      priceId: 'price_starter'
+      priceId: 'price_1Qp2e8B4RWKZ2dNz9TmEjEM9' // Starter plan price ID
     },
     {
       name: t('pricing.plans.professional.name'),
@@ -63,7 +65,7 @@ const PricingPage = () => {
       period: t('pricing.plans.professional.period'),
       popular: true,
       features: t('pricing.plans.professional.features', { returnObjects: true }) as string[],
-      priceId: 'price_professional'
+      priceId: 'price_1Qp2e8B4RWKZ2dNzE3i3i37m' // Professional plan price ID
     },
     {
       name: t('pricing.plans.enterprise.name'),
