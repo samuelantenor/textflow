@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UseFormReturn } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 interface LogoSectionProps {
   form: UseFormReturn<any>;
@@ -8,11 +9,12 @@ interface LogoSectionProps {
 }
 
 export function LogoSection({ form, onLogoUpload }: LogoSectionProps) {
+  const { t } = useTranslation("forms");
   const formData = form.watch();
 
   return (
     <div className="space-y-4">
-      <Label>Logo</Label>
+      <Label>{t("design.logo.title")}</Label>
       <Input
         type="file"
         accept="image/*"
@@ -25,7 +27,7 @@ export function LogoSection({ form, onLogoUpload }: LogoSectionProps) {
         <div className="mt-2">
           <img
             src={formData.logo_url}
-            alt="Form logo"
+            alt={t("design.logo.title")}
             className="max-h-20 rounded"
           />
         </div>

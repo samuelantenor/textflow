@@ -11,6 +11,7 @@ import { BackgroundSection } from "./design/BackgroundSection";
 import { InputStyleSection } from "./design/InputStyleSection";
 import { LogoSection } from "./design/LogoSection";
 import { FontSection } from "./design/FontSection";
+import { useTranslation } from "react-i18next";
 
 interface FormDesignTabProps {
   form: UseFormReturn<any>;
@@ -21,6 +22,7 @@ interface FormDesignTabProps {
 export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabProps) {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation("forms");
   const formData = form.watch();
 
   const handleBackgroundImageUpload = async (file: File) => {
@@ -42,8 +44,8 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
     } catch (error) {
       console.error('Error uploading background image:', error);
       toast({
-        title: "Error",
-        description: "Failed to upload background image. Please try again.",
+        title: t("design.background.image.error"),
+        description: t("design.background.image.error"),
         variant: "destructive",
       });
     }
@@ -52,8 +54,8 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
   const handleSaveDesign = async () => {
     if (!formId) {
       toast({
-        title: "Error",
-        description: "Please save the form first before updating the design.",
+        title: t("design.error"),
+        description: t("design.saveFirst"),
         variant: "destructive",
       });
       return;
@@ -79,14 +81,14 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Form design has been saved successfully.",
+        title: t("design.success"),
+        description: t("design.success"),
       });
     } catch (error) {
       console.error('Error saving form design:', error);
       toast({
-        title: "Error",
-        description: "Failed to save form design. Please try again.",
+        title: t("design.error"),
+        description: t("design.error"),
         variant: "destructive",
       });
     } finally {
@@ -104,17 +106,17 @@ export function FormDesignTab({ form, handleLogoUpload, formId }: FormDesignTabP
               disabled={isSaving}
               size="sm"
             >
-              {isSaving ? "Saving..." : (
+              {isSaving ? t("design.saving") : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  Save Design
+                  {t("design.saveButton")}
                 </>
               )}
             </Button>
           </div>
 
           <ColorPicker
-            label="Primary Color (Buttons & Accents)"
+            label={t("design.colors.primary")}
             value={formData.primary_color}
             onChange={(value) => form.setValue("primary_color", value)}
           />
