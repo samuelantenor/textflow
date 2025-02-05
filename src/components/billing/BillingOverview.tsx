@@ -11,11 +11,20 @@ export const BillingOverview = () => {
   const { t, i18n } = useTranslation(['billing']);
 
   // Fetch subscription data
-  const { data: subscription } = useQuery({
+  const { data: subscription, error: subscriptionError } = useQuery({
     queryKey: ['subscription'],
     queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return null;
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        return null;
+      }
+      
+      if (!session) {
+        console.log('No active session found');
+        return null;
+      }
 
       const { data, error } = await supabase
         .from('subscriptions')
@@ -23,23 +32,27 @@ export const BillingOverview = () => {
         .eq('user_id', session.user.id)
         .maybeSingle();
 
-      console.log('Subscription data:', data); // Debug log
-      console.log('Subscription error:', error); // Debug log for any potential errors
-
-      if (error) throw error;
+      console.log('Subscription data:', data);
+      if (error) {
+        console.error('Subscription fetch error:', error);
+        throw error;
+      }
+      
       return data;
     },
+    // Only run the query if we're not on the login page
+    enabled: !window.location.pathname.includes('/login'),
   });
 
-  console.log('Current subscription:', subscription); // Debug log for the subscription after query
-  console.log('Plan type:', subscription?.plan_type); // Debug log specifically for plan_type
+  console.log('Current subscription:', subscription);
+  console.log('Subscription error:', subscriptionError);
 
   const handleSubscribe = () => {
     navigate(`/${i18n.language}/pricing`);
   };
 
   const formatPlanType = (planType: string) => {
-    console.log('Formatting plan type:', planType); // Debug log for the plan type being formatted
+    console.log('Formatting plan type:', planType);
     switch (planType) {
       case 'paid_starter':
         return 'Starter';
@@ -48,11 +61,12 @@ export const BillingOverview = () => {
       case 'free':
         return 'Free';
       default:
-        return planType;
+        return planType || 'Free';
     }
   };
 
-  const isFreePlan = subscription?.plan_type === 'free';
+  // Default to free plan if no subscription is found
+  const isFreePlan = !subscription || subscription?.plan_type === 'free';
 
   return (
     <div className="bg-card rounded-lg p-6">
