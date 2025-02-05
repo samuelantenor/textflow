@@ -102,6 +102,9 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
+      subscription_data: {
+        trial_period_days: 30, // Add 30-day trial period
+      },
       success_url: `${req.headers.get('origin')}/billing?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get('origin')}/`,
     });
