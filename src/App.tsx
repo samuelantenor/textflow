@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
 import { MainLayout } from './components/Layout/MainLayout';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
@@ -13,6 +13,44 @@ import Pricing from './pages/Pricing';
 import LandingPage from './app/page';
 import { useEffect, useState } from 'react';
 import { supabase } from './integrations/supabase/client';
+import { useTranslation } from 'react-i18next';
+
+// Language settings
+const SUPPORTED_LANGUAGES = ['en', 'fr'];
+const DEFAULT_LANGUAGE = 'en';
+
+// Language redirect component
+function LanguageRedirect() {
+  const navigate = useNavigate();
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    // Get browser language or stored preference
+    const userLang = i18n.language.split('-')[0];
+    const targetLang = SUPPORTED_LANGUAGES.includes(userLang) ? userLang : DEFAULT_LANGUAGE;
+    navigate(`/${targetLang}`, { replace: true });
+  }, [navigate, i18n]);
+
+  return null;
+}
+
+// Language wrapper component
+function LanguageWrapper({ children }: { children: React.ReactNode }) {
+  const { lang } = useParams();
+  const { i18n } = useTranslation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (lang && SUPPORTED_LANGUAGES.includes(lang)) {
+      i18n.changeLanguage(lang);
+    } else {
+      // Redirect to default language if invalid language is provided
+      navigate(`/${DEFAULT_LANGUAGE}${window.location.pathname}`, { replace: true });
+    }
+  }, [lang, i18n, navigate]);
+
+  return <>{children}</>;
+}
 
 // Routes that should use the main layout
 const layoutRoutes = [
@@ -36,6 +74,7 @@ const publicRoutes = [
 function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { i18n } = useTranslation();
 
   useEffect(() => {
     // Get initial session
@@ -55,43 +94,56 @@ function App() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; // You might want to add a proper loading screen here
+    return <div>Loading...</div>;
   }
 
   return (
     <Router>
       <Routes>
-        {/* Public routes */}
+        {/* Root redirect */}
+        <Route path="/" element={<LanguageRedirect />} />
+
+        {/* Language-specific routes */}
+        <Route path="/:lang" element={<LanguageWrapper><LandingPage /></LanguageWrapper>} />
+        
+        {/* Public routes with language prefix */}
         {publicRoutes.map(({ path, element }) => (
-          <Route 
-            key={path} 
-            path={path} 
-            element={
-              // If user is authenticated and tries to access public routes except landing page,
-              // redirect to dashboard
-              session && path !== '/' ? (
-                <Navigate to="/dashboard" replace />
-              ) : (
-                element
-              )
-            } 
-          />
+          path !== '/' && (
+            <Route
+              key={path}
+              path={`/:lang${path}`}
+              element={
+                <LanguageWrapper>
+                  {session && path !== '/' ? (
+                    <Navigate to={`/${i18n.language}/dashboard`} replace />
+                  ) : (
+                    element
+                  )}
+                </LanguageWrapper>
+              }
+            />
+          )
         ))}
         
-        {/* Protected routes with MainLayout */}
+        {/* Protected routes with language prefix */}
         {layoutRoutes.map(({ path, element }) => (
           <Route
             key={path}
-            path={path}
+            path={`/:lang${path}`}
             element={
-              session ? (
-                <MainLayout>{element}</MainLayout>
-              ) : (
-                <Navigate to="/login" replace />
-              )
+              <LanguageWrapper>
+                {session ? (
+                  <MainLayout>{element}</MainLayout>
+                ) : (
+                  <Navigate to={`/${i18n.language}/login`} replace />
+                )}
+              </LanguageWrapper>
             }
           />
         ))}
+
+        {/* Catch all redirect */}
+        <Route path="*" element={<Navigate to={`/${DEFAULT_LANGUAGE}`} replace />} />
       </Routes>
     </Router>
   );
