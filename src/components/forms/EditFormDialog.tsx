@@ -10,6 +10,7 @@ import { FormFieldsTab } from "./form-builder/FormFieldsTab";
 import { FormDesignTab } from "./form-builder/FormDesignTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CustomForm } from "./types";
+import { useTranslation } from "react-i18next";
 
 interface EditFormDialogProps {
   form: CustomForm;
@@ -18,6 +19,7 @@ interface EditFormDialogProps {
 }
 
 export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFormDialogProps) {
+  const { t } = useTranslation("forms");
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"fields" | "design">("fields");
   const { toast } = useToast();
@@ -80,7 +82,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       const { error: uploadError } = await supabase.storage
         .from("landing_page_assets")
         .upload(fileName, file);
-      if (uploadError) throw new Error("File upload failed");
+      if (uploadError) throw new Error(t("design.logo.error"));
 
       const { data: { publicUrl } } = supabase.storage
         .from("landing_page_assets")
@@ -89,7 +91,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       form.setValue("logo_url", publicUrl);
     } catch (error) {
       toast({
-        title: "Error",
+        title: t("design.logo.error"),
         description: (error as Error).message,
         variant: "destructive",
       });
@@ -123,10 +125,17 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
 
       if (error) throw error;
 
-      toast({ title: "Success", description: "Form updated successfully." });
+      toast({ 
+        title: t("edit.success"), 
+        description: t("edit.success") 
+      });
       onOpenChange(false);
     } catch (error) {
-      toast({ title: "Error", description: "Failed to update form.", variant: "destructive" });
+      toast({ 
+        title: t("edit.error"), 
+        description: t("edit.error"), 
+        variant: "destructive" 
+      });
     } finally {
       setIsLoading(false);
     }
@@ -136,14 +145,14 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[1200px] h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Edit Form: {initialForm.title}</DialogTitle>
+          <DialogTitle>{t("edit.title")}: {initialForm.title}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden">
             <Tabs value={activeTab} onValueChange={(tab: "fields" | "design") => setActiveTab(tab)} className="h-full flex flex-col">
               <TabsList className="mb-4">
-                <TabsTrigger value="fields">Form Fields</TabsTrigger>
-                <TabsTrigger value="design">Design</TabsTrigger>
+                <TabsTrigger value="fields">{t("builder.tabs.fields")}</TabsTrigger>
+                <TabsTrigger value="design">{t("builder.tabs.design")}</TabsTrigger>
               </TabsList>
               <TabsContent value="fields" className="flex-1 overflow-hidden">
                 <FormFieldsTab form={form} />
@@ -153,10 +162,12 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
               </TabsContent>
             </Tabs>
             <div className="flex justify-end space-x-4 pt-4 sticky bottom-0 bg-background p-4 border-t">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                {t("edit.buttons.cancel")}
+              </Button>
               <Button type="submit" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
+                {t("edit.buttons.save")}
               </Button>
             </div>
           </form>

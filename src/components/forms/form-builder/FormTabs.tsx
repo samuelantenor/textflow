@@ -2,6 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UseFormReturn } from "react-hook-form";
 import { FormFieldsTab } from "./FormFieldsTab";
 import { FormDesignTab } from "./FormDesignTab";
+import { useTranslation } from "react-i18next";
 
 export interface FormTabsProps {
   form: UseFormReturn<any>;
@@ -12,11 +13,13 @@ export interface FormTabsProps {
 }
 
 export function FormTabs({ form, activeTab, onTabChange, formId, handleLogoUpload }: FormTabsProps) {
+  const { t } = useTranslation("forms");
+
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="h-full flex flex-col">
       <TabsList className="mb-4">
-        <TabsTrigger value="fields">Form Fields</TabsTrigger>
-        <TabsTrigger value="design">Design</TabsTrigger>
+        <TabsTrigger value="fields">{t("builder.tabs.fields")}</TabsTrigger>
+        <TabsTrigger value="design">{t("builder.tabs.design")}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="fields" className="flex-1 overflow-hidden">

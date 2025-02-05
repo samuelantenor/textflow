@@ -1,0 +1,118 @@
+{
+  "overview": {
+    "title": "Forms",
+    "noGroups": {
+      "title": "No Contact Groups",
+      "description": "You need to create a contact group before you can create a form."
+    }
+  },
+  "builder": {
+    "title": "Create Form",
+    "createButton": "Create Form",
+    "success": "Form created successfully.",
+    "error": "Failed to create form. Please try again.",
+    "tabs": {
+      "fields": "Form Fields",
+      "design": "Design"
+    },
+    "form": {
+      "title": {
+        "label": "Form Title",
+        "placeholder": "Enter form title"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Describe your form (optional)"
+      },
+      "group": {
+        "label": "Select Contact Group",
+        "placeholder": "Select a group"
+      }
+    }
+  },
+  "design": {
+    "saveButton": "Save Design",
+    "saving": "Saving...",
+    "success": "Form design has been saved successfully.",
+    "error": "Failed to save form design. Please try again.",
+    "saveFirst": "Please save the form first before updating the design.",
+    "colors": {
+      "primary": "Primary Color (Buttons & Accents)",
+      "background": "Background Color",
+      "input": "Input Background Color"
+    },
+    "background": {
+      "title": "Background",
+      "image": {
+        "label": "Background Image",
+        "upload": "Upload Image",
+        "error": "Failed to upload background image. Please try again."
+      },
+      "style": {
+        "label": "Background Style",
+        "cover": "Cover",
+        "contain": "Contain",
+        "repeat": "Repeat"
+      },
+      "opacity": "Background Opacity"
+    },
+    "font": {
+      "title": "Font",
+      "family": "Font Family"
+    },
+    "logo": {
+      "title": "Logo",
+      "upload": "Upload Logo",
+      "error": "Failed to upload logo. Please try again."
+    },
+    "border": {
+      "label": "Show Input Borders"
+    }
+  },
+  "share": {
+    "title": "Share Form",
+    "description": "Share this link with others to allow them to fill out your form.",
+    "copied": {
+      "title": "Copied!",
+      "description": "Form URL has been copied to clipboard"
+    },
+    "error": "Failed to copy URL to clipboard"
+  },
+  "submissions": {
+    "title": "Form Submissions",
+    "description": "View and search through all submissions for this form",
+    "search": "Search submissions...",
+    "empty": "No submissions found",
+    "loading": "Loading submissions...",
+    "submittedAt": "Submitted At"
+  },
+  "edit": {
+    "title": "Edit Form",
+    "success": "Form updated successfully.",
+    "error": "Failed to update form.",
+    "buttons": {
+      "cancel": "Cancel",
+      "save": "Save Changes"
+    }
+  },
+  "list": {
+    "empty": {
+      "title": "No forms yet",
+      "description": "Create your first form to start collecting submissions."
+    },
+    "loading": "Loading forms...",
+    "group": "Group",
+    "noGroup": "No group",
+    "noDescription": "No description",
+    "buttons": {
+      "share": "Share",
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete"
+    }
+  },
+  "view": {
+    "submit": "Submit",
+    "submitting": "Submitting..."
+  }
+} 

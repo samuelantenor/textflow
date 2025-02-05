@@ -8,12 +8,14 @@ import { FormFieldBuilder } from "../FormFieldBuilder";
 import { FormFieldList } from "../FormFieldList";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 
 interface FormFieldsTabProps {
   form: UseFormReturn<any>;
 }
 
 export function FormFieldsTab({ form }: FormFieldsTabProps) {
+  const { t } = useTranslation("forms");
   const formData = form.watch();
 
   const { data: groups, isLoading } = useQuery({
@@ -35,23 +37,23 @@ export function FormFieldsTab({ form }: FormFieldsTabProps) {
         <div className="space-y-4 pr-4">
           <div className="space-y-4 bg-muted/50 rounded-lg p-4">
             <Input
-              placeholder="Enter form title"
+              placeholder={t("builder.form.title.placeholder")}
               className="text-xl font-semibold bg-background"
               {...form.register("title", { required: true })}
             />
             <Textarea
-              placeholder="Describe your form (optional)"
+              placeholder={t("builder.form.description.placeholder")}
               className="bg-background"
               {...form.register("description")}
             />
             <div className="space-y-2">
-              <label className="text-sm font-medium">Select Contact Group</label>
+              <label className="text-sm font-medium">{t("builder.form.group.label")}</label>
               <Select
                 value={form.watch("group_id")}
                 onValueChange={(value) => form.setValue("group_id", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a group" />
+                  <SelectValue placeholder={t("builder.form.group.placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {groups?.map((group) => (

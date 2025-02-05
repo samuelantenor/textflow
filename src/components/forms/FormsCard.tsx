@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Share2, Eye, Pencil, Trash2 } from "lucide-react";
 import { CustomForm } from "./types";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface FormsCardProps {
   form: CustomForm;
@@ -19,6 +20,8 @@ export const FormsCard = ({
   onEdit,
   onDelete,
 }: FormsCardProps) => {
+  const { t } = useTranslation("forms");
+
   // Memoize handlers to prevent unnecessary re-renders
   const handleShare = () => onShare(form);
   const handleViewSubmissions = () => onViewSubmissions(form);
@@ -31,12 +34,12 @@ export const FormsCard = ({
         <div>
           <h3 className="text-lg font-semibold truncate">{form.title}</h3>
           <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-            {form.description || "No description"}
+            {form.description || t("list.noDescription")}
           </p>
         </div>
 
         <div className="text-sm text-muted-foreground">
-          Group: {form.campaign_groups?.name || "No group"}
+          {t("list.group")}: {form.campaign_groups?.name || t("list.noGroup")}
         </div>
 
         <div className="flex flex-wrap gap-2 pt-2">
@@ -50,7 +53,7 @@ export const FormsCard = ({
             onClick={handleShare}
           >
             <Share2 className="h-4 w-4" />
-            Share
+            {t("list.buttons.share")}
           </Button>
 
           <Button
@@ -63,7 +66,7 @@ export const FormsCard = ({
             onClick={handleViewSubmissions}
           >
             <Eye className="h-4 w-4" />
-            View
+            {t("list.buttons.view")}
           </Button>
 
           <Button
@@ -76,7 +79,7 @@ export const FormsCard = ({
             onClick={handleEdit}
           >
             <Pencil className="h-4 w-4" />
-            Edit
+            {t("list.buttons.edit")}
           </Button>
 
           <Button
@@ -86,7 +89,7 @@ export const FormsCard = ({
             onClick={handleDelete}
           >
             <Trash2 className="h-4 w-4" />
-            Delete
+            {t("list.buttons.delete")}
           </Button>
         </div>
       </div>

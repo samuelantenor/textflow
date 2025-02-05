@@ -9,12 +9,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { FormTabs } from "./form-builder/FormTabs";
 import { FormActions } from "./form-builder/FormActions";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 interface FormBuilderProps {
   groupId?: string;
 }
 
 export function FormBuilder({ groupId }: FormBuilderProps) {
+  const { t } = useTranslation("forms");
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("fields");
@@ -54,8 +56,8 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
     } catch (error) {
       console.error("Error uploading logo:", error);
       toast({
-        title: "Error",
-        description: "Failed to upload logo. Please try again.",
+        title: t("design.logo.error"),
+        description: t("design.logo.error"),
         variant: "destructive",
       });
     }
@@ -90,16 +92,16 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
       await queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
 
       toast({
-        title: "Success",
-        description: "Form created successfully.",
+        title: t("builder.success"),
+        description: t("builder.success"),
       });
 
       setOpen(false);
     } catch (error) {
       console.error("Error creating form:", error);
       toast({
-        title: "Error",
-        description: "Failed to create form. Please try again.",
+        title: t("builder.error"),
+        description: t("builder.error"),
         variant: "destructive",
       });
     } finally {
@@ -112,12 +114,12 @@ export function FormBuilder({ groupId }: FormBuilderProps) {
       <DialogTrigger asChild>
         <Button>
           <Plus className="w-4 h-4 mr-2" />
-          Create Form
+          {t("builder.createButton")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[1200px] h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Create Form</DialogTitle>
+          <DialogTitle>{t("builder.title")}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden">

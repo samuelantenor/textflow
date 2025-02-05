@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Copy, Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ShareFormDialogProps {
   form: {
@@ -15,6 +16,7 @@ interface ShareFormDialogProps {
 }
 
 export function ShareFormDialog({ form, open, onOpenChange }: ShareFormDialogProps) {
+  const { t } = useTranslation("forms");
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
@@ -25,14 +27,14 @@ export function ShareFormDialog({ form, open, onOpenChange }: ShareFormDialogPro
       await navigator.clipboard.writeText(formUrl);
       setCopied(true);
       toast({
-        title: "Copied!",
-        description: "Form URL has been copied to clipboard",
+        title: t("share.copied.title"),
+        description: t("share.copied.description"),
       });
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       toast({
-        title: "Error",
-        description: "Failed to copy URL to clipboard",
+        title: t("share.error"),
+        description: t("share.error"),
         variant: "destructive",
       });
     }
@@ -42,9 +44,9 @@ export function ShareFormDialog({ form, open, onOpenChange }: ShareFormDialogPro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Share Form{form ? `: ${form.title}` : ''}</DialogTitle>
+          <DialogTitle>{t("share.title")}{form ? `: ${form.title}` : ''}</DialogTitle>
           <DialogDescription>
-            Share this link with others to allow them to fill out your form.
+            {t("share.description")}
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center space-x-2">

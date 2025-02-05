@@ -1,0 +1,118 @@
+{
+  "overview": {
+    "title": "Formulaires",
+    "noGroups": {
+      "title": "Aucun groupe de contacts",
+      "description": "Vous devez créer un groupe de contacts avant de pouvoir créer un formulaire."
+    }
+  },
+  "builder": {
+    "title": "Créer un formulaire",
+    "createButton": "Créer un formulaire",
+    "success": "Formulaire créé avec succès.",
+    "error": "Échec de la création du formulaire. Veuillez réessayer.",
+    "tabs": {
+      "fields": "Champs du formulaire",
+      "design": "Design"
+    },
+    "form": {
+      "title": {
+        "label": "Titre du formulaire",
+        "placeholder": "Entrez le titre du formulaire"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Décrivez votre formulaire (optionnel)"
+      },
+      "group": {
+        "label": "Sélectionner un groupe de contacts",
+        "placeholder": "Sélectionnez un groupe"
+      }
+    }
+  },
+  "design": {
+    "saveButton": "Enregistrer le design",
+    "saving": "Enregistrement...",
+    "success": "Le design du formulaire a été enregistré avec succès.",
+    "error": "Échec de l'enregistrement du design. Veuillez réessayer.",
+    "saveFirst": "Veuillez d'abord enregistrer le formulaire avant de mettre à jour le design.",
+    "colors": {
+      "primary": "Couleur principale (Boutons & Accents)",
+      "background": "Couleur de fond",
+      "input": "Couleur de fond des champs"
+    },
+    "background": {
+      "title": "Arrière-plan",
+      "image": {
+        "label": "Image de fond",
+        "upload": "Télécharger une image",
+        "error": "Échec du téléchargement de l'image. Veuillez réessayer."
+      },
+      "style": {
+        "label": "Style d'arrière-plan",
+        "cover": "Couvrir",
+        "contain": "Contenir",
+        "repeat": "Répéter"
+      },
+      "opacity": "Opacité de l'arrière-plan"
+    },
+    "font": {
+      "title": "Police",
+      "family": "Famille de police"
+    },
+    "logo": {
+      "title": "Logo",
+      "upload": "Télécharger un logo",
+      "error": "Échec du téléchargement du logo. Veuillez réessayer."
+    },
+    "border": {
+      "label": "Afficher les bordures des champs"
+    }
+  },
+  "share": {
+    "title": "Partager le formulaire",
+    "description": "Partagez ce lien avec d'autres pour leur permettre de remplir votre formulaire.",
+    "copied": {
+      "title": "Copié !",
+      "description": "L'URL du formulaire a été copiée dans le presse-papiers"
+    },
+    "error": "Échec de la copie de l'URL dans le presse-papiers"
+  },
+  "submissions": {
+    "title": "Soumissions du formulaire",
+    "description": "Consultez et recherchez toutes les soumissions pour ce formulaire",
+    "search": "Rechercher des soumissions...",
+    "empty": "Aucune soumission trouvée",
+    "loading": "Chargement des soumissions...",
+    "submittedAt": "Soumis le"
+  },
+  "edit": {
+    "title": "Modifier le formulaire",
+    "success": "Formulaire mis à jour avec succès.",
+    "error": "Échec de la mise à jour du formulaire.",
+    "buttons": {
+      "cancel": "Annuler",
+      "save": "Enregistrer les modifications"
+    }
+  },
+  "list": {
+    "empty": {
+      "title": "Aucun formulaire pour le moment",
+      "description": "Créez votre premier formulaire pour commencer à collecter des soumissions."
+    },
+    "loading": "Chargement des formulaires...",
+    "group": "Groupe",
+    "noGroup": "Aucun groupe",
+    "noDescription": "Aucune description",
+    "buttons": {
+      "share": "Partager",
+      "view": "Voir",
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    }
+  },
+  "view": {
+    "submit": "Envoyer",
+    "submitting": "Envoi en cours..."
+  }
+} 

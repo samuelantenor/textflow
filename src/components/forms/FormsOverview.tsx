@@ -9,8 +9,10 @@ import { CustomForm } from "./types";
 import { FormsList } from "./FormsList";
 import { useFormsData } from "@/hooks/forms/useFormsData";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 
 export const FormsOverview = () => {
+  const { t } = useTranslation("forms");
   const [selectedShareForm, setSelectedShareForm] = useState<CustomForm | null>(null);
   const [selectedEditForm, setSelectedEditForm] = useState<CustomForm | null>(null);
   const [selectedSubmissionForm, setSelectedSubmissionForm] = useState<CustomForm | null>(null);
@@ -61,7 +63,11 @@ export const FormsOverview = () => {
       setSelectedEditForm(transformedData);
       setEditDialogOpen(true);
     } catch (error) {
-      toast({ title: "Error", description: "Failed to load form data.", variant: "destructive" });
+      toast({ 
+        title: t("edit.error"), 
+        description: t("edit.error"), 
+        variant: "destructive" 
+      });
     }
   };
 
@@ -86,10 +92,18 @@ export const FormsOverview = () => {
 
       if (error) throw error;
 
-      toast({ title: "Success", description: "Form deleted successfully." });
+      toast({ 
+        title: t("list.buttons.delete"), 
+        description: t("list.success"), 
+        variant: "default" 
+      });
       queryClient.invalidateQueries({ queryKey: ["custom-forms"] });
     } catch (error) {
-      toast({ title: "Error", description: "Failed to delete form.", variant: "destructive" });
+      toast({ 
+        title: t("list.buttons.delete"), 
+        description: t("list.error"), 
+        variant: "destructive" 
+      });
     }
   };
 
@@ -111,10 +125,10 @@ export const FormsOverview = () => {
   if (!groups?.length) {
     return (
       <div className="space-y-8">
-        <h2 className="text-2xl font-bold">Forms</h2>
+        <h2 className="text-2xl font-bold">{t("overview.title")}</h2>
         <Card className="p-12 text-center space-y-4 mt-4">
           <p className="text-muted-foreground">
-            You need to create a contact group before you can create a form.
+            {t("overview.noGroups.description")}
           </p>
         </Card>
       </div>
@@ -124,7 +138,7 @@ export const FormsOverview = () => {
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Forms</h2>
+        <h2 className="text-2xl font-bold">{t("overview.title")}</h2>
         <FormBuilder groupId={groups[0].id} />
       </div>
       <FormsList

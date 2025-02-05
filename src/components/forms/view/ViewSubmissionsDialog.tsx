@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { FormField } from "@/types/form";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ViewSubmissionsDialogProps {
   formId?: string;
@@ -20,6 +21,7 @@ interface FormDetails {
 }
 
 export function ViewSubmissionsDialog({ formId, open, onOpenChange }: ViewSubmissionsDialogProps) {
+  const { t } = useTranslation("forms");
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
@@ -73,16 +75,16 @@ export function ViewSubmissionsDialog({ formId, open, onOpenChange }: ViewSubmis
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <DialogTitle>Form Submissions</DialogTitle>
+          <DialogTitle>{t("submissions.title")}</DialogTitle>
           <DialogDescription>
-            View and search through all submissions for this form
+            {t("submissions.description")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search submissions..."
+            placeholder={t("submissions.search")}
             className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -93,6 +95,7 @@ export function ViewSubmissionsDialog({ formId, open, onOpenChange }: ViewSubmis
           {isLoading ? (
             <div className="flex items-center justify-center p-8">
               <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-2">{t("submissions.loading")}</span>
             </div>
           ) : (
             <Table>
@@ -101,7 +104,7 @@ export function ViewSubmissionsDialog({ formId, open, onOpenChange }: ViewSubmis
                   {form?.fields?.map((field: FormField) => (
                     <TableHead key={field.label}>{field.label}</TableHead>
                   ))}
-                  <TableHead>Submitted At</TableHead>
+                  <TableHead>{t("submissions.submittedAt")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -111,7 +114,7 @@ export function ViewSubmissionsDialog({ formId, open, onOpenChange }: ViewSubmis
                       colSpan={(form?.fields?.length || 0) + 1} 
                       className="text-center"
                     >
-                      No submissions found
+                      {t("submissions.empty")}
                     </TableCell>
                   </TableRow>
                 ) : (

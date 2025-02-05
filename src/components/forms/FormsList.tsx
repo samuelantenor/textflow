@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { FormsCard } from "./FormsCard";
 import { EmptyFormsState } from "./EmptyFormsState";
 import { CustomForm } from "./types";
+import { useTranslation } from "react-i18next";
 
 interface FormsListProps {
   forms: CustomForm[] | undefined;
@@ -20,12 +21,15 @@ export const FormsList = ({
   onEdit,
   onDelete
 }: FormsListProps) => {
+  const { t } = useTranslation("forms");
+
   if (isLoading) {
     return (
       <Card className="p-6">
         <div className="animate-pulse space-y-3">
           <div className="h-4 bg-muted rounded w-3/4"></div>
           <div className="h-4 bg-muted rounded w-1/2"></div>
+          <p className="text-muted-foreground">{t("list.loading")}</p>
         </div>
       </Card>
     );
