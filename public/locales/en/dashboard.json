@@ -1,0 +1,106 @@
+{
+  "title": "Dashboard",
+  "welcome": {
+    "greeting": "Welcome back",
+    "description": "Here's what's happening with your campaigns"
+  },
+  "overview": {
+    "title": "Overview",
+    "stats": {
+      "totalSent": "Total SMS sent",
+      "deliveryRate": "Delivery rate",
+      "openRate": "Open rate",
+      "activeContacts": "Active contacts",
+      "totalMessages": "Total messages",
+      "failedMessages": "Failed messages",
+      "pendingMessages": "Pending messages",
+      "messagesInQueue": "Messages in queue",
+      "allTimeMessagesSent": "All time messages sent",
+      "messagesToSend": "Messages that failed to send"
+    }
+  },
+  "stats": {
+    "deliveryRate": {
+      "title": "Delivery Rate",
+      "description": "{{total}} total messages"
+    },
+    "failedMessages": {
+      "title": "Failed Messages",
+      "description": "Messages that failed to send"
+    },
+    "pendingMessages": {
+      "title": "Pending Messages",
+      "description": "Messages in queue"
+    },
+    "totalMessages": {
+      "title": "Total Messages",
+      "description": "All time messages sent"
+    }
+  },
+  "recentCampaigns": {
+    "title": "Recent Campaigns",
+    "empty": "No campaigns yet",
+    "createFirst": "Create your first campaign",
+    "table": {
+      "name": "Campaign name",
+      "status": "Status",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "opened": "Opened",
+      "date": "Date",
+      "created": "Created on"
+    },
+    "status": {
+      "draft": "Draft",
+      "scheduled": "Scheduled",
+      "sending": "Sending",
+      "completed": "Completed",
+      "failed": "Failed",
+      "sent": "Sent"
+    },
+    "actions": {
+      "analytics": "Analytics",
+      "edit": "Edit",
+      "delete": "Delete",
+      "send": "Send",
+      "deleteSuccess": "Campaign deleted successfully",
+      "deleteError": "Failed to delete campaign",
+      "sendSuccess": "Campaign sent successfully",
+      "sendError": "Failed to send campaign"
+    }
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "newCampaign": "New Campaign",
+    "addContacts": "Add Contacts",
+    "viewReports": "View Reports",
+    "settings": "Settings"
+  },
+  "upcomingCampaigns": {
+    "title": "Upcoming Campaigns",
+    "empty": "No upcoming campaigns",
+    "schedule": "Schedule a campaign"
+  },
+  "contactGroups": {
+    "title": "Contact Groups",
+    "empty": "No contact groups",
+    "create": "Create a group",
+    "total": "Total contacts"
+  },
+  "recentSubmissions": {
+    "title": "Recent Submissions",
+    "empty": "No submissions yet",
+    "description": "Form submissions will appear here"
+  },
+  "loading": {
+    "dashboard": "Loading dashboard...",
+    "campaigns": "Loading campaigns...",
+    "contacts": "Loading contacts..."
+  },
+  "errors": {
+    "loadingFailed": "Failed to load data",
+    "campaignsFailed": "Failed to load campaigns",
+    "contactsFailed": "Failed to load contacts",
+    "retry": "Try again"
+  }
+} 

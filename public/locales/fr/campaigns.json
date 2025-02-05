@@ -1,0 +1,69 @@
+{
+  "create": {
+    "title": "Créer une nouvelle campagne",
+    "subtitle": "Créez une nouvelle campagne pour envoyer à vos contacts",
+    "backToCampaigns": "Retour aux campagnes",
+    "saveAsDraft": "Enregistrer comme brouillon",
+    "createCampaign": "Créer la campagne",
+    "newCampaign": "Nouvelle campagne",
+    "campaignCreated": "Campagne créée",
+    "savedAsDraft": "Votre campagne a été enregistrée comme brouillon"
+  },
+  "form": {
+    "name": {
+      "label": "Nom de la campagne",
+      "placeholder": "Entrez le nom de la campagne"
+    },
+    "message": {
+      "label": "Message",
+      "placeholder": "Entrez votre message"
+    },
+    "group": {
+      "label": "Groupe de contacts",
+      "placeholder": "Sélectionnez un groupe"
+    },
+    "schedule": {
+      "label": "Planification",
+      "date": "Date",
+      "time": "Heure",
+      "placeholder": "Sélectionnez une date"
+    },
+    "media": {
+      "label": "Média",
+      "placeholder": "Télécharger un média"
+    }
+  },
+  "list": {
+    "title": "Campagnes",
+    "empty": {
+      "title": "Aucune campagne pour le moment",
+      "description": "Créez votre première campagne pour commencer à envoyer des messages à vos contacts"
+    },
+    "loading": "Chargement des campagnes..."
+  },
+  "errors": {
+    "create": "Échec de la création de la campagne",
+    "delete": "Échec de la suppression de la campagne",
+    "send": "Échec de l'envoi de la campagne",
+    "update": "Échec de la mise à jour de la campagne",
+    "limitReached": {
+      "title": "Limite de campagnes atteinte",
+      "description": "Veuillez mettre à niveau votre forfait pour créer plus de campagnes"
+    },
+    "auth": "Utilisateur non authentifié"
+  },
+  "success": {
+    "created": "Campagne créée avec succès",
+    "deleted": "Campagne supprimée avec succès",
+    "sent": "Campagne envoyée avec succès",
+    "updated": "Campagne mise à jour avec succès"
+  },
+  "buttons": {
+    "cancel": "Annuler",
+    "create": "Créer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "send": "Envoyer",
+    "analytics": "Analytiques"
+  }
+} 

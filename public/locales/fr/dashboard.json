@@ -1,0 +1,106 @@
+{
+  "title": "Tableau de bord",
+  "welcome": {
+    "greeting": "Bon retour",
+    "description": "Voici ce qui se passe avec vos campagnes"
+  },
+  "overview": {
+    "title": "Aperçu",
+    "stats": {
+      "totalSent": "Total SMS envoyés",
+      "deliveryRate": "Taux de livraison",
+      "openRate": "Taux d'ouverture",
+      "activeContacts": "Contacts actifs",
+      "totalMessages": "Total des messages",
+      "failedMessages": "Messages échoués",
+      "pendingMessages": "Messages en attente",
+      "messagesInQueue": "Messages en file d'attente",
+      "allTimeMessagesSent": "Tous les messages envoyés",
+      "messagesToSend": "Messages qui n'ont pas pu être envoyés"
+    }
+  },
+  "stats": {
+    "deliveryRate": {
+      "title": "Taux de livraison",
+      "description": "{{total}} messages au total"
+    },
+    "failedMessages": {
+      "title": "Messages échoués",
+      "description": "Messages qui n'ont pas pu être envoyés"
+    },
+    "pendingMessages": {
+      "title": "Messages en attente",
+      "description": "Messages en file d'attente"
+    },
+    "totalMessages": {
+      "title": "Total des messages",
+      "description": "Tous les messages envoyés"
+    }
+  },
+  "recentCampaigns": {
+    "title": "Campagnes récentes",
+    "empty": "Aucune campagne pour le moment",
+    "createFirst": "Créez votre première campagne",
+    "table": {
+      "name": "Nom de la campagne",
+      "status": "Statut",
+      "sent": "Envoyés",
+      "delivered": "Livrés",
+      "opened": "Ouverts",
+      "date": "Date",
+      "created": "Créé le"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "scheduled": "Planifiée",
+      "sending": "En cours d'envoi",
+      "completed": "Terminée",
+      "failed": "Échouée",
+      "sent": "Envoyée"
+    },
+    "actions": {
+      "analytics": "Analytiques",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "send": "Envoyer",
+      "deleteSuccess": "Campagne supprimée avec succès",
+      "deleteError": "Échec de la suppression de la campagne",
+      "sendSuccess": "Campagne envoyée avec succès",
+      "sendError": "Échec de l'envoi de la campagne"
+    }
+  },
+  "quickActions": {
+    "title": "Actions rapides",
+    "newCampaign": "Nouvelle campagne",
+    "addContacts": "Ajouter des contacts",
+    "viewReports": "Voir les rapports",
+    "settings": "Paramètres"
+  },
+  "upcomingCampaigns": {
+    "title": "Campagnes à venir",
+    "empty": "Aucune campagne à venir",
+    "schedule": "Planifier une campagne"
+  },
+  "contactGroups": {
+    "title": "Groupes de contacts",
+    "empty": "Aucun groupe de contacts",
+    "create": "Créer un groupe",
+    "total": "Total des contacts"
+  },
+  "recentSubmissions": {
+    "title": "Soumissions récentes",
+    "empty": "Aucune soumission pour le moment",
+    "description": "Les soumissions de formulaire apparaîtront ici"
+  },
+  "loading": {
+    "dashboard": "Chargement du tableau de bord...",
+    "campaigns": "Chargement des campagnes...",
+    "contacts": "Chargement des contacts..."
+  },
+  "errors": {
+    "loadingFailed": "Échec du chargement des données",
+    "campaignsFailed": "Échec du chargement des campagnes",
+    "contactsFailed": "Échec du chargement des contacts",
+    "retry": "Réessayer"
+  }
+} 
