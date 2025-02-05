@@ -34,6 +34,36 @@ serve(async (req) => {
       throw new Error('No email found');
     }
 
+    // Parse request body ONCE at the start
+    const { priceId } = await req.json();
+    console.log('Received price ID:', priceId);
+
+    // Validate price ID and determine plan type
+    const validPriceIds = {
+      'price_1Qp2e8B4RWKZ2dNz9TmEjEM9': 'starter',
+      'price_1Qp2e8B4RWKZ2dNzE3i3i37m': 'professional'
+    };
+
+    const requestedPlanType = validPriceIds[priceId];
+    if (!requestedPlanType) {
+      throw new Error('Invalid price ID');
+    }
+
+    // Check current subscription plan type
+    const { data: subscriptionData, error: subError } = await supabaseClient
+      .from('subscriptions')
+      .select('plan_type')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (subError) throw subError;
+
+    // Only block if subscription exists and trying to subscribe to the same plan type
+    if (subscriptionData?.plan_type === requestedPlanType) {
+      throw new Error(`You are already subscribed to the ${requestedPlanType} plan`);
+    }
+
     console.log('Creating Stripe instance...');
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
@@ -45,31 +75,11 @@ serve(async (req) => {
       limit: 1
     });
 
-    let customer_id = undefined;
+    let customer_id;
     if (customers.data.length > 0) {
       customer_id = customers.data[0].id;
       console.log('Found existing customer:', customer_id);
-      
-      // Check current subscription plan type using maybeSingle() instead of single()
-      const { data: subscriptionData, error: subError } = await supabaseClient
-        .from('subscriptions')
-        .select('plan_type')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .maybeSingle();
-
-      if (subError) throw subError;
-
-      const { priceId } = await req.json();
-      const requestedPlanType = priceId === 'price_1Qp2e8B4RWKZ2dNz9TmEjEM9' ? 'starter' : 'professional';
-      
-      // Only block if subscription exists and trying to subscribe to the same plan type
-      if (subscriptionData?.plan_type === requestedPlanType) {
-        throw new Error(`You are already subscribed to the ${requestedPlanType} plan`);
-      }
-
     } else {
-      // Create new customer
       console.log('Creating new customer...');
       const customer = await stripe.customers.create({
         email: email,
@@ -78,18 +88,6 @@ serve(async (req) => {
         }
       });
       customer_id = customer.id;
-    }
-
-    const { priceId } = await req.json();
-    
-    // Validate priceId
-    const validPriceIds = [
-      'price_1Qp2e8B4RWKZ2dNz9TmEjEM9', // Starter
-      'price_1Qp2e8B4RWKZ2dNzE3i3i37m'  // Professional
-    ];
-
-    if (!validPriceIds.includes(priceId)) {
-      throw new Error('Invalid price ID');
     }
 
     console.log('Creating checkout session...');
