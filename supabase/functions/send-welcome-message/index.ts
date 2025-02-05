@@ -36,10 +36,10 @@ serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get form details
+    // Get form details including welcome message template
     const { data: form, error: formError } = await supabaseClient
       .from('custom_forms')
-      .select('title')
+      .select('title, welcome_message_template')
       .eq('id', formId)
       .single();
 
@@ -48,10 +48,16 @@ serve(async (req: Request) => {
       throw formError;
     }
 
-    // Prepare welcome message based on language
-    const message = language === 'fr' 
-      ? `Merci d'avoir soumis le formulaire "${form.title}". Nous avons bien reçu votre réponse et nous vous contacterons bientôt.`
-      : `Thank you for submitting the form "${form.title}". We have received your response and will be in touch soon.`;
+    // Prepare welcome message based on template and language
+    let message;
+    if (form.welcome_message_template && form.welcome_message_template[language]) {
+      message = form.welcome_message_template[language].replace('{title}', form.title);
+    } else {
+      // Fallback to default message if no template is set
+      message = language === 'fr' 
+        ? `Merci d'avoir soumis le formulaire "${form.title}". Nous avons bien reçu votre réponse et nous vous contacterons bientôt.`
+        : `Thank you for submitting the form "${form.title}". We have received your response and will be in touch soon.`;
+    }
 
     console.log('Sending welcome SMS to:', phoneNumber);
     console.log('Message:', message);

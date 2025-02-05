@@ -224,6 +224,7 @@ export type Database = {
           website_background_gradient: string | null
           website_background_image_url: string | null
           website_background_style: string | null
+          welcome_message_template: Json | null
         }
         Insert: {
           background_color?: string | null
@@ -249,6 +250,7 @@ export type Database = {
           website_background_gradient?: string | null
           website_background_image_url?: string | null
           website_background_style?: string | null
+          welcome_message_template?: Json | null
         }
         Update: {
           background_color?: string | null
@@ -274,6 +276,7 @@ export type Database = {
           website_background_gradient?: string | null
           website_background_image_url?: string | null
           website_background_style?: string | null
+          welcome_message_template?: Json | null
         }
         Relationships: [
           {
