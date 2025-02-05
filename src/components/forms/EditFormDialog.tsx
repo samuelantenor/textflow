@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -8,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { FormFieldsTab } from "./form-builder/FormFieldsTab";
 import { FormDesignTab } from "./form-builder/FormDesignTab";
+import { FormMessagesTab } from "./form-builder/FormMessagesTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CustomForm } from "./types";
 import { useTranslation } from "react-i18next";
@@ -21,7 +23,7 @@ interface EditFormDialogProps {
 export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFormDialogProps) {
   const { t } = useTranslation("forms");
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"fields" | "design">("fields");
+  const [activeTab, setActiveTab] = useState<"fields" | "design" | "messages">("fields");
   const { toast } = useToast();
 
   const form = useForm({
@@ -39,6 +41,10 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
       background_opacity: initialForm.background_opacity || 100,
       input_background_color: initialForm.input_background_color || "#FFFFFF",
       show_border: initialForm.show_border ?? true,
+      welcome_message_template: initialForm.welcome_message_template || {
+        en: "Thank you for submitting the form \"{title}\". We have received your response and will be in touch soon.",
+        fr: "Merci d'avoir soumis le formulaire \"{title}\". Nous avons bien reçu votre réponse et nous vous contacterons bientôt."
+      },
     },
   });
 
@@ -52,14 +58,16 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
           .single();
           
         if (!error && data) {
-          // Ensure fields is an array before resetting the form
           const formData = {
             ...data,
             fields: Array.isArray(data.fields) ? data.fields : [],
             description: data.description || "",
+            welcome_message_template: data.welcome_message_template || {
+              en: "Thank you for submitting the form \"{title}\". We have received your response and will be in touch soon.",
+              fr: "Merci d'avoir soumis le formulaire \"{title}\". Nous avons bien reçu votre réponse et nous vous contacterons bientôt."
+            },
           };
           
-          // Only include fields that are in the form's defaultValues
           const sanitizedData = Object.keys(form.getValues()).reduce((acc, key) => {
             if (key in formData) {
               acc[key] = formData[key];
@@ -116,6 +124,7 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
         background_opacity: data.background_opacity,
         input_background_color: data.input_background_color,
         show_border: data.show_border,
+        welcome_message_template: data.welcome_message_template,
       };
 
       const { error } = await supabase
@@ -149,16 +158,20 @@ export function EditFormDialog({ form: initialForm, open, onOpenChange }: EditFo
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex-1 overflow-hidden">
-            <Tabs value={activeTab} onValueChange={(tab: "fields" | "design") => setActiveTab(tab)} className="h-full flex flex-col">
+            <Tabs value={activeTab} onValueChange={(tab: "fields" | "design" | "messages") => setActiveTab(tab)} className="h-full flex flex-col">
               <TabsList className="mb-4">
                 <TabsTrigger value="fields">{t("builder.tabs.fields")}</TabsTrigger>
                 <TabsTrigger value="design">{t("builder.tabs.design")}</TabsTrigger>
+                <TabsTrigger value="messages">{t("builder.tabs.messages")}</TabsTrigger>
               </TabsList>
               <TabsContent value="fields" className="flex-1 overflow-hidden">
                 <FormFieldsTab form={form} />
               </TabsContent>
               <TabsContent value="design" className="flex-1 overflow-hidden">
                 <FormDesignTab form={form} handleLogoUpload={handleLogoUpload} formId={initialForm.id} />
+              </TabsContent>
+              <TabsContent value="messages" className="flex-1 overflow-hidden">
+                <FormMessagesTab form={form} />
               </TabsContent>
             </Tabs>
             <div className="flex justify-end space-x-4 pt-4 sticky bottom-0 bg-background p-4 border-t">
