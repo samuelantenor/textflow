@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -65,22 +64,21 @@ export default function ViewForm() {
 
     setSubmitting(true);
     try {
-      // Check if phone number exists in group using EXISTS query
-      const { data: exists, error: checkError } = await supabase
+      // Check for duplicate using a COUNT query
+      const { count, error: checkError } = await supabase
         .from('contacts')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'exact' })
         .eq('group_id', form.group_id)
         .eq('phone_number', phoneNumber);
 
-      // Log for debugging
-      console.log("Checking for existing contact:", { exists, checkError });
+      console.log("Duplicate check result:", { count, checkError });
 
       if (checkError) {
-        console.error('Error checking for existing contact:', checkError);
+        console.error('Error checking for duplicate:', checkError);
         throw checkError;
       }
 
-      if (exists && exists.length > 0) {
+      if (count && count > 0) {
         toast({
           title: t("submission.warning.title"),
           description: t("submission.warning.alreadyInGroup"),
@@ -258,4 +256,3 @@ export default function ViewForm() {
     </div>
   );
 }
-
