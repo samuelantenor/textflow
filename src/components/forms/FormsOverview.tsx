@@ -54,15 +54,22 @@ export const FormsOverview = () => {
 
       if (error) throw error;
 
+      const defaultTemplate = {
+        en: "Thank you for submitting the form '{title}'. We have received your response and will be in touch soon.",
+        fr: "Merci d'avoir soumis le formulaire '{title}'. Nous avons bien reçu votre réponse et nous vous contacterons bientôt."
+      };
+
       // Transform the data to match CustomForm type
       const transformedData: CustomForm = {
         ...data,
         fields: Array.isArray(data.fields) ? data.fields : [],
         campaign_groups: form.campaign_groups || null,
-        welcome_message_template: data.welcome_message_template || {
-          en: "Thank you for submitting the form '{title}'. We have received your response and will be in touch soon.",
-          fr: "Merci d'avoir soumis le formulaire '{title}'. Nous avons bien reçu votre réponse et nous vous contacterons bientôt."
-        }
+        welcome_message_template: typeof data.welcome_message_template === 'object' && data.welcome_message_template !== null
+          ? {
+              en: String(data.welcome_message_template.en || defaultTemplate.en),
+              fr: String(data.welcome_message_template.fr || defaultTemplate.fr)
+            }
+          : defaultTemplate
       };
 
       setSelectedEditForm(transformedData);

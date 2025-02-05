@@ -64,14 +64,21 @@ export function useFormsData() {
         });
         throw error;
       }
+
+      const defaultTemplate = {
+        en: "Thank you for submitting the form '{title}'. We have received your response and will be in touch soon.",
+        fr: "Merci d'avoir soumis le formulaire '{title}'. Nous avons bien reçu votre réponse et nous vous contacterons bientôt."
+      };
       
       return (data || []).map(form => ({
         ...form,
         fields: Array.isArray(form.fields) ? form.fields : [],
-        welcome_message_template: form.welcome_message_template || {
-          en: "Thank you for submitting the form '{title}'. We have received your response and will be in touch soon.",
-          fr: "Merci d'avoir soumis le formulaire '{title}'. Nous avons bien reçu votre réponse et nous vous contacterons bientôt."
-        }
+        welcome_message_template: typeof form.welcome_message_template === 'object' && form.welcome_message_template !== null
+          ? {
+              en: String(form.welcome_message_template.en || defaultTemplate.en),
+              fr: String(form.welcome_message_template.fr || defaultTemplate.fr)
+            }
+          : defaultTemplate
       })) as CustomForm[];
     },
     retry: false,
