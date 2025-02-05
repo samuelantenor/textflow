@@ -32,6 +32,19 @@ export const BillingOverview = () => {
     navigate(`/${i18n.language}/pricing`);
   };
 
+  const formatPlanType = (planType: string) => {
+    switch (planType) {
+      case 'paid_starter':
+        return 'Starter';
+      case 'paid_pro':
+        return 'Pro';
+      case 'free':
+        return 'Free';
+      default:
+        return planType;
+    }
+  };
+
   const isFreePlan = subscription?.plan_type === 'free';
 
   return (
@@ -55,7 +68,9 @@ export const BillingOverview = () => {
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground">{t('overview.plan')}</span>
-            <span className="font-medium capitalize">{subscription?.plan_type}</span>
+            <span className="font-medium">
+              {formatPlanType(subscription?.plan_type || 'free')}
+            </span>
           </div>
         </div>
       )}
