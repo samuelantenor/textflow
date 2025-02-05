@@ -1,0 +1,24 @@
+{
+  "title": "Bon retour",
+  "subtitle": "Connectez-vous à votre compte",
+  "form": {
+    "email": {
+      "label": "Adresse e-mail",
+      "placeholder": "Entrez votre e-mail"
+    },
+    "password": {
+      "label": "Mot de passe",
+      "placeholder": "Entrez votre mot de passe"
+    },
+    "submit": "Se connecter",
+    "loading": "Connexion en cours..."
+  },
+  "forgotPassword": "Mot de passe oublié ?",
+  "noAccount": "Vous n'avez pas de compte ?",
+  "signUp": "S'inscrire",
+  "errors": {
+    "invalidEmail": "Adresse e-mail invalide",
+    "invalidCredentials": "Identifiants invalides",
+    "required": "Ce champ est obligatoire"
+  }
+} 

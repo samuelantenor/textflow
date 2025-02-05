@@ -1,0 +1,86 @@
+{
+  "nav": {
+    "signIn": "Se connecter",
+    "createAccount": "Créer un compte gratuit"
+  },
+  "hero": {
+    "tagline": "Transformez vos SMS en ventes avec un marketing SMS puissant",
+    "welcome": "Bienvenue sur FlowText",
+    "subtitle": "où {{highlight}} sont notre priorité",
+    "highlight": "l'engagement et les résultats",
+    "createAccount": "Créer un compte gratuit"
+  },
+  "features": {
+    "smsCampaigns": {
+      "name": "Campagnes SMS",
+      "description": "Envoyez des messages en masse avec personnalisation"
+    },
+    "contactLists": {
+      "name": "Listes de contacts",
+      "description": "Gérez et segmentez votre audience"
+    },
+    "analytics": {
+      "name": "Analytiques",
+      "description": "Suivez et optimisez la performance"
+    },
+    "targeting": {
+      "name": "Ciblage",
+      "description": "Atteignez la bonne audience"
+    },
+    "bulkSms": {
+      "title": "Campagnes SMS en masse",
+      "description": "Envoyez des messages personnalisés à des milliers de clients avec notre puissant outil de campagne."
+    },
+    "contactManagement": {
+      "title": "Gestion des contacts",
+      "description": "Organisez et segmentez votre audience pour un ciblage précis et un meilleur engagement."
+    },
+    "advancedAnalytics": {
+      "title": "Analytiques avancées",
+      "description": "Suivez les taux de livraison, l'engagement et le ROI avec des rapports de campagne détaillés."
+    }
+  },
+  "pricing": {
+    "title": "Prix simples et transparents",
+    "subtitle": "Choisissez le forfait qui correspond le mieux à vos besoins",
+    "mostPopular": "Le plus populaire",
+    "perMonth": "par mois",
+    "getStarted": "Commencer",
+    "plans": {
+      "starter": {
+        "name": "Débutant",
+        "features": [
+          "Jusqu'à 1 000 SMS/mois",
+          "Personnalisation basique",
+          "Gestion des listes de contacts",
+          "Support par email"
+        ]
+      },
+      "professional": {
+        "name": "Professionnel",
+        "features": [
+          "Jusqu'à 10 000 SMS/mois",
+          "Personnalisation avancée",
+          "Segmentation des listes",
+          "Analytiques des campagnes",
+          "Support prioritaire"
+        ]
+      },
+      "enterprise": {
+        "name": "Entreprise",
+        "features": [
+          "SMS illimités",
+          "Intégrations personnalisées",
+          "Gestionnaire de compte dédié",
+          "Analytiques avancées",
+          "Fonctionnalités personnalisées"
+        ]
+      }
+    }
+  },
+  "cta": {
+    "title": "Prêt à transformer votre engagement client ?",
+    "subtitle": "Rejoignez des milliers d'entreprises qui utilisent FlowText pour développer leur activité grâce au marketing SMS.",
+    "button": "Créer un compte gratuit"
+  }
+} 
