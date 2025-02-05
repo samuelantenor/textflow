@@ -59,15 +59,17 @@ export const FormsOverview = () => {
         fr: "Merci d'avoir soumis le formulaire '{title}'. Nous avons bien reçu votre réponse et nous vous contacterons bientôt."
       };
 
+      const template = data.welcome_message_template as { [key: string]: string } | null;
+
       // Transform the data to match CustomForm type
       const transformedData: CustomForm = {
         ...data,
         fields: Array.isArray(data.fields) ? data.fields : [],
         campaign_groups: form.campaign_groups || null,
-        welcome_message_template: typeof data.welcome_message_template === 'object' && data.welcome_message_template !== null
+        welcome_message_template: template && typeof template === 'object'
           ? {
-              en: String(data.welcome_message_template.en || defaultTemplate.en),
-              fr: String(data.welcome_message_template.fr || defaultTemplate.fr)
+              en: String(template.en || defaultTemplate.en),
+              fr: String(template.fr || defaultTemplate.fr)
             }
           : defaultTemplate
       };

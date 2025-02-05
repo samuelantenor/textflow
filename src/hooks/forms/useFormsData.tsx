@@ -70,16 +70,19 @@ export function useFormsData() {
         fr: "Merci d'avoir soumis le formulaire '{title}'. Nous avons bien reçu votre réponse et nous vous contacterons bientôt."
       };
       
-      return (data || []).map(form => ({
-        ...form,
-        fields: Array.isArray(form.fields) ? form.fields : [],
-        welcome_message_template: typeof form.welcome_message_template === 'object' && form.welcome_message_template !== null
-          ? {
-              en: String(form.welcome_message_template.en || defaultTemplate.en),
-              fr: String(form.welcome_message_template.fr || defaultTemplate.fr)
-            }
-          : defaultTemplate
-      })) as CustomForm[];
+      return (data || []).map(form => {
+        const template = form.welcome_message_template as { [key: string]: string } | null;
+        return {
+          ...form,
+          fields: Array.isArray(form.fields) ? form.fields : [],
+          welcome_message_template: template && typeof template === 'object'
+            ? {
+                en: String(template.en || defaultTemplate.en),
+                fr: String(template.fr || defaultTemplate.fr)
+              }
+            : defaultTemplate
+        };
+      }) as CustomForm[];
     },
     retry: false,
   });
