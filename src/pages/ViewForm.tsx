@@ -64,6 +64,9 @@ export default function ViewForm() {
 
     setSubmitting(true);
     try {
+      // Debugging: Log the group_id and phoneNumber
+      console.log("Checking for existing contact with group_id:", form.group_id, "and phone_number:", phoneNumber);
+
       // Check if phone number already exists in the group
       const { data: existingContact, error: checkError } = await supabase
         .from('contacts')
@@ -71,6 +74,9 @@ export default function ViewForm() {
         .eq('group_id', form.group_id)
         .eq('phone_number', phoneNumber)
         .single();
+
+      // Debugging: Log the response
+      console.log("Existing contact check response:", existingContact, checkError);
 
       if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "not found" error
         throw checkError;
