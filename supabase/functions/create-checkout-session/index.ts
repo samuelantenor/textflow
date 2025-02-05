@@ -41,7 +41,7 @@ serve(async (req) => {
     // Validate price ID and determine plan type
     const validPriceIds = {
       'price_1Qp2e8B4RWKZ2dNz9TmEjEM9': 'starter',
-      'price_1Qp2e8B4RWKZ2dNzE3i3i37m': 'professional'
+      'price_1QhissB4RWKZ2dNzqP59PjSe': 'professional'
     };
 
     const requestedPlanType = validPriceIds[priceId];
