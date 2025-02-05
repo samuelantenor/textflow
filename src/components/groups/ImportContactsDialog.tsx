@@ -13,6 +13,39 @@ interface ImportContactsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+interface Contact {
+  name?: string;
+  phone_number: string;
+  group_id: string;
+}
+
+function processCSVContacts(csvText: string, groupId: string): Contact[] {
+  const lines = csvText.split('\n');
+  if (lines.length < 2) return []; // Empty or invalid CSV
+
+  const contacts: Contact[] = [];
+  const phoneRegex = /^\+?[1-9]\d{1,14}$/; // Basic phone number validation
+
+  // Skip header row and process each line
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    const [name = '', phone = ''] = line.split(',').map(field => field.trim());
+    const phoneNumber = phone.replace(/[^+\d]/g, ''); // Clean phone number
+
+    if (phoneNumber && phoneRegex.test(phoneNumber)) {
+      contacts.push({
+        name: name || undefined, // Only include name if it exists
+        phone_number: phoneNumber,
+        group_id: groupId
+      });
+    }
+  }
+
+  return contacts;
+}
+
 export function ImportContactsDialog({ groupId, open, onOpenChange }: ImportContactsDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();

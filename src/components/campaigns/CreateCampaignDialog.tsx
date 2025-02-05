@@ -14,8 +14,8 @@ import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Loader2 } from "lucide-react";
-import { CampaignFormFields } from "./CampaignFormFields";
-import type { CampaignFormData } from "./types";
+import { CampaignFormFields } from "@/components/campaign/CampaignFormFields";
+import type { CampaignFormData } from "@/types/campaign";
 import { useTranslation } from "react-i18next";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
