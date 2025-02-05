@@ -8,13 +8,16 @@ import { FormLoader } from "@/components/forms/view/FormLoader";
 import { FormError } from "@/components/forms/view/FormError";
 import { ViewFormContent } from "@/components/forms/view/ViewFormContent";
 import { useFormData } from "@/hooks/forms/useFormData";
+import { useTranslation } from "react-i18next";
 
 export default function ViewForm() {
   const { id } = useParams();
   const { toast } = useToast();
+  const { t } = useTranslation("forms");
   const { form, loading, fetchForm } = useFormData();
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -33,8 +36,8 @@ export default function ViewForm() {
     
     if (!form?.group_id) {
       toast({
-        title: "Error",
-        description: "This form is not properly configured.",
+        title: t("errors.title"),
+        description: t("errors.formConfiguration"),
         variant: "destructive",
       });
       return;
@@ -53,8 +56,8 @@ export default function ViewForm() {
 
     if (!phoneNumber) {
       toast({
-        title: "Error",
-        description: "Phone number is required",
+        title: t("errors.title"),
+        description: t("errors.phoneRequired"),
         variant: "destructive",
       });
       return;
@@ -91,10 +94,14 @@ export default function ViewForm() {
         throw submissionError;
       }
 
+      // Show success message
       toast({
-        title: "Success",
-        description: "Form submitted successfully",
+        title: t("submission.success.title"),
+        description: t("submission.success.description"),
       });
+
+      // Set submitted state to true
+      setSubmitted(true);
 
       // Reset form
       setFormData({});
@@ -108,8 +115,8 @@ export default function ViewForm() {
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
-        title: "Error",
-        description: "Failed to submit form. Please try again.",
+        title: t("errors.title"),
+        description: t("errors.submissionFailed"),
         variant: "destructive",
       });
     } finally {
@@ -129,6 +136,39 @@ export default function ViewForm() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <FormError />
+      </div>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <div 
+        className="min-h-screen w-full flex items-center justify-center py-12 px-4"
+        style={{
+          backgroundColor: form.background_color || '#000000',
+          backgroundImage: form.background_image_url ? `url(${form.background_image_url})` : undefined,
+          backgroundSize: form.background_image_style === 'repeat' ? 'auto' : form.background_image_style,
+          backgroundRepeat: form.background_image_style === 'repeat' ? 'repeat' : 'no-repeat',
+          backgroundPosition: 'center',
+          fontFamily: form.font_family || 'Inter',
+        }}
+      >
+        <Card className="w-full max-w-2xl mx-auto p-6 sm:p-8 text-center bg-black/80 backdrop-blur-sm border-gray-800/50">
+          <h2 className="text-2xl font-bold mb-4" style={{ color: form.primary_color }}>
+            {t("submission.success.title")}
+          </h2>
+          <p className="text-gray-300 mb-6">{t("submission.success.description")}</p>
+          <button
+            onClick={() => setSubmitted(false)}
+            className="inline-flex items-center justify-center px-4 py-2 rounded-md"
+            style={{
+              backgroundColor: form.primary_color,
+              color: '#ffffff',
+            }}
+          >
+            {t("submission.success.submitAnother")}
+          </button>
+        </Card>
       </div>
     );
   }

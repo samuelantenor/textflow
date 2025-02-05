@@ -198,5 +198,18 @@
       "addedOn": "Added on {{date}}",
       "noNumbers": "No phone numbers added yet."
     }
+  },
+  "submission": {
+    "success": {
+      "title": "Thank you!",
+      "description": "Your form has been submitted successfully.",
+      "submitAnother": "Submit Another Response"
+    }
+  },
+  "errors": {
+    "title": "Error",
+    "formConfiguration": "This form is not properly configured.",
+    "phoneRequired": "Phone number is required",
+    "submissionFailed": "Failed to submit form. Please try again."
   }
-} 
+}

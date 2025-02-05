@@ -198,5 +198,18 @@
       "addedOn": "Ajouté le {{date}}",
       "noNumbers": "Aucun numéro de téléphone ajouté pour le moment."
     }
+  },
+  "submission": {
+    "success": {
+      "title": "Merci !",
+      "description": "Votre formulaire a été soumis avec succès.",
+      "submitAnother": "Soumettre une autre réponse"
+    }
+  },
+  "errors": {
+    "title": "Erreur",
+    "formConfiguration": "Ce formulaire n'est pas configuré correctement.",
+    "phoneRequired": "Le numéro de téléphone est requis",
+    "submissionFailed": "Échec de la soumission du formulaire. Veuillez réessayer."
   }
-} 
+}
