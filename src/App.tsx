@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { MainLayout } from './components/Layout/MainLayout';
 import Login from './pages/Login';
@@ -13,7 +14,7 @@ import Pricing from './pages/Pricing';
 import LandingPage from './app/page';
 import { useEffect, useState } from 'react';
 import { supabase } from './integrations/supabase/client';
-import './lib/i18n'; // Import i18n configuration
+import './lib/i18n';
 import { useTranslation } from 'react-i18next';
 
 // Routes that should use the main layout
@@ -22,7 +23,6 @@ const layoutRoutes = [
   { path: 'billing', element: <Billing /> },
   { path: 'profile', element: <Profile /> },
   { path: 'settings', element: <Settings /> },
-  { path: 'forms/:id', element: <ViewForm /> },
   { path: 'campaigns/create', element: <CreateCampaign /> },
 ];
 
@@ -33,6 +33,7 @@ const publicRoutes = [
   { path: 'signup', element: <SignUp /> },
   { path: 'reset-password', element: <ResetPassword /> },
   { path: 'pricing', element: <Pricing />, allowAuthenticated: true },
+  { path: 'forms/:id', element: <ViewForm />, allowAuthenticated: true },
 ];
 
 // Language redirect component
@@ -90,10 +91,10 @@ function App() {
                 key={path}
                 path={path}
                 element={
-                  session && path !== '' && !allowAuthenticated ? (
+                  session && !allowAuthenticated && path !== '' ? (
                     <Navigate to={`/${lang}/dashboard`} replace />
                   ) : (
-                    element
+                    session ? <MainLayout>{element}</MainLayout> : element
                   )
                 }
               />

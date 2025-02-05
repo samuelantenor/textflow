@@ -1,3 +1,4 @@
+
 import { ReactNode } from 'react';
 import { SideNav } from './SideNav';
 import { useLocation } from 'react-router-dom';
@@ -9,7 +10,7 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const location = useLocation();
-  const isFormView = location.pathname.startsWith('/forms/');
+  const isFormView = location.pathname.includes('/forms/');
 
   return (
     <div className="min-h-screen bg-black">
