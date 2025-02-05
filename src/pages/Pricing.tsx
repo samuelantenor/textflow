@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -88,7 +89,7 @@ const PricingPage = () => {
       price: t('pricing.plans.starter.price'),
       period: t('pricing.plans.starter.period'),
       features: t('pricing.plans.starter.features', { returnObjects: true }) as string[],
-      priceId: 'price_1QhissB4RWKZ2dNzqP59PjSe', // Starter plan price ID
+      priceId: 'price_1Qp2e8B4RWKZ2dNz9TmEjEM9', // Starter plan price ID
       messageLimit: '1,000',
       planType: 'paid_starter'
     },
