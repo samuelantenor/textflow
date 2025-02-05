@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,25 +65,22 @@ export default function ViewForm() {
 
     setSubmitting(true);
     try {
-      // Debugging: Log the group_id and phoneNumber
-      console.log("Checking for existing contact with group_id:", form.group_id, "and phone_number:", phoneNumber);
-
-      // Check if phone number already exists in the group
-      const { data: existingContact, error: checkError } = await supabase
+      // Check if phone number exists in group using EXISTS query
+      const { data: exists, error: checkError } = await supabase
         .from('contacts')
-        .select('id')
+        .select('*', { count: 'exact', head: true })
         .eq('group_id', form.group_id)
-        .eq('phone_number', phoneNumber)
-        .single();
+        .eq('phone_number', phoneNumber);
 
-      // Debugging: Log the response
-      console.log("Existing contact check response:", existingContact, checkError);
+      // Log for debugging
+      console.log("Checking for existing contact:", { exists, checkError });
 
-      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "not found" error
+      if (checkError) {
+        console.error('Error checking for existing contact:', checkError);
         throw checkError;
       }
 
-      if (existingContact) {
+      if (exists && exists.length > 0) {
         toast({
           title: t("submission.warning.title"),
           description: t("submission.warning.alreadyInGroup"),
@@ -260,3 +258,4 @@ export default function ViewForm() {
     </div>
   );
 }
+
