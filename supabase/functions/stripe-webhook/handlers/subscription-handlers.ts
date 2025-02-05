@@ -68,7 +68,7 @@ export async function handleCheckoutCompleted(session: any) {
     const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
     console.log('Retrieved subscription data:', JSON.stringify(subscription, null, 2));
 
-    // Update subscription in database
+    // Update subscription in database with 10,000 message limit for professional plan
     const { error: updateError } = await supabaseClient
       .from('subscriptions')
       .upsert({
@@ -76,7 +76,7 @@ export async function handleCheckoutCompleted(session: any) {
         stripe_subscription_id: subscription.id,
         status: subscription.status,
         plan_type: 'paid',
-        monthly_message_limit: 1000,
+        monthly_message_limit: 10000, // Updated to 10,000 messages
         campaign_limit: 999999,
         has_been_paid: true
       });
@@ -122,13 +122,13 @@ export async function handleSubscriptionUpdated(subscription: any) {
     throw findError || new Error('Subscription not found');
   }
 
-  // Update subscription status
+  // Update subscription status with 10,000 message limit for active paid plans
   const { error: updateError } = await supabaseClient
     .from('subscriptions')
     .update({ 
       status: subscription.status,
       plan_type: subscription.status === 'active' ? 'paid' : 'free',
-      monthly_message_limit: subscription.status === 'active' ? 1000 : 20,
+      monthly_message_limit: subscription.status === 'active' ? 10000 : 20, // Updated to 10,000 messages
       campaign_limit: subscription.status === 'active' ? 999999 : 3,
       has_been_paid: subscription.status === 'active'
     })
