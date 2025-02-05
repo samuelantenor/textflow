@@ -13,7 +13,8 @@
     "error": "Failed to create form. Please try again.",
     "tabs": {
       "fields": "Form Fields",
-      "design": "Design"
+      "design": "Design",
+      "messages": "Messages"
     },
     "fields": {
       "addNew": "Add New Field",
@@ -55,6 +56,20 @@
         "placeholder": "Select a group"
       }
     }
+  },
+  "messages": {
+    "placeholder": {
+      "description": "Use {title} in your message to include the form's title. It will be automatically replaced."
+    },
+    "english": {
+      "label": "English Welcome Message",
+      "placeholder": "Enter the welcome message in English"
+    },
+    "french": {
+      "label": "French Welcome Message",
+      "placeholder": "Enter the welcome message in French"
+    },
+    "preview": "Preview"
   },
   "design": {
     "saveButton": "Save Design",

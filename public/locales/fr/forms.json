@@ -13,7 +13,8 @@
     "error": "Échec de la création du formulaire. Veuillez réessayer.",
     "tabs": {
       "fields": "Champs du formulaire",
-      "design": "Design"
+      "design": "Design",
+      "messages": "Messages"
     },
     "fields": {
       "addNew": "Ajouter un nouveau champ",
@@ -55,6 +56,20 @@
         "placeholder": "Sélectionnez un groupe"
       }
     }
+  },
+  "messages": {
+    "placeholder": {
+      "description": "Utilisez {title} dans votre message pour inclure le titre du formulaire. Il sera automatiquement remplacé."
+    },
+    "english": {
+      "label": "Message de bienvenue en anglais",
+      "placeholder": "Entrez le message de bienvenue en anglais"
+    },
+    "french": {
+      "label": "Message de bienvenue en français",
+      "placeholder": "Entrez le message de bienvenue en français"
+    },
+    "preview": "Aperçu"
   },
   "design": {
     "saveButton": "Enregistrer le design",
