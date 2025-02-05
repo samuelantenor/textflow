@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -16,11 +17,11 @@ interface ShareFormDialogProps {
 }
 
 export function ShareFormDialog({ form, open, onOpenChange }: ShareFormDialogProps) {
-  const { t } = useTranslation("forms");
+  const { t, i18n } = useTranslation("forms");
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
-  const formUrl = form ? `${window.location.origin}/forms/${form.id}` : '';
+  const formUrl = form ? `${window.location.origin}/${i18n.language}/forms/${form.id}` : '';
 
   const handleCopy = async () => {
     try {
