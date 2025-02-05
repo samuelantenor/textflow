@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -65,7 +64,29 @@ export default function ViewForm() {
 
     setSubmitting(true);
     try {
-      // Create the contact first
+      // Check if phone number already exists in the group
+      const { data: existingContact, error: checkError } = await supabase
+        .from('contacts')
+        .select('id')
+        .eq('group_id', form.group_id)
+        .eq('phone_number', phoneNumber)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "not found" error
+        throw checkError;
+      }
+
+      if (existingContact) {
+        toast({
+          title: t("submission.warning.title"),
+          description: t("submission.warning.alreadyInGroup"),
+          variant: "warning",
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      // Create the contact if it doesn't exist
       const { data: contactData, error: contactError } = await supabase
         .from('contacts')
         .insert({

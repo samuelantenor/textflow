@@ -219,6 +219,10 @@
       "title": "Thank you!",
       "description": "Your form has been submitted successfully.",
       "submitAnother": "Submit Another Response"
+    },
+    "warning": {
+      "title": "Warning",
+      "alreadyInGroup": "You are already in the group!"
     }
   },
   "errors": {
