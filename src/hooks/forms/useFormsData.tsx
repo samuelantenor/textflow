@@ -47,6 +47,7 @@ export function useFormsData() {
           font_family,
           logo_url,
           primary_color,
+          welcome_message_template,
           campaign_groups (
             name
           )
@@ -66,7 +67,11 @@ export function useFormsData() {
       
       return (data || []).map(form => ({
         ...form,
-        fields: Array.isArray(form.fields) ? form.fields : []
+        fields: Array.isArray(form.fields) ? form.fields : [],
+        welcome_message_template: form.welcome_message_template || {
+          en: "Thank you for submitting the form '{title}'. We have received your response and will be in touch soon.",
+          fr: "Merci d'avoir soumis le formulaire '{title}'. Nous avons bien reçu votre réponse et nous vous contacterons bientôt."
+        }
       })) as CustomForm[];
     },
     retry: false,

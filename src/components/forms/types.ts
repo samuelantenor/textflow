@@ -17,7 +17,7 @@ export interface CustomForm {
   background_opacity?: number;
   input_background_color?: string;
   show_border?: boolean;
-  welcome_message_template?: {
+  welcome_message_template: {
     en: string;
     fr: string;
   };

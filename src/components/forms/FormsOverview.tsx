@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { FormBuilder } from "./FormBuilder";
@@ -58,6 +59,10 @@ export const FormsOverview = () => {
         ...data,
         fields: Array.isArray(data.fields) ? data.fields : [],
         campaign_groups: form.campaign_groups || null,
+        welcome_message_template: data.welcome_message_template || {
+          en: "Thank you for submitting the form '{title}'. We have received your response and will be in touch soon.",
+          fr: "Merci d'avoir soumis le formulaire '{title}'. Nous avons bien reçu votre réponse et nous vous contacterons bientôt."
+        }
       };
 
       setSelectedEditForm(transformedData);
