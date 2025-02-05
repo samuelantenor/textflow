@@ -1,91 +1,45 @@
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
-import { ArrowRight, MessageSquare, Users, BarChart3, Layers, Target, Zap } from 'lucide-react';
+import { ArrowRight, Shield, Lock, Users, Check, Star, MessageSquare, Globe, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
-import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
-// Navigation items
-const navItems = [
-  { label: "Features", href: "#features" },
-  { label: "Solutions", href: "#solutions" },
-  { label: "Resources", href: "#resources" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "For Business", href: "#business" },
-];
-
-const productFeatures = [
-  {
-    icon: MessageSquare,
-    name: "smsCampaigns",
-    description: "smsCampaigns"
-  },
-  {
-    icon: Users,
-    name: "contactLists",
-    description: "contactLists"
-  },
-  {
-    icon: BarChart3,
-    name: "analytics",
-    description: "analytics"
-  },
-  {
-    icon: Target,
-    name: "targeting",
-    description: "targeting"
-  }
-];
+const fadeIn = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6 }
+};
 
 const stats = [
-  { number: "10M+", label: "SMS Delivered" },
-  { number: "98%", label: "Open Rate" },
-  { number: "5K+", label: "Active Users" },
-  { number: "2x", label: "Avg. ROI" }
-];
-
-const features = [
-  {
-    icon: MessageSquare,
-    title: "features.bulkSms.title",
-    description: "features.bulkSms.description"
-  },
-  {
-    icon: Users,
-    title: "features.contactManagement.title",
-    description: "features.contactManagement.description"
-  },
-  {
-    icon: BarChart3,
-    title: "features.advancedAnalytics.title",
-    description: "features.advancedAnalytics.description"
-  }
+  { number: "99.9%", label: "Uptime" },
+  { number: "10M+", label: "Messages Sent" },
+  { number: "50K+", label: "Active Users" },
+  { number: "120+", label: "Countries" }
 ];
 
 const pricingPlans = [
   {
-    name: "Starter",
-    price: "$29",
-    period: "per month",
+    name: "Free",
+    price: "$0",
+    period: "forever",
     features: [
-      "Up to 1,000 SMS/month",
-      "Basic personalization",
-      "Contact list management",
+      "Up to 1,000 messages/month",
+      "Basic encryption",
+      "2 team members",
       "Email support"
     ]
   },
   {
-    name: "Professional",
-    price: "$99",
+    name: "Pro",
+    price: "$9",
     period: "per month",
     popular: true,
     features: [
-      "Up to 10,000 SMS/month",
-      "Advanced personalization",
-      "List segmentation",
-      "Campaign analytics",
+      "Unlimited messages",
+      "Advanced encryption",
+      "Unlimited team members",
       "Priority support",
-      
+      "Custom branding",
+      "API access"
     ]
   },
   {
@@ -93,194 +47,193 @@ const pricingPlans = [
     price: "Custom",
     period: "per month",
     features: [
-      "Unlimited SMS",
-      "Custom integrations",
-      "Dedicated account manager",
-      "Advanced analytics",
+      "Everything in Pro",
+      "Dedicated server",
+      "24/7 phone support",
+      "SLA guarantee",
       "Custom features"
     ]
   }
 ];
 
 export default function LandingPage() {
-  const { t } = useTranslation();
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-lg border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/" className="text-2xl font-bold text-white">
-                FlowText
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <LanguageSwitcher />
-              <Link to="/login">
-                <Button variant="ghost" className="text-gray-300 hover:text-white">
-                  {t('nav.signIn')}
+      {/* Hero Section */}
+      <section className="relative pt-20 pb-32 px-4">
+        <motion.div 
+          className="max-w-7xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <div className="text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h1 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-300 mb-6">
+                Welcome to TextFlow
+              </h1>
+            </motion.div>
+            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+              Where privacy and freedom come first. Send messages securely and maintain control over your communications.
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Link to="/signup">
+                <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-6 rounded-lg text-lg group">
+                  Get Started
+                  <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link to="/signup">
-                <Button className="bg-red-600 hover:bg-red-700">
-                  {t('nav.createAccount')}
+              <Link to="/about">
+                <Button variant="outline" className="px-8 py-6 rounded-lg text-lg hover:bg-white/10">
+                  Learn More
                 </Button>
               </Link>
             </div>
           </div>
-        </div>
-      </nav>
+        </motion.div>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mb-4 text-sm font-medium text-red-400"
-          >
-            {t('hero.tagline')}
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-bold text-white mb-6"
-          >
-            {t('hero.welcome')}
-            <br />
-            {t('hero.subtitle', { highlight: t('hero.highlight') })}
-          </motion.h1>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto mt-16"
-          >
-            {productFeatures.map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 + 0.3 }}
-                className="p-4 bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-800 hover:border-red-500/50 transition-colors"
-              >
-                <div className="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center mb-3 mx-auto">
-                  <feature.icon className="w-6 h-6 text-red-400" />
-                </div>
-                <h3 className="text-white font-medium text-sm mb-1">
-                  {t(`features.${feature.name}.name`)}
-                </h3>
-                <p className="text-gray-400 text-xs">
-                  {t(`features.${feature.name}.description`)}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="mt-12"
-          >
-            <Link to="/signup">
-              <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-6 rounded-lg text-lg">
-                {t('hero.createAccount')}
-              </Button>
-            </Link>
-          </motion.div>
-        </div>
-
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden -z-10">
-          <motion.div
-            className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl"
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.5, 0.3]
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-          <motion.div
-            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-red-400/10 rounded-full blur-3xl"
-            animate={{
-              scale: [1, 1.3, 1],
-              opacity: [0.3, 0.5, 0.3]
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-        </div>
+        {/* Animated Floating Elements */}
+        <motion.div
+          className="absolute top-40 left-10 w-20 h-20 bg-red-500/10 rounded-full blur-xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.5, 0.8, 0.5]
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div
+          className="absolute bottom-20 right-10 w-32 h-32 bg-red-400/10 rounded-full blur-xl"
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.5, 0.7, 0.5]
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
       </section>
 
-      {/* Features Grid Section */}
-      <section className="py-20 px-4 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
+      {/* Stats Section */}
+      <section className="py-16 bg-black/30">
+        <motion.div 
+          className="max-w-7xl mx-auto px-4"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
               <motion.div
                 key={index}
+                className="text-center"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="p-6 bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-800 hover:border-red-500/50 transition-all duration-300"
               >
-                <feature.icon className="w-12 h-12 text-red-400 mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">{t(feature.title)}</h3>
-                <p className="text-gray-400">{t(feature.description)}</p>
+                <h3 className="text-4xl font-bold text-red-400 mb-2">{stat.number}</h3>
+                <p className="text-gray-400">{stat.label}</p>
               </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 px-4 bg-black/50">
+        <motion.div 
+          className="max-w-7xl mx-auto"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+        >
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Why Choose TextFlow?</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">Experience the next generation of secure messaging with our cutting-edge features.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            <motion.div 
+              className="p-6 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 hover:border-red-500/50 transition-colors"
+              whileHover={{ y: -5 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Shield className="w-12 h-12 text-red-500 mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">Your data, your rules</h3>
+              <p className="text-gray-400">End-to-end encryption ensures your messages stay private and secure.</p>
+            </motion.div>
+            <motion.div 
+              className="p-6 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 hover:border-red-500/50 transition-colors"
+              whileHover={{ y: -5 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Lock className="w-12 h-12 text-red-500 mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">Security by design</h3>
+              <p className="text-gray-400">Built with privacy-first principles and state-of-the-art security.</p>
+            </motion.div>
+            <motion.div 
+              className="p-6 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 hover:border-red-500/50 transition-colors"
+              whileHover={{ y: -5 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Users className="w-12 h-12 text-red-500 mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">Community driven</h3>
+              <p className="text-gray-400">Join thousands of users who value their privacy and freedom.</p>
+            </motion.div>
+          </div>
+        </motion.div>
       </section>
 
       {/* Pricing Section */}
-      <section className="py-20 px-4 bg-black/30">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-20 px-4">
+        <motion.div 
+          className="max-w-7xl mx-auto"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+        >
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{t('pricing.title')}</h2>
-            <p className="text-gray-400">{t('pricing.subtitle')}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
+            <p className="text-gray-400">Choose the plan that best fits your needs</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {pricingPlans.map((plan, index) => (
               <motion.div
                 key={index}
+                className={`p-6 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border ${
+                  plan.popular ? 'border-red-500' : 'border-gray-800'
+                } relative`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className={`p-6 bg-gray-900/50 backdrop-blur-sm rounded-xl border ${
-                  plan.popular ? 'border-red-500' : 'border-gray-800'
-                } relative`}
+                whileHover={{ y: -5 }}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm">
-                      {t('pricing.mostPopular')}
-                    </span>
+                    <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm">Most Popular</span>
                   </div>
                 )}
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  {t(`pricing.plans.${plan.name.toLowerCase()}.name`)}
-                </h3>
+                <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
                 <div className="mb-4">
                   <span className="text-4xl font-bold text-white">{plan.price}</span>
-                  <span className="text-gray-400">/{t('pricing.perMonth')}</span>
+                  <span className="text-gray-400">/{plan.period}</span>
                 </div>
                 <ul className="space-y-3 mb-6">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-center text-gray-300">
-                      <ArrowRight className="w-5 h-5 text-red-400 mr-2" />
-                      {t(`pricing.plans.${plan.name.toLowerCase()}.features.${i}`)}
+                      <Check className="w-5 h-5 text-red-500 mr-2" />
+                      {feature}
                     </li>
                   ))}
                 </ul>
@@ -288,39 +241,56 @@ export default function LandingPage() {
                   <Button className={`w-full ${
                     plan.popular ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-800 hover:bg-gray-700'
                   } text-white py-4 rounded-lg`}>
-                    {t('pricing.getStarted')}
+                    Get Started
                   </Button>
                 </Link>
               </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
+      </section>
+
+      {/* Trust Section */}
+      <section className="py-20 px-4 bg-black/30">
+        <motion.div 
+          className="max-w-7xl mx-auto text-center"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">Trusted by Industry Leaders</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-center opacity-50">
+            {/* Replace with actual company logos */}
+            <div className="h-12 bg-gray-800 rounded-lg"></div>
+            <div className="h-12 bg-gray-800 rounded-lg"></div>
+            <div className="h-12 bg-gray-800 rounded-lg"></div>
+            <div className="h-12 bg-gray-800 rounded-lg"></div>
+          </div>
+        </motion.div>
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-b from-gray-900 to-black relative overflow-hidden">
+      <section className="py-20 px-4 bg-gradient-to-b from-gray-900 to-black">
         <motion.div 
-          className="max-w-4xl mx-auto text-center relative z-10"
+          className="max-w-4xl mx-auto text-center"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
         >
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            {t('cta.title')}
+            Ready to take control of your communications?
           </h2>
           <p className="text-gray-300 mb-8 text-lg">
-            {t('cta.subtitle')}
+            Join TextFlow today and experience secure messaging like never before.
+            Start your journey to privacy-first communication.
           </p>
           <Link to="/signup">
-            <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-6 rounded-lg text-lg">
-              {t('cta.button')}
-              <ArrowRight className="ml-2" />
+            <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-6 rounded-lg text-lg group">
+              Start Messaging Securely
+              <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
         </motion.div>
-        
-        {/* Background Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black"></div>
       </section>
     </div>
   );
