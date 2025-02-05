@@ -4,7 +4,6 @@ import { supabaseClient } from '../supabase-client.ts';
 export async function handleSubscriptionDeleted(subscription: any) {
   console.log('Processing subscription cancellation:', subscription.id);
   
-  // Find the user_id from the subscription
   const { data: subscriptionData, error: findError } = await supabaseClient
     .from('subscriptions')
     .select('user_id')
@@ -19,7 +18,6 @@ export async function handleSubscriptionDeleted(subscription: any) {
   const userId = subscriptionData.user_id;
   console.log('Found user ID:', userId);
 
-  // Update subscription status
   const { error: updateError } = await supabaseClient
     .from('subscriptions')
     .update({ 
@@ -37,7 +35,6 @@ export async function handleSubscriptionDeleted(subscription: any) {
     throw updateError;
   }
 
-  // Add cancellation record to payment history
   const { error: paymentHistoryError } = await supabaseClient
     .from('payment_history')
     .insert({
@@ -68,15 +65,27 @@ export async function handleCheckoutCompleted(session: any) {
     const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
     console.log('Retrieved subscription data:', JSON.stringify(subscription, null, 2));
 
-    // Update subscription in database with 10,000 message limit for professional plan
+    // Determine plan type based on price ID
+    const priceId = session.line_items?.data[0]?.price?.id;
+    let planType = 'free';
+    let messageLimit = 20;
+
+    if (priceId === 'price_1Qp2e8B4RWKZ2dNz9TmEjEM9') {
+      planType = 'paid_starter';
+      messageLimit = 1000;
+    } else if (priceId === 'price_1Qp2e8B4RWKZ2dNzE3i3i37m') {
+      planType = 'paid_pro';
+      messageLimit = 10000;
+    }
+
     const { error: updateError } = await supabaseClient
       .from('subscriptions')
       .upsert({
         user_id: session.client_reference_id,
         stripe_subscription_id: subscription.id,
         status: subscription.status,
-        plan_type: 'paid',
-        monthly_message_limit: 10000, // Updated to 10,000 messages
+        plan_type: planType,
+        monthly_message_limit: messageLimit,
         campaign_limit: 999999,
         has_been_paid: true
       });
@@ -86,7 +95,6 @@ export async function handleCheckoutCompleted(session: any) {
       throw updateError;
     }
 
-    // Add payment history record
     const { error: paymentError } = await supabaseClient
       .from('payment_history')
       .insert({
@@ -110,10 +118,9 @@ export async function handleSubscriptionUpdated(subscription: any) {
   console.log('Processing subscription update:', subscription.id);
   console.log('Subscription data:', JSON.stringify(subscription, null, 2));
   
-  // Find the user_id from the subscription
   const { data: subscriptionData, error: findError } = await supabaseClient
     .from('subscriptions')
-    .select('user_id')
+    .select('user_id, plan_type')
     .eq('stripe_subscription_id', subscription.id)
     .single();
 
@@ -122,13 +129,23 @@ export async function handleSubscriptionUpdated(subscription: any) {
     throw findError || new Error('Subscription not found');
   }
 
-  // Update subscription status with 10,000 message limit for active paid plans
+  // Maintain the current plan type if active, otherwise set to free
+  const planType = subscription.status === 'active' ? subscriptionData.plan_type : 'free';
+  
+  // Set message limit based on plan type
+  let messageLimit = 20; // Default free tier
+  if (planType === 'paid_starter') {
+    messageLimit = 1000;
+  } else if (planType === 'paid_pro') {
+    messageLimit = 10000;
+  }
+
   const { error: updateError } = await supabaseClient
     .from('subscriptions')
     .update({ 
       status: subscription.status,
-      plan_type: subscription.status === 'active' ? 'paid' : 'free',
-      monthly_message_limit: subscription.status === 'active' ? 10000 : 20, // Updated to 10,000 messages
+      plan_type: planType,
+      monthly_message_limit: messageLimit,
       campaign_limit: subscription.status === 'active' ? 999999 : 3,
       has_been_paid: subscription.status === 'active'
     })

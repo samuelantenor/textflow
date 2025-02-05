@@ -28,7 +28,7 @@ const PricingPage = () => {
         return;
       }
 
-      console.log('Creating checkout session with priceId:', priceId); // Debug log
+      console.log('Creating checkout session with priceId:', priceId);
 
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: { priceId },
@@ -57,7 +57,8 @@ const PricingPage = () => {
       price: t('pricing.plans.starter.price'),
       period: t('pricing.plans.starter.period'),
       features: t('pricing.plans.starter.features', { returnObjects: true }) as string[],
-      priceId: 'price_1Qp2e8B4RWKZ2dNz9TmEjEM9' // Starter plan price ID
+      priceId: 'price_1Qp2e8B4RWKZ2dNz9TmEjEM9', // Starter plan price ID
+      messageLimit: '1,000'
     },
     {
       name: t('pricing.plans.professional.name'),
@@ -65,14 +66,16 @@ const PricingPage = () => {
       period: t('pricing.plans.professional.period'),
       popular: true,
       features: t('pricing.plans.professional.features', { returnObjects: true }) as string[],
-      priceId: 'price_1Qp2e8B4RWKZ2dNzE3i3i37m' // Professional plan price ID
+      priceId: 'price_1Qp2e8B4RWKZ2dNzE3i3i37m', // Professional plan price ID
+      messageLimit: '10,000'
     },
     {
       name: t('pricing.plans.enterprise.name'),
       price: t('pricing.plans.enterprise.price'),
       period: t('pricing.plans.enterprise.period'),
       features: t('pricing.plans.enterprise.features', { returnObjects: true }) as string[],
-      priceId: 'price_enterprise'
+      priceId: 'price_enterprise',
+      messageLimit: 'Unlimited'
     }
   ];
 
@@ -107,6 +110,9 @@ const PricingPage = () => {
                 <div className="mb-4">
                   <span className="text-4xl font-bold text-white">{plan.price}</span>
                   <span className="text-gray-400">/{plan.period}</span>
+                </div>
+                <div className="mb-4">
+                  <span className="text-sm text-gray-400">Up to {plan.messageLimit} messages/month</span>
                 </div>
                 <ul className="space-y-3 mb-6">
                   {plan.features.map((feature, i) => (
