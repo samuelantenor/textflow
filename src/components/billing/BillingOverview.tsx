@@ -26,13 +26,17 @@ export const BillingOverview = () => {
         return null;
       }
 
+      // Get the most recent active subscription
       const { data, error } = await supabase
         .from('subscriptions')
         .select('plan_type')
         .eq('user_id', session.user.id)
+        .eq('status', 'active')  // Only get active subscriptions
+        .order('created_at', { ascending: false }) // Get the most recent one
+        .limit(1)  // Only get one record
         .maybeSingle();
 
-      console.log('Subscription data:', data);
+      console.log('Raw subscription data:', data);
       if (error) {
         console.error('Subscription fetch error:', error);
         throw error;
