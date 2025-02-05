@@ -1,3 +1,4 @@
+
 import { UseFormReturn } from "react-hook-form";
 import { CampaignFormData } from "@/types/campaign";
 import {
@@ -20,6 +21,8 @@ import { Calendar as CalendarIcon, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { GroupSelectField } from "./form-fields/GroupSelectField";
 import { PhoneNumberField } from "./form-fields/PhoneNumberField";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CampaignFormFieldsProps {
   form: UseFormReturn<CampaignFormData>;
@@ -31,6 +34,23 @@ export function CampaignFormFields({ form, showAllFields = false }: CampaignForm
   const message = form.watch("message") || "";
   const messageLength = message.length;
   const maxLength = 160;
+
+  // Fetch campaign groups
+  const { data: groups, isLoading: isLoadingGroups } = useQuery({
+    queryKey: ['campaign-groups'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('campaign_groups')
+        .select('id, name')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching groups:', error);
+        throw error;
+      }
+      return data;
+    },
+  });
 
   return (
     <div className="grid gap-6">
@@ -85,8 +105,11 @@ export function CampaignFormFields({ form, showAllFields = false }: CampaignForm
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="group1">Group 1</SelectItem>
-                    <SelectItem value="group2">Group 2</SelectItem>
+                    {groups?.map((group) => (
+                      <SelectItem key={group.id} value={group.id}>
+                        {group.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
