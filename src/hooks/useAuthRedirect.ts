@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 export const useAuthRedirect = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -58,7 +60,7 @@ export const useAuthRedirect = () => {
       // Only navigate if we still have a valid session
       const { data: { session: currentSession } } = await supabase.auth.getSession();
       if (currentSession) {
-        navigate("/dashboard", { replace: true });
+        navigate(`/${i18n.language}/dashboard`, { replace: true });
       } else {
         // If session is no longer valid, show error
         toast({

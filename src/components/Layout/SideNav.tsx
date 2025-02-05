@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from 'react';
+import { useTranslation } from "react-i18next";
 
 const navigation = [
   { name: 'Overview', href: '/dashboard?tab=overview', icon: LayoutDashboard },
@@ -40,6 +41,7 @@ export function SideNav({ className }: SideNavProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
+  const { i18n } = useTranslation();
 
   // Close menu when route changes
   useEffect(() => {
@@ -80,7 +82,7 @@ export function SideNav({ className }: SideNavProps) {
       if (signOutError) {
         console.error('Error signing out:', signOutError);
         if (signOutError.message.includes('Auth session missing')) {
-          navigate("/login", { replace: true });
+          navigate(`/${i18n.language}/login`, { replace: true });
           return;
         }
         
@@ -96,10 +98,10 @@ export function SideNav({ className }: SideNavProps) {
         });
       }
 
-      navigate("/login", { replace: true });
+      navigate(`/${i18n.language}/login`, { replace: true });
     } catch (error) {
       console.error('Unexpected error during sign out:', error);
-      navigate("/login", { replace: true });
+      navigate(`/${i18n.language}/login`, { replace: true });
       toast({
         variant: "destructive",
         title: "Error signing out",
@@ -112,18 +114,24 @@ export function SideNav({ className }: SideNavProps) {
   const isRouteActive = (href: string) => {
     const [path, query] = href.split('?');
     if (!query) {
-      return location.pathname === path;
+      return location.pathname === `/${i18n.language}${path}`;
     }
     const searchParams = new URLSearchParams(query);
     const currentSearchParams = new URLSearchParams(location.search);
     
     // If there's no tab in the current URL and we're checking the overview tab
     if (!currentSearchParams.get('tab') && searchParams.get('tab') === 'overview') {
-      return location.pathname === '/dashboard';
+      return location.pathname === `/${i18n.language}/dashboard`;
     }
     
-    return location.pathname === path && 
+    return location.pathname === `/${i18n.language}${path}` && 
            searchParams.get('tab') === currentSearchParams.get('tab');
+  };
+
+  // Helper function to get localized href
+  const getLocalizedHref = (href: string) => {
+    const [path, query] = href.split('?');
+    return query ? `/${i18n.language}${path}?${query}` : `/${i18n.language}${path}`;
   };
 
   return (
@@ -163,7 +171,7 @@ export function SideNav({ className }: SideNavProps) {
         )}
       >
         <div className="flex h-16 items-center px-6 border-b border-gray-800/50">
-          <Link to="/dashboard" className="flex items-center gap-2 group">
+          <Link to={`/${i18n.language}/dashboard`} className="flex items-center gap-2 group">
             <MessageSquare className="h-6 w-6 text-primary-500 fill-current transition-transform group-hover:scale-110" />
             <span className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
               FlowText
@@ -181,7 +189,7 @@ export function SideNav({ className }: SideNavProps) {
               return (
                 <Link
                   key={item.name}
-                  to={item.href}
+                  to={getLocalizedHref(item.href)}
                   className={cn(
                     'flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 animate-fade-in',
                     'hover:bg-white/5 relative group',
@@ -213,7 +221,7 @@ export function SideNav({ className }: SideNavProps) {
               return (
                 <Link
                   key={item.name}
-                  to={item.href}
+                  to={getLocalizedHref(item.href)}
                   className={cn(
                     'flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 animate-fade-in',
                     'hover:bg-white/5 relative group',

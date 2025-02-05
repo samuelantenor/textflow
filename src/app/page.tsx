@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { ArrowRight, MessageSquare, Users, BarChart3, Layers, Target, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 // Navigation items
 const navItems = [
@@ -12,95 +14,79 @@ const navItems = [
   { label: "For Business", href: "#business" },
 ];
 
-const productFeatures = [
-  {
-    icon: MessageSquare,
-    name: "SMS Campaigns",
-    description: "Send bulk messages with personalization"
-  },
-  {
-    icon: Users,
-    name: "Contact Lists",
-    description: "Manage and segment your audience"
-  },
-  {
-    icon: BarChart3,
-    name: "Analytics",
-    description: "Track and optimize performance"
-  },
-  {
-    icon: Target,
-    name: "Targeting",
-    description: "Reach the right audience"
-  }
-];
-
-const stats = [
-  { number: "10M+", label: "SMS Delivered" },
-  { number: "98%", label: "Open Rate" },
-  { number: "5K+", label: "Active Users" },
-  { number: "2x", label: "Avg. ROI" }
-];
-
-const features = [
-  {
-    icon: MessageSquare,
-    title: "Bulk SMS Campaigns",
-    description: "Send personalized messages to thousands of customers with our powerful campaign builder."
-  },
-  {
-    icon: Users,
-    title: "Contact Management",
-    description: "Organize and segment your audience for targeted messaging and better engagement."
-  },
-  {
-    icon: BarChart3,
-    title: "Advanced Analytics",
-    description: "Track delivery rates, engagement, and ROI with detailed campaign reporting."
-  }
-];
-
-const pricingPlans = [
-  {
-    name: "Starter",
-    price: "$29",
-    period: "per month",
-    features: [
-      "Up to 1,000 SMS/month",
-      "Basic personalization",
-      "Contact list management",
-      "Email support"
-    ]
-  },
-  {
-    name: "Professional",
-    price: "$99",
-    period: "per month",
-    popular: true,
-    features: [
-      "Up to 10,000 SMS/month",
-      "Advanced personalization",
-      "List segmentation",
-      "Campaign analytics",
-      "Priority support",
-      
-    ]
-  },
-  {
-    name: "Enterprise",
-    price: "Custom",
-    period: "per month",
-    features: [
-      "Unlimited SMS",
-      "Custom integrations",
-      "Dedicated account manager",
-      "Advanced analytics",
-      "Custom features"
-    ]
-  }
-];
-
 export default function LandingPage() {
+  const { t, i18n } = useTranslation(['landing', 'common']);
+
+  const productFeatures = [
+    {
+      icon: MessageSquare,
+      name: t('features.smsCampaigns.title'),
+      description: t('features.smsCampaigns.description')
+    },
+    {
+      icon: Users,
+      name: t('features.contactLists.title'),
+      description: t('features.contactLists.description')
+    },
+    {
+      icon: BarChart3,
+      name: t('features.analytics.title'),
+      description: t('features.analytics.description')
+    },
+    {
+      icon: Target,
+      name: t('features.targeting.title'),
+      description: t('features.targeting.description')
+    }
+  ];
+
+  const stats = [
+    { number: t('stats.smsDelivered.number'), label: t('stats.smsDelivered.label') },
+    { number: t('stats.openRate.number'), label: t('stats.openRate.label') },
+    { number: t('stats.activeUsers.number'), label: t('stats.activeUsers.label') },
+    { number: t('stats.roi.number'), label: t('stats.roi.label') }
+  ];
+
+  const features = [
+    {
+      icon: MessageSquare,
+      title: t('mainFeatures.bulkSms.title'),
+      description: t('mainFeatures.bulkSms.description')
+    },
+    {
+      icon: Users,
+      title: t('mainFeatures.contactManagement.title'),
+      description: t('mainFeatures.contactManagement.description')
+    },
+    {
+      icon: BarChart3,
+      title: t('mainFeatures.advancedAnalytics.title'),
+      description: t('mainFeatures.advancedAnalytics.description')
+    }
+  ];
+
+  const pricingPlans = [
+    {
+      name: t('pricing.plans.starter.name'),
+      price: t('pricing.plans.starter.price'),
+      period: t('pricing.plans.starter.period'),
+      features: t('pricing.plans.starter.features', { returnObjects: true }) as string[]
+    },
+    {
+      name: t('pricing.plans.professional.name'),
+      price: t('pricing.plans.professional.price'),
+      period: t('pricing.plans.professional.period'),
+      popular: true,
+      features: t('pricing.plans.professional.features', { returnObjects: true }) as string[]
+    },
+    {
+      name: t('pricing.plans.enterprise.name'),
+      price: t('pricing.plans.enterprise.price'),
+      period: t('pricing.plans.enterprise.period'),
+      features: t('pricing.plans.enterprise.features', { returnObjects: true }) as string[]
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
       {/* Navigation */}
@@ -108,19 +94,20 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
-              <Link to="/" className="text-2xl font-bold text-white">
+              <Link to={`/${i18n.language}`} className="text-2xl font-bold text-white">
                 FlowText
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <Link to="/login">
+              <LanguageSwitcher />
+              <Link to={`/${i18n.language}/login`}>
                 <Button variant="ghost" className="text-gray-300 hover:text-white">
-                  Sign in
+                  {t('common:navigation.signIn')}
                 </Button>
               </Link>
-              <Link to="/signup">
+              <Link to={`/${i18n.language}/signup`}>
                 <Button className="bg-red-600 hover:bg-red-700">
-                  Create free account
+                  {t('common:navigation.createAccount')}
                 </Button>
               </Link>
             </div>
@@ -136,18 +123,18 @@ export default function LandingPage() {
             animate={{ opacity: 1 }}
             className="mb-4 text-sm font-medium text-red-400"
           >
-            Turn Texts into Sales with Powerful SMS Marketing
+            {t('hero.tagline')}
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-6xl font-bold text-white mb-6"
           >
-            Welcome to FlowText
+            {t('hero.title.welcome')}
             <br />
-            where <span className="text-red-400">engagement and results</span>
+            {t('hero.title.where')} <span className="text-red-400">{t('hero.title.engagement')}</span>
             <br />
-            come first
+            {t('hero.title.comeFirst')}
           </motion.h1>
           <motion.div
             initial={{ opacity: 0 }}
@@ -177,9 +164,9 @@ export default function LandingPage() {
             transition={{ delay: 0.6 }}
             className="mt-12"
           >
-            <Link to="/signup">
+            <Link to={`/${i18n.language}/signup`}>
               <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-6 rounded-lg text-lg">
-                Create free account
+                {t('common:navigation.createAccount')}
               </Button>
             </Link>
           </motion.div>
@@ -240,8 +227,8 @@ export default function LandingPage() {
       <section className="py-20 px-4 bg-black/30">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-gray-400">Choose the plan that best fits your messaging needs</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{t('pricing.title')}</h2>
+            <p className="text-gray-400">{t('pricing.subtitle')}</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {pricingPlans.map((plan, index) => (
@@ -257,7 +244,9 @@ export default function LandingPage() {
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm">Most Popular</span>
+                    <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm">
+                      {t('pricing.plans.professional.popular')}
+                    </span>
                   </div>
                 )}
                 <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
@@ -273,11 +262,11 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link to="/signup" className="block">
+                <Link to={`/${i18n.language}/signup`} className="block">
                   <Button className={`w-full ${
                     plan.popular ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-800 hover:bg-gray-700'
                   } text-white py-4 rounded-lg`}>
-                    Get Started
+                    {t('common:buttons.getStarted')}
                   </Button>
                 </Link>
               </motion.div>
@@ -295,14 +284,14 @@ export default function LandingPage() {
           viewport={{ once: true }}
         >
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Ready to transform your customer engagement?
+            {t('cta.title')}
           </h2>
           <p className="text-gray-300 mb-8 text-lg">
-            Join thousands of businesses using FlowText to drive growth through SMS marketing.
+            {t('cta.description')}
           </p>
-          <Link to="/signup">
+          <Link to={`/${i18n.language}/signup`}>
             <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-6 rounded-lg text-lg">
-              Create free account
+              {t('common:navigation.createAccount')}
               <ArrowRight className="ml-2" />
             </Button>
           </Link>
