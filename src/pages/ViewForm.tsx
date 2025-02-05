@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 export default function ViewForm() {
   const { id } = useParams();
   const { toast } = useToast();
-  const { t } = useTranslation("forms");
+  const { t, i18n } = useTranslation("forms");
   const { form, loading, fetchForm } = useFormData();
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
@@ -92,6 +92,20 @@ export default function ViewForm() {
       if (submissionError) {
         console.error('Error creating submission:', submissionError);
         throw submissionError;
+      }
+
+      // Send welcome message
+      const { error: welcomeError } = await supabase.functions.invoke('send-welcome-message', {
+        body: { 
+          phoneNumber,
+          formId: id,
+          language: i18n.language,
+        },
+      });
+
+      if (welcomeError) {
+        console.error('Error sending welcome message:', welcomeError);
+        // Don't throw here, we still want to show success for the form submission
       }
 
       // Show success message
