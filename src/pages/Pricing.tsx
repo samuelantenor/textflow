@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ContactDialog } from '@/components/ContactDialog';
+import { useQuery } from '@tanstack/react-query';
 
 const PricingPage = () => {
   const navigate = useNavigate();
@@ -14,7 +16,26 @@ const PricingPage = () => {
   const { t, i18n } = useTranslation(['landing', 'common']);
   const [isContactOpen, setIsContactOpen] = useState(false);
 
-  const handleSubscription = async (priceId: string) => {
+  // Fetch current subscription status
+  const { data: subscription } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const handleSubscription = async (priceId: string, planType: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -25,6 +46,17 @@ const PricingPage = () => {
           variant: "destructive",
         });
         navigate('/login');
+        return;
+      }
+
+      // Check if user is already subscribed to this plan
+      if (subscription?.plan_type === planType && subscription?.status === 'active') {
+        toast({
+          title: "Already subscribed",
+          description: `You are already subscribed to the ${planType} plan`,
+          variant: "destructive",
+        });
+        navigate('/billing');
         return;
       }
 
@@ -57,8 +89,9 @@ const PricingPage = () => {
       price: t('pricing.plans.starter.price'),
       period: t('pricing.plans.starter.period'),
       features: t('pricing.plans.starter.features', { returnObjects: true }) as string[],
-      priceId: 'price_1Qp2e8B4RWKZ2dNz9TmEjEM9', // Starter plan price ID
-      messageLimit: '1,000'
+      priceId: 'price_1Qp2e8B4RWKZ2dNzE3i3i37m', // Updated Starter plan price ID
+      messageLimit: '1,000',
+      planType: 'paid_starter'
     },
     {
       name: t('pricing.plans.professional.name'),
@@ -67,7 +100,8 @@ const PricingPage = () => {
       popular: true,
       features: t('pricing.plans.professional.features', { returnObjects: true }) as string[],
       priceId: 'price_1QhissB4RWKZ2dNzqP59PjSe', // Professional plan price ID
-      messageLimit: '10,000'
+      messageLimit: '10,000',
+      planType: 'paid_pro'
     },
     {
       name: t('pricing.plans.enterprise.name'),
@@ -75,7 +109,8 @@ const PricingPage = () => {
       period: t('pricing.plans.enterprise.period'),
       features: t('pricing.plans.enterprise.features', { returnObjects: true }) as string[],
       priceId: 'price_enterprise',
-      messageLimit: 'Unlimited'
+      messageLimit: 'Unlimited',
+      planType: 'enterprise'
     }
   ];
 
@@ -131,7 +166,7 @@ const PricingPage = () => {
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => handleSubscription(plan.priceId)}
+                    onClick={() => handleSubscription(plan.priceId, plan.planType)}
                     className={`w-full ${
                       plan.popular ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-800 hover:bg-gray-700'
                     } text-white py-4 rounded-lg`}
@@ -150,3 +185,4 @@ const PricingPage = () => {
 };
 
 export default PricingPage;
+

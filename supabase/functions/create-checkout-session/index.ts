@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from 'https://esm.sh/stripe@14.21.0';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
@@ -40,7 +41,7 @@ serve(async (req) => {
 
     // Validate price ID and determine plan type
     const validPriceIds = {
-      'price_1Qp2e8B4RWKZ2dNz9TmEjEM9': 'starter',
+      'price_1Qp2e8B4RWKZ2dNzE3i3i37m': 'starter',
       'price_1QhissB4RWKZ2dNzqP59PjSe': 'professional'
     };
 
@@ -101,7 +102,7 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      success_url: `${req.headers.get('origin')}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${req.headers.get('origin')}/billing?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get('origin')}/`,
     });
 
@@ -124,3 +125,4 @@ serve(async (req) => {
     );
   }
 });
+
