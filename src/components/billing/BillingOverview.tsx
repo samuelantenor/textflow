@@ -23,16 +23,23 @@ export const BillingOverview = () => {
         .eq('user_id', session.user.id)
         .maybeSingle();
 
+      console.log('Subscription data:', data); // Debug log
+      console.log('Subscription error:', error); // Debug log for any potential errors
+
       if (error) throw error;
       return data;
     },
   });
+
+  console.log('Current subscription:', subscription); // Debug log for the subscription after query
+  console.log('Plan type:', subscription?.plan_type); // Debug log specifically for plan_type
 
   const handleSubscribe = () => {
     navigate(`/${i18n.language}/pricing`);
   };
 
   const formatPlanType = (planType: string) => {
+    console.log('Formatting plan type:', planType); // Debug log for the plan type being formatted
     switch (planType) {
       case 'paid_starter':
         return 'Starter';
