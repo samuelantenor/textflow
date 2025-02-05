@@ -9,6 +9,15 @@ import { FormError } from "@/components/forms/view/FormError";
 import { ViewFormContent } from "@/components/forms/view/ViewFormContent";
 import { useFormData } from "@/hooks/forms/useFormData";
 import { useTranslation } from "react-i18next";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function ViewForm() {
   const { id } = useParams();
@@ -18,10 +27,10 @@ export default function ViewForm() {
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
 
   useEffect(() => {
     if (id) {
-      // Set session variable directly through SQL query
       const fetchData = async () => {
         await supabase.from('custom_forms').select('id').limit(1).then(() => {
           fetchForm(id);
@@ -80,11 +89,7 @@ export default function ViewForm() {
       }
 
       if (count && count > 0) {
-        toast({
-          title: t("submission.warning.title"),
-          description: t("submission.warning.alreadyInGroup"),
-          variant: "destructive",
-        });
+        setShowDuplicateWarning(true);
         setSubmitting(false);
         return;
       }
@@ -226,34 +231,59 @@ export default function ViewForm() {
   }
 
   return (
-    <div 
-      className="min-h-screen w-full flex items-center justify-center py-12 px-4"
-      style={backgroundStyle}
-    >
-      <Card 
-        className="w-full max-w-2xl mx-auto p-6 sm:p-8 relative overflow-hidden bg-black/80 backdrop-blur-sm border-gray-800/50"
+    <>
+      <AlertDialog open={showDuplicateWarning} onOpenChange={setShowDuplicateWarning}>
+        <AlertDialogContent className="bg-black/95 border-gray-800">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">
+              {t("submission.warning.title")}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-300">
+              {t("submission.warning.alreadyInGroup")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => setShowDuplicateWarning(false)}
+              style={{ backgroundColor: form?.primary_color }}
+              className="text-white hover:opacity-90"
+            >
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div 
+        className="min-h-screen w-full flex items-center justify-center py-12 px-4"
+        style={backgroundStyle}
       >
-        {form.background_image_url && (
-          <div 
-            className="absolute inset-0 z-0"
-            style={{
-              backgroundColor: form.background_color,
-              opacity: (form.background_opacity || 100) / 100,
-            }}
-          />
-        )}
-        <div className="relative z-10">
-          <ViewFormContent
-            form={form}
-            formData={formData}
-            onFieldChange={(fieldName, value) => {
-              setFormData(prev => ({ ...prev, [fieldName]: value }));
-            }}
-            onSubmit={handleSubmit}
-            submitting={submitting}
-          />
-        </div>
-      </Card>
-    </div>
+        <Card 
+          className="w-full max-w-2xl mx-auto p-6 sm:p-8 relative overflow-hidden bg-black/80 backdrop-blur-sm border-gray-800/50"
+        >
+          {form.background_image_url && (
+            <div 
+              className="absolute inset-0 z-0"
+              style={{
+                backgroundColor: form.background_color,
+                opacity: (form.background_opacity || 100) / 100,
+              }}
+            />
+          )}
+          <div className="relative z-10">
+            <ViewFormContent
+              form={form}
+              formData={formData}
+              onFieldChange={(fieldName, value) => {
+                setFormData(prev => ({ ...prev, [fieldName]: value }));
+              }}
+              onSubmit={handleSubmit}
+              submitting={submitting}
+            />
+          </div>
+        </Card>
+      </div>
+    </>
   );
 }
+
