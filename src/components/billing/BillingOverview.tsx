@@ -3,33 +3,50 @@ import { Button } from "@/components/ui/button";
 import { CreditCard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-interface Subscription {
-  id: string;
-  user_id: string;
-  stripe_subscription_id: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  plan_type: string;
-  monthly_message_limit: number;
-  campaign_limit: number;
-  has_been_paid: boolean;
-}
-
-interface BillingOverviewProps {
-  subscription?: Subscription | null;
-}
-
-export const BillingOverview = ({ subscription }: BillingOverviewProps) => {
+export const BillingOverview = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation(['billing']);
+
+  // Fetch subscription data
+  const { data: subscription, isLoading } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const handleSubscribe = () => {
     navigate(`/${i18n.language}/pricing`);
   };
 
   const isFreePlan = subscription?.plan_type === 'free';
+
+  if (isLoading) {
+    return (
+      <div className="bg-card rounded-lg p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-muted rounded w-1/4"></div>
+          <div className="space-y-3">
+            <div className="h-3 bg-muted rounded"></div>
+            <div className="h-3 bg-muted rounded w-5/6"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-card rounded-lg p-6">
