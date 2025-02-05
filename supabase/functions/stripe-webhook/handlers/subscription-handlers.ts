@@ -65,35 +65,62 @@ export async function handleCheckoutCompleted(session: any) {
     const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
     console.log('Retrieved subscription data:', JSON.stringify(subscription, null, 2));
 
-    // Determine plan type based on price ID
-    const priceId = session.line_items?.data[0]?.price?.id;
+    // Determine plan type based on price ID from the subscription
+    const priceId = subscription.items.data[0]?.price?.id;
+    console.log('Price ID from subscription:', priceId);
+    
     let planType = 'free';
     let messageLimit = 20;
 
     if (priceId === 'price_1Qp2e8B4RWKZ2dNz9TmEjEM9') {
       planType = 'paid_starter';
       messageLimit = 1000;
-    } else if (priceId === 'price_1Qp2e8B4RWKZ2dNzE3i3i37m') {
+    } else if (priceId === 'price_1QhissB4RWKZ2dNzqP59PjSe') {
       planType = 'paid_pro';
       messageLimit = 10000;
     }
 
-    const { error: updateError } = await supabaseClient
+    console.log('Determined plan type:', planType, 'with message limit:', messageLimit);
+
+    // Log the data we're about to insert
+    const subscriptionData = {
+      user_id: session.client_reference_id,
+      stripe_subscription_id: subscription.id,
+      status: subscription.status,
+      plan_type: planType,
+      monthly_message_limit: messageLimit,
+      campaign_limit: 999999,
+      has_been_paid: true,
+      updated_at: new Date().toISOString()
+    };
+    
+    console.log('Attempting to update subscription with data:', JSON.stringify(subscriptionData, null, 2));
+
+    // First, check if a subscription record exists
+    const { data: existingSubscription, error: fetchError } = await supabaseClient
       .from('subscriptions')
-      .upsert({
-        user_id: session.client_reference_id,
-        stripe_subscription_id: subscription.id,
-        status: subscription.status,
-        plan_type: planType,
-        monthly_message_limit: messageLimit,
-        campaign_limit: 999999,
-        has_been_paid: true
-      });
+      .select('*')
+      .eq('user_id', session.client_reference_id)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching existing subscription:', fetchError);
+    }
+    
+    console.log('Existing subscription:', JSON.stringify(existingSubscription, null, 2));
+
+    const { data: updatedSubscription, error: updateError } = await supabaseClient
+      .from('subscriptions')
+      .upsert(subscriptionData)
+      .select()
+      .single();
 
     if (updateError) {
       console.error('Error updating subscription:', updateError);
       throw updateError;
     }
+
+    console.log('Successfully updated subscription in database:', JSON.stringify(updatedSubscription, null, 2));
 
     const { error: paymentError } = await supabaseClient
       .from('payment_history')
@@ -102,7 +129,8 @@ export async function handleCheckoutCompleted(session: any) {
         amount: session.amount_total ? session.amount_total / 100 : 0,
         currency: session.currency?.toUpperCase() || 'USD',
         status: 'completed',
-        payment_method: session.payment_method_types?.[0] || null
+        payment_method: session.payment_method_types?.[0] || null,
+        payment_date: new Date().toISOString()
       });
 
     if (paymentError) {

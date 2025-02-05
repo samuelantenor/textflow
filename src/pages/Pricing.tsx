@@ -66,7 +66,7 @@ const PricingPage = () => {
       period: t('pricing.plans.professional.period'),
       popular: true,
       features: t('pricing.plans.professional.features', { returnObjects: true }) as string[],
-      priceId: 'price_1QhissB4RWKZ2dNzqP59PjSe', // Professional plan price ID
+      priceId: 'price_1Qp4GhB4RWKZ2dNzdCctM3i5', // Professional plan price ID
       messageLimit: '10,000'
     },
     {
