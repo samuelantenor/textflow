@@ -1,8 +1,11 @@
+
 import { Card } from "@/components/ui/card";
 import { FormsCard } from "./FormsCard";
 import { EmptyFormsState } from "./EmptyFormsState";
 import { CustomForm } from "./types";
 import { useTranslation } from "react-i18next";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface FormsListProps {
   forms: CustomForm[] | undefined;
@@ -21,7 +24,7 @@ export const FormsList = ({
   onEdit,
   onDelete
 }: FormsListProps) => {
-  const { t } = useTranslation("forms");
+  const { t } = useTranslation(["forms"]);
 
   if (isLoading) {
     return (
@@ -35,7 +38,18 @@ export const FormsList = ({
     );
   }
 
-  if (!forms?.length) {
+  if (!forms) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          {t("errors.unauthorized")}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (forms.length === 0) {
     return <EmptyFormsState />;
   }
 
