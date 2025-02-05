@@ -1,4 +1,3 @@
-
 export interface CustomForm {
   id: string;
   title: string;
@@ -17,10 +16,6 @@ export interface CustomForm {
   background_opacity?: number;
   input_background_color?: string;
   show_border?: boolean;
-  welcome_message_template?: {
-    en: string;
-    fr: string;
-  };
 }
 
 export interface FormField {

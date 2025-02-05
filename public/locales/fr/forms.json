@@ -12,9 +12,8 @@
     "success": "Formulaire créé avec succès.",
     "error": "Échec de la création du formulaire. Veuillez réessayer.",
     "tabs": {
-      "fields": "Champs",
-      "design": "Design",
-      "messages": "Messages"
+      "fields": "Champs du formulaire",
+      "design": "Design"
     },
     "fields": {
       "addNew": "Ajouter un nouveau champ",
@@ -212,20 +211,5 @@
     "formConfiguration": "Ce formulaire n'est pas configuré correctement.",
     "phoneRequired": "Le numéro de téléphone est requis",
     "submissionFailed": "Échec de la soumission du formulaire. Veuillez réessayer."
-  },
-  "messages": {
-    "welcome": {
-      "en": {
-        "label": "Message de bienvenue (Anglais)",
-        "placeholder": "Saisissez le message de bienvenue qui sera envoyé après la soumission du formulaire"
-      },
-      "fr": {
-        "label": "Message de bienvenue (Français)",
-        "placeholder": "Saisissez le message de bienvenue qui sera envoyé après la soumission du formulaire"
-      },
-      "preview": "Aperçu",
-      "help": "Ce message sera envoyé à l'utilisateur après qu'il ait soumis le formulaire.",
-      "placeholder_hint": "Utilisez {title} comme espace réservé pour inclure le titre du formulaire dans votre message."
-    }
   }
 }

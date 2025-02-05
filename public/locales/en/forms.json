@@ -13,8 +13,7 @@
     "error": "Failed to create form. Please try again.",
     "tabs": {
       "fields": "Form Fields",
-      "design": "Design",
-      "messages": "Messages"
+      "design": "Design"
     },
     "fields": {
       "addNew": "Add New Field",
@@ -212,20 +211,5 @@
     "formConfiguration": "This form is not properly configured.",
     "phoneRequired": "Phone number is required",
     "submissionFailed": "Failed to submit form. Please try again."
-  },
-  "messages": {
-    "welcome": {
-      "en": {
-        "label": "Welcome Message (English)",
-        "placeholder": "Enter the welcome message that will be sent after form submission"
-      },
-      "fr": {
-        "label": "Welcome Message (French)",
-        "placeholder": "Enter the welcome message that will be sent after form submission"
-      },
-      "preview": "Preview",
-      "help": "This message will be sent to the user after they submit the form.",
-      "placeholder_hint": "Use {title} as a placeholder to include the form title in your message."
-    }
   }
 }
