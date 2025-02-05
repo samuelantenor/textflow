@@ -54,7 +54,6 @@ serve(async (req) => {
       const subscriptions = await stripe.subscriptions.list({
         customer: customer_id,
         status: 'active',
-        price: 'price_1QfP8MB4RWKZ2dNz3OwF4joZ',
         limit: 1
       });
 
@@ -73,13 +72,25 @@ serve(async (req) => {
       customer_id = customer.id;
     }
 
+    const { priceId } = await req.json();
+    
+    // Validate priceId
+    const validPriceIds = [
+      'price_1Qp2e8B4RWKZ2dNz9TmEjEM9', // Starter
+      'price_1Qp2e8B4RWKZ2dNzE3i3i37m'  // Professional
+    ];
+
+    if (!validPriceIds.includes(priceId)) {
+      throw new Error('Invalid price ID');
+    }
+
     console.log('Creating checkout session...');
     const session = await stripe.checkout.sessions.create({
       customer: customer_id,
       client_reference_id: user.id,
       line_items: [
         {
-          price: 'price_1QfP8MB4RWKZ2dNz3OwF4joZ',
+          price: priceId,
           quantity: 1,
         },
       ],
