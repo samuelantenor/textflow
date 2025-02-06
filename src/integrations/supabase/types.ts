@@ -626,6 +626,15 @@ export type Database = {
           count: number
         }[]
       }
+      get_or_create_phone_number: {
+        Args: {
+          p_user_id: string
+          p_phone_number: string
+          p_twilio_sid: string
+          p_monthly_cost: number
+        }
+        Returns: string
+      }
       get_user_billing_cycle: {
         Args: {
           user_id: string
