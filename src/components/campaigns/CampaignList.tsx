@@ -14,9 +14,13 @@ export function CampaignList() {
   const { data: campaigns, isLoading } = useQuery({
     queryKey: ['campaigns'],
     queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) throw new Error("Not authenticated");
+
       const { data, error } = await supabase
         .from('campaigns')
         .select('*')
+        .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -26,6 +30,9 @@ export function CampaignList() {
 
   // Subscribe to real-time changes
   useEffect(() => {
+    const { data: { session } } = supabase.auth.getSession();
+    if (!session?.user) return;
+
     const channel = supabase
       .channel('campaigns-changes')
       .on(
@@ -33,12 +40,13 @@ export function CampaignList() {
         {
           event: '*', // Listen to all changes
           schema: 'public',
-          table: 'campaigns'
+          table: 'campaigns',
+          filter: `user_id=eq.${session.user.id}` // Only listen to current user's campaigns
         },
-        (payload) => {
+        async (payload) => {
           console.log('Campaign change received:', payload);
           // Invalidate and refetch campaigns
-          queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+          await queryClient.invalidateQueries({ queryKey: ['campaigns'] });
         }
       )
       .subscribe();
