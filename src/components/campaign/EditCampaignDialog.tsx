@@ -62,7 +62,6 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
         scheduledFor.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
       }
 
-      // Determine campaign status
       let status = campaign.status;
       if (scheduledFor) {
         status = 'scheduled';
