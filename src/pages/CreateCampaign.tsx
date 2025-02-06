@@ -41,7 +41,7 @@ const CreateCampaign = () => {
       await queryClient.invalidateQueries({ queryKey: ['campaigns'] });
 
       toast({
-        title: t('success.created'),
+        title: t('success.created.title'),
         description: t('create.savedAsDraft'),
       });
 

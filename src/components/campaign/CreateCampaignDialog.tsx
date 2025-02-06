@@ -74,7 +74,7 @@ export function CreateCampaignDialog() {
       if (error) throw error;
 
       toast({
-        title: status === 'scheduled' ? t('success.scheduled') : t('success.created'),
+        title: status === 'scheduled' ? t('success.scheduled.title') : t('success.created.title'),
         description: status === 'scheduled' ? t('create.scheduledDescription') : t('create.savedAsDraft'),
       });
 
