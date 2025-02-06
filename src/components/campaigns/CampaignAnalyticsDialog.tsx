@@ -51,6 +51,7 @@ export function CampaignAnalyticsDialog({
       const delivered = messageStats.filter(msg => msg.status === 'delivered').length;
       const failed = messageStats.filter(msg => msg.status === 'failed').length;
       const pending = messageStats.filter(msg => msg.status === 'pending').length;
+      const deliveryRate = analyticsData?.delivery_rate || 0;
 
       return {
         ...analyticsData,
@@ -59,7 +60,7 @@ export function CampaignAnalyticsDialog({
           delivered,
           failed,
           pending,
-          deliveryRate: analyticsData?.delivery_rate || 0
+          deliveryRate
         }
       };
     },
