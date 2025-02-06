@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Clock } from "lucide-react";
 
 interface Profile {
   full_name: string;
@@ -41,6 +41,7 @@ const CampaignRequest = () => {
   const { t } = useTranslation(['campaigns']);
   const [messageLength, setMessageLength] = useState(0);
   const [date, setDate] = useState<Date>();
+  const [time, setTime] = useState('09:00');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -81,7 +82,11 @@ const CampaignRequest = () => {
       formData.append('business_email', profile?.email || '');
       
       if (date) {
-        formData.set('preferred_date', format(date, 'PPP'));
+        // Combine date and time
+        const dateTime = new Date(date);
+        const [hours, minutes] = time.split(':').map(Number);
+        dateTime.setHours(hours, minutes);
+        formData.set('preferred_date', format(dateTime, 'PPP p'));
       }
       
       const response = await fetch('https://formspree.io/f/mnnqpdwn', {
@@ -99,6 +104,7 @@ const CampaignRequest = () => {
         });
         (e.target as HTMLFormElement).reset();
         setDate(undefined);
+        setTime('09:00');
         setMessageLength(0);
       } else {
         throw new Error('Failed to send message');
@@ -172,29 +178,40 @@ const CampaignRequest = () => {
                 </span>
               </div>
             </div>
-            <div>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : t('form.schedule.placeholder')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {date ? format(date, "PPP") : t('form.schedule.placeholder')}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="relative">
+                <Input
+                  type="time"
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  className="pl-10 bg-background"
+                />
+                <Clock className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
+              </div>
             </div>
             <div>
               <Textarea
@@ -217,3 +234,4 @@ const CampaignRequest = () => {
 };
 
 export default CampaignRequest;
+
