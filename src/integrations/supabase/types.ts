@@ -116,8 +116,10 @@ export type Database = {
           media_url: string | null
           message: string | null
           name: string
+          processing_status: string | null
           scheduled_at: string | null
           scheduled_for: string | null
+          scheduled_job_id: string | null
           status: string
           timezone: string | null
           updated_at: string
@@ -131,8 +133,10 @@ export type Database = {
           media_url?: string | null
           message?: string | null
           name: string
+          processing_status?: string | null
           scheduled_at?: string | null
           scheduled_for?: string | null
+          scheduled_job_id?: string | null
           status?: string
           timezone?: string | null
           updated_at?: string
@@ -146,8 +150,10 @@ export type Database = {
           media_url?: string | null
           message?: string | null
           name?: string
+          processing_status?: string | null
           scheduled_at?: string | null
           scheduled_for?: string | null
+          scheduled_job_id?: string | null
           status?: string
           timezone?: string | null
           updated_at?: string

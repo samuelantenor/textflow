@@ -82,6 +82,7 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
         status = 'scheduled';
       }
 
+      // Update campaign in database
       const { error } = await supabase
         .from("campaigns")
         .update({
@@ -92,23 +93,40 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
           group_id: data.group_id,
           from_number: data.from_number,
           status: status,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          processing_status: scheduledFor ? 'pending' : null
         })
         .eq('id', campaign.id);
 
       if (error) throw error;
 
-      toast({
-        title: t('success.updated'),
-        description: t('success.updated'),
-      });
+      // If campaign is scheduled, initiate the scheduling process
+      if (scheduledFor) {
+        const { error: scheduleError } = await supabase.functions.invoke('schedule-campaign-send', {
+          body: { campaignId: campaign.id }
+        });
+
+        if (scheduleError) {
+          throw new Error(`Failed to schedule campaign: ${scheduleError.message}`);
+        }
+
+        toast({
+          title: t('success.scheduled'),
+          description: t('success.scheduledDescription'),
+        });
+      } else {
+        toast({
+          title: t('success.updated'),
+          description: t('success.updated'),
+        });
+      }
 
       onOpenChange(false);
     } catch (error) {
       console.error("Error updating campaign:", error);
       toast({
         title: t('errors.update'),
-        description: t('errors.update'),
+        description: error instanceof Error ? error.message : t('errors.update'),
         variant: "destructive",
       });
     } finally {
