@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -22,7 +21,7 @@ interface EditCampaignDialogProps {
 export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaignDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { t } = useTranslation(['campaigns']);
+  const { t, i18n } = useTranslation(['campaigns']);
   
   // Convert scheduled_for to Date object if it exists
   const scheduledDate = campaign.scheduled_for ? new Date(campaign.scheduled_for) : undefined;
@@ -123,8 +122,8 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
 
       onOpenChange(false);
       
-      // Refresh the page while maintaining the campaigns tab
-      window.location.href = "/en/dashboard?tab=campaigns";
+      // Refresh the page while maintaining the campaigns tab and user's language
+      window.location.href = `/${i18n.language}/dashboard?tab=campaigns`;
 
     } catch (error) {
       console.error("Error updating campaign:", error);

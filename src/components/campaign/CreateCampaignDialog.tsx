@@ -101,8 +101,8 @@ export function CreateCampaignDialog() {
       setOpen(false);
       form.reset();
       
-      // Refresh the page while maintaining the campaigns tab
-      window.location.href = "/en/dashboard?tab=campaigns";
+      // Refresh the page while maintaining the campaigns tab and user's language
+      window.location.href = `/${i18n.language}/dashboard?tab=campaigns`;
 
     } catch (error) {
       console.error("Error creating campaign:", error);
