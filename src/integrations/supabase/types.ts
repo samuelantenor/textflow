@@ -585,6 +585,8 @@ export type Database = {
         Row: {
           campaign_limit: number
           created_at: string
+          delivered_messages_this_cycle: number
+          failed_messages_this_cycle: number
           has_been_paid: boolean | null
           id: string
           messages_sent_this_cycle: number
@@ -598,6 +600,8 @@ export type Database = {
         Insert: {
           campaign_limit?: number
           created_at?: string
+          delivered_messages_this_cycle?: number
+          failed_messages_this_cycle?: number
           has_been_paid?: boolean | null
           id?: string
           messages_sent_this_cycle?: number
@@ -611,6 +615,8 @@ export type Database = {
         Update: {
           campaign_limit?: number
           created_at?: string
+          delivered_messages_this_cycle?: number
+          failed_messages_this_cycle?: number
           has_been_paid?: boolean | null
           id?: string
           messages_sent_this_cycle?: number
@@ -676,9 +682,17 @@ export type Database = {
           billing_cycle_start: string
           billing_cycle_end: string
           messages_sent_this_cycle: number
+          delivered_messages_this_cycle: number
+          failed_messages_this_cycle: number
         }[]
       }
-      increment_messages_sent_count: {
+      increment_delivered_message_count: {
+        Args: {
+          user_id_param: string
+        }
+        Returns: undefined
+      }
+      increment_failed_message_count: {
         Args: {
           user_id_param: string
         }
