@@ -43,7 +43,7 @@ const CreateCampaign = () => {
           async (payload) => {
             // When the new campaign is detected, invalidate the query and navigate
             await queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-            navigate(`/${i18n.language}/campaigns`, { replace: true });
+            navigate(`/${i18n.language}/dashboard?tab=campaigns`, { replace: true });
           }
         )
         .subscribe();
@@ -74,7 +74,7 @@ const CreateCampaign = () => {
         description: error instanceof Error ? error.message : t('errors.create'),
         variant: "destructive",
       });
-      navigate(`/${i18n.language}/campaigns`, { replace: true });
+      navigate(`/${i18n.language}/dashboard?tab=campaigns`, { replace: true });
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +86,7 @@ const CreateCampaign = () => {
         <Button
           variant="ghost"
           className="mb-6"
-          onClick={() => navigate(`/${i18n.language}/campaigns`)}
+          onClick={() => navigate(`/${i18n.language}/dashboard?tab=campaigns`)}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           {t('create.backToCampaigns')}
@@ -107,7 +107,7 @@ const CreateCampaign = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate(`/${i18n.language}/campaigns`)}
+                  onClick={() => navigate(`/${i18n.language}/dashboard?tab=campaigns`)}
                 >
                   {t('buttons.cancel')}
                 </Button>
