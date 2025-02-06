@@ -75,59 +75,48 @@ serve(async (req) => {
       throw new Error(`Error updating campaign status: ${updateError.message}`)
     }
 
-    // Use Deno.serve's background task handling
-    const ctx = Deno.env.get('DENO_DEPLOYMENT_ID') && // Only use in production
-      new Promise(async (resolve, reject) => {
-        try {
-          console.log(`Waiting ${delay}ms before sending campaign ${campaignId}`)
-          await new Promise(resolve => setTimeout(resolve, delay))
-
-          console.log(`Delay complete, sending campaign ${campaignId}`)
-          
-          // Call send-campaign function
-          const response = await fetch(
-            `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-campaign`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-              },
-              body: JSON.stringify({ campaignId }),
-            }
-          )
-
-          if (!response.ok) {
-            throw new Error(`Failed to send campaign: ${await response.text()}`)
+    // Start the delayed execution in a background task
+    setTimeout(async () => {
+      try {
+        console.log(`Delay complete, sending campaign ${campaignId}`)
+        
+        // Call send-campaign function
+        const response = await fetch(
+          `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-campaign`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+            },
+            body: JSON.stringify({ campaignId }),
           }
+        )
 
-          // Update campaign status to completed
-          await supabaseClient
-            .from('campaigns')
-            .update({ processing_status: 'completed' })
-            .eq('id', campaignId)
-
-          console.log(`Successfully completed scheduled send for campaign ${campaignId}`)
-          resolve(true)
-        } catch (error) {
-          console.error(`Error in delayed execution for campaign ${campaignId}:`, error)
-          
-          // Update campaign status to failed
-          await supabaseClient
-            .from('campaigns')
-            .update({ 
-              processing_status: 'failed',
-              status: 'draft' // Reset to draft so user can retry
-            })
-            .eq('id', campaignId)
-          reject(error)
+        if (!response.ok) {
+          throw new Error(`Failed to send campaign: ${await response.text()}`)
         }
-      })
 
-    if (ctx) {
-      // @ts-ignore - Deno.serve's context type is not properly defined
-      ctx.waitUntil(ctx)
-    }
+        // Update campaign status to completed
+        await supabaseClient
+          .from('campaigns')
+          .update({ processing_status: 'completed' })
+          .eq('id', campaignId)
+
+        console.log(`Successfully completed scheduled send for campaign ${campaignId}`)
+      } catch (error) {
+        console.error(`Error in delayed execution for campaign ${campaignId}:`, error)
+        
+        // Update campaign status to failed
+        await supabaseClient
+          .from('campaigns')
+          .update({ 
+            processing_status: 'failed',
+            status: 'draft' // Reset to draft so user can retry
+          })
+          .eq('id', campaignId)
+      }
+    }, delay)
 
     return new Response(
       JSON.stringify({ 
