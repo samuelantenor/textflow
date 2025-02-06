@@ -1,3 +1,4 @@
+
 export interface Campaign {
   id: string;
   user_id: string;
@@ -5,9 +6,10 @@ export interface Campaign {
   message: string;
   media_url?: string;
   scheduled_for?: string;
-  status: 'draft' | 'sent';
+  status: 'draft' | 'sent' | 'deleted';
   created_at: string;
   updated_at: string;
+  deleted_at?: string;
   group_id?: string;
 }
 

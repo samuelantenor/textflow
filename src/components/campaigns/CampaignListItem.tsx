@@ -33,31 +33,22 @@ export function CampaignListItem({ campaign }: CampaignListItemProps) {
     try {
       setIsDeleting(true);
       
-      // First delete associated message logs
-      const { error: logsError } = await supabase
-        .from('message_logs')
-        .delete()
-        .eq('campaign_id', campaign.id);
-
-      if (logsError) throw logsError;
-
-      // Then delete campaign analytics if they exist
-      const { error: analyticsError } = await supabase
-        .from('campaign_analytics')
-        .delete()
-        .eq('campaign_id', campaign.id);
-
-      if (analyticsError) throw analyticsError;
-
-      // Finally delete the campaign
+      // Soft delete the campaign by setting deleted_at
       const { error: campaignError } = await supabase
         .from('campaigns')
-        .delete()
+        .update({ 
+          deleted_at: new Date().toISOString(),
+          status: 'deleted'
+        })
         .eq('id', campaign.id);
 
       if (campaignError) throw campaignError;
 
+      // Invalidate queries to refresh the UI
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+      // Also invalidate analytics queries to update stats
+      queryClient.invalidateQueries({ queryKey: ['campaign-analytics-summary'] });
+      
       toast({
         title: t("success.deleted.title"),
         description: t("success.deleted.description"),
@@ -107,10 +98,17 @@ export function CampaignListItem({ campaign }: CampaignListItemProps) {
         return 'bg-green-100 text-green-800 border-green-200';
       case 'draft':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'deleted':
+        return 'bg-red-100 text-red-800 border-red-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
+
+  // Don't show deleted campaigns in the list
+  if (campaign.deleted_at) {
+    return null;
+  }
 
   return (
     <div className="campaign-card rounded-lg border p-4 space-y-4">
@@ -182,4 +180,4 @@ export function CampaignListItem({ campaign }: CampaignListItemProps) {
       )}
     </div>
   );
-};
+}

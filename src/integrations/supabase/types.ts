@@ -110,6 +110,7 @@ export type Database = {
       campaigns: {
         Row: {
           created_at: string
+          deleted_at: string | null
           error_log: string | null
           from_number: string | null
           group_id: string | null
@@ -130,6 +131,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
           error_log?: string | null
           from_number?: string | null
           group_id?: string | null
@@ -150,6 +152,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
           error_log?: string | null
           from_number?: string | null
           group_id?: string | null

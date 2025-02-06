@@ -30,6 +30,7 @@ const CampaignTable = () => {
       const { data, error } = await supabase
         .from('campaigns')
         .select('*')
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -40,7 +41,10 @@ const CampaignTable = () => {
   const handleDelete = async (id: string) => {
     const { error } = await supabase
       .from('campaigns')
-      .delete()
+      .update({ 
+        deleted_at: new Date().toISOString(),
+        status: 'deleted'
+      })
       .eq('id', id);
 
     if (error) {
