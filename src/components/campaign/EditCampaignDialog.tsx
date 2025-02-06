@@ -93,13 +93,13 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
         }
 
         toast({
-          title: t('success.scheduled'),
-          description: t('success.scheduledDescription'),
+          title: t('success.scheduled.title'),
+          description: t('success.scheduled.description'),
         });
       } else {
         toast({
-          title: t('success.updated'),
-          description: t('success.updated'),
+          title: t('success.updated.title'),
+          description: t('success.updated.description'),
         });
       }
 
