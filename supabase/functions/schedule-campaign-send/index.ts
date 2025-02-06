@@ -47,11 +47,27 @@ serve(async (req) => {
       throw new Error('Campaign has no scheduled time')
     }
 
+    // Calculate delay and validate scheduled time
+    const scheduledTime = new Date(campaign.scheduled_for)
+    const now = new Date()
+    const delay = scheduledTime.getTime() - now.getTime()
+
+    console.log('Calculated delay:', {
+      scheduledTime: scheduledTime.toISOString(),
+      currentTime: now.toISOString(),
+      delayMs: delay
+    })
+
+    if (delay < 0) {
+      throw new Error('Cannot schedule campaign in the past')
+    }
+
     // Update campaign status to processing
     const { error: updateError } = await supabaseClient
       .from('campaigns')
       .update({
-        processing_status: 'processing',
+        status: 'scheduled',
+        processing_status: 'pending',
         scheduled_job_id: crypto.randomUUID()
       })
       .eq('id', campaignId)
@@ -64,7 +80,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true,
         message: 'Campaign scheduled successfully',
-        scheduledFor: campaign.scheduled_for
+        scheduledFor: scheduledTime.toISOString()
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -82,3 +98,4 @@ serve(async (req) => {
     )
   }
 })
+
