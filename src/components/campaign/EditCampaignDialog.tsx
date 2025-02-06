@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -26,10 +25,8 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
   const { t, i18n } = useTranslation(['campaigns']);
   const navigate = useNavigate();
   
-  // Convert scheduled_for to Date object if it exists
   const scheduledDate = campaign.scheduled_for ? new Date(campaign.scheduled_for) : undefined;
   
-  // Extract time from scheduled_for if it exists
   const scheduledTime = campaign.scheduled_for 
     ? new Date(campaign.scheduled_for).toLocaleTimeString('en-US', { 
         hour12: false, 
@@ -53,26 +50,8 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
     try {
       setIsLoading(true);
 
-      // Validate campaign ID
       if (!campaign.id) {
         throw new Error('Invalid campaign ID');
-      }
-
-      let mediaUrl = campaign.media_url;
-      if (data.media) {
-        const fileExt = data.media.name.split(".").pop();
-        const fileName = `${crypto.randomUUID()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
-          .from("campaign_media")
-          .upload(fileName, data.media);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from("campaign_media")
-          .getPublicUrl(fileName);
-        
-        mediaUrl = publicUrl;
       }
 
       // Combine date and time if both are provided
@@ -95,7 +74,6 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
         .update({
           name: data.name,
           message: data.message,
-          media_url: mediaUrl,
           scheduled_for: scheduledFor?.toISOString(),
           group_id: data.group_id || null,
           from_number: data.from_number || null,
@@ -129,7 +107,6 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
       }
 
       onOpenChange(false);
-      // Refresh the page to show updated data
       navigate(`/${i18n.language}/dashboard?tab=campaigns`);
     } catch (error) {
       console.error("Error updating campaign:", error);

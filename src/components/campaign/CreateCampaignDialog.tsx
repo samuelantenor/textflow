@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -17,7 +16,6 @@ import * as z from "zod";
 const campaignFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   message: z.string().min(1, "Message is required"),
-  media: z.instanceof(File).optional(),
   scheduled_for: z.date().optional(),
   scheduled_time: z.string().optional(),
   group_id: z.string().min(1, "Group is required"),
@@ -51,23 +49,6 @@ export function CreateCampaignDialog() {
         throw new Error(t('errors.auth'));
       }
 
-      let mediaUrl = null;
-      if (data.media) {
-        const fileExt = data.media.name.split(".").pop();
-        const fileName = `${crypto.randomUUID()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
-          .from("campaign_media")
-          .upload(fileName, data.media);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from("campaign_media")
-          .getPublicUrl(fileName);
-        
-        mediaUrl = publicUrl;
-      }
-
       // Calculate scheduled_at by combining date and time
       let scheduled_at = null;
       let status = 'draft';
@@ -83,7 +64,6 @@ export function CreateCampaignDialog() {
         user_id: session.user.id,
         name: data.name,
         message: data.message,
-        media_url: mediaUrl,
         scheduled_at,
         status,
         group_id: data.group_id,

@@ -36,24 +36,6 @@ export function CreateCampaignDialog() {
         throw new Error(t('errors.auth'));
       }
 
-      let mediaUrl = null;
-      if (data.media) {
-        const fileExt = data.media.name.split(".").pop();
-        const fileName = `${crypto.randomUUID()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
-          .from("campaign_media")
-          .upload(fileName, data.media);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from("campaign_media")
-          .getPublicUrl(fileName);
-        
-        mediaUrl = publicUrl;
-      }
-
-      // Combine date and time if both are provided
       let scheduledFor = data.scheduled_for;
       if (scheduledFor && data.scheduled_time) {
         const [hours, minutes] = data.scheduled_time.split(':');
@@ -65,7 +47,6 @@ export function CreateCampaignDialog() {
         user_id: session.user.id,
         name: data.name,
         message: data.message,
-        media_url: mediaUrl,
         scheduled_for: scheduledFor?.toISOString(),
         group_id: data.group_id,
         status: "draft",
