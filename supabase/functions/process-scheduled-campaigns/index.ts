@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -6,6 +5,9 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+const PROCESSING_TIMEOUT_MINUTES = 5
+const MAX_RETRY_COUNT = 3
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -22,20 +24,22 @@ serve(async (req) => {
     const now = new Date()
     console.log('Current server time:', now.toISOString())
 
-    // Get all scheduled campaigns that haven't exceeded retry limit
+    // Get all scheduled campaigns and stuck processing campaigns
+    const timeoutThreshold = new Date(now.getTime() - (PROCESSING_TIMEOUT_MINUTES * 60 * 1000))
+    
     const { data: campaignsToProcess, error: fetchError } = await supabaseClient
       .from('campaigns')
       .select('*')
-      .eq('status', 'scheduled')
-      .lt('retry_count', 3)
+      .or(`status.eq.scheduled,and(status.eq.processing,last_processing_started.lt.${timeoutThreshold.toISOString()})`)
+      .lt('retry_count', MAX_RETRY_COUNT)
 
     if (fetchError) {
       console.error('Error fetching scheduled campaigns:', fetchError)
       throw fetchError
     }
 
-    console.log(`Found ${campaignsToProcess?.length || 0} total scheduled campaigns`)
-    console.log('All scheduled campaigns:', campaignsToProcess)
+    console.log(`Found ${campaignsToProcess?.length || 0} campaigns to check`)
+    console.log('Campaigns to process:', campaignsToProcess)
 
     // Filter campaigns that are due to be sent
     const dueCampaigns = campaignsToProcess?.filter(campaign => {
@@ -46,12 +50,14 @@ serve(async (req) => {
         currentTime: now.toISOString(),
         isDue,
         timezone: campaign.timezone,
-        retryCount: campaign.retry_count
+        retryCount: campaign.retry_count,
+        status: campaign.status,
+        lastProcessingStarted: campaign.last_processing_started
       })
       return isDue
     }) || []
 
-    console.log(`Found ${dueCampaigns.length} campaigns due to be sent`)
+    console.log(`Found ${dueCampaigns.length} campaigns due for processing`)
     console.log('Due campaigns:', dueCampaigns)
 
     if (dueCampaigns.length === 0) {
@@ -77,8 +83,28 @@ serve(async (req) => {
           name: campaign.name,
           scheduledFor: campaign.scheduled_for,
           timezone: campaign.timezone,
-          retryCount: campaign.retry_count
+          retryCount: campaign.retry_count,
+          status: campaign.status,
+          lastProcessingStarted: campaign.last_processing_started
         })
+
+        // Reset stuck processing campaigns
+        if (campaign.status === 'processing') {
+          console.log(`Campaign ${campaign.id} appears to be stuck in processing state. Resetting...`)
+          const { error: resetError } = await supabaseClient
+            .from('campaigns')
+            .update({ 
+              status: 'scheduled',
+              retry_count: campaign.retry_count + 1,
+              error_log: `Reset after being stuck in processing state for over ${PROCESSING_TIMEOUT_MINUTES} minutes`
+            })
+            .eq('id', campaign.id)
+
+          if (resetError) {
+            console.error(`Error resetting stuck campaign ${campaign.id}:`, resetError)
+            throw resetError
+          }
+        }
         
         // Call the send-campaign function
         const response = await fetch(
@@ -105,18 +131,33 @@ serve(async (req) => {
         console.error(`Error processing campaign ${campaign.id}:`, error)
         
         // Update campaign status to failed if retry limit reached
-        if (campaign.retry_count >= 2) {
+        const newRetryCount = campaign.retry_count + 1
+        if (newRetryCount >= MAX_RETRY_COUNT) {
           const { error: updateError } = await supabaseClient
             .from('campaigns')
             .update({ 
               status: 'failed',
-              error_log: `Max retries reached. Last error: ${error.message}`,
-              retry_count: campaign.retry_count + 1
+              error_log: `Max retries (${MAX_RETRY_COUNT}) reached. Last error: ${error.message}`,
+              retry_count: newRetryCount
             })
             .eq('id', campaign.id)
 
           if (updateError) {
             console.error(`Error updating failed campaign status:`, updateError)
+          }
+        } else {
+          // Update retry count and error log but keep as scheduled
+          const { error: updateError } = await supabaseClient
+            .from('campaigns')
+            .update({ 
+              status: 'scheduled',
+              error_log: `Attempt ${newRetryCount}: ${error.message}`,
+              retry_count: newRetryCount
+            })
+            .eq('id', campaign.id)
+
+          if (updateError) {
+            console.error(`Error updating campaign retry count:`, updateError)
           }
         }
         

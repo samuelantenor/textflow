@@ -21,20 +21,6 @@ serve(async (req) => {
     const { campaignId } = await req.json()
     console.log('Processing campaign:', campaignId)
 
-    // Update last processing started timestamp
-    const { error: updateStartError } = await supabaseClient
-      .from('campaigns')
-      .update({ 
-        last_processing_started: new Date().toISOString(),
-        status: 'processing'
-      })
-      .eq('id', campaignId)
-
-    if (updateStartError) {
-      console.error('Error updating campaign start time:', updateStartError)
-      throw updateStartError
-    }
-
     // First, get the campaign details and check status
     const { data: campaign, error: campaignError } = await supabaseClient
       .from('campaigns')
@@ -51,10 +37,10 @@ serve(async (req) => {
     }
 
     // Verify campaign status is valid for sending
-    if (campaign.status !== 'scheduled' && campaign.status !== 'draft') {
-      console.log(`Campaign ${campaignId} is already ${campaign.status}, skipping`)
+    if (!['scheduled', 'draft'].includes(campaign.status)) {
+      console.log(`Campaign ${campaignId} is ${campaign.status}, skipping`)
       return new Response(
-        JSON.stringify({ success: false, message: `Campaign is already ${campaign.status}` }),
+        JSON.stringify({ success: false, message: `Campaign is ${campaign.status}` }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400,
@@ -64,6 +50,21 @@ serve(async (req) => {
 
     if (!campaign.group_id) {
       throw new Error('Campaign has no associated contact group')
+    }
+
+    // Update processing started timestamp and status atomically
+    const { error: updateStartError } = await supabaseClient
+      .from('campaigns')
+      .update({ 
+        last_processing_started: new Date().toISOString(),
+        status: 'processing'
+      })
+      .eq('id', campaignId)
+      .eq('status', campaign.status) // Ensure status hasn't changed
+
+    if (updateStartError) {
+      console.error('Error updating campaign start time:', updateStartError)
+      throw updateStartError
     }
 
     // Get contacts that haven't been messaged yet for this campaign
@@ -141,8 +142,9 @@ serve(async (req) => {
 
         if (!response.ok) {
           errorCount++
-          errorMessages.push(`Error sending to ${contact.phone_number}: ${result.message}`)
-          throw new Error(`Twilio error: ${result.message}`)
+          const errorMessage = `Error sending to ${contact.phone_number}: ${result.message}`
+          errorMessages.push(errorMessage)
+          throw new Error(errorMessage)
         }
 
         // Log the message
@@ -182,8 +184,7 @@ serve(async (req) => {
         .from('campaigns')
         .update({ 
           status: finalStatus,
-          error_log: errorMessages.length > 0 ? errorMessages.join('\n') : null,
-          retry_count: campaign.retry_count + 1
+          error_log: errorMessages.length > 0 ? errorMessages.join('\n') : null
         })
         .eq('id', campaignId)
 
@@ -209,8 +210,7 @@ serve(async (req) => {
         .from('campaigns')
         .update({ 
           status: 'failed',
-          error_log: errorMessages.join('\n'),
-          retry_count: campaign.retry_count + 1
+          error_log: errorMessages.join('\n')
         })
         .eq('id', campaignId)
 
