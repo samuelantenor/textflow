@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -9,6 +10,8 @@ import { Loader2 } from "lucide-react";
 import { CampaignFormFields } from "./CampaignFormFields";
 import { Campaign, CampaignFormData } from "@/types/campaign";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { useTranslation } from "react-i18next";
 
 interface EditCampaignDialogProps {
   campaign: Campaign;
@@ -19,6 +22,7 @@ interface EditCampaignDialogProps {
 export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaignDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation(['campaigns']);
   
   // Convert scheduled_for to Date object if it exists
   const scheduledDate = campaign.scheduled_for ? new Date(campaign.scheduled_for) : undefined;
@@ -87,16 +91,16 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
       if (error) throw error;
 
       toast({
-        title: "Campaign updated",
-        description: "Your campaign has been updated successfully.",
+        title: t('success.updated'),
+        description: t('success.updated'),
       });
 
       onOpenChange(false);
     } catch (error) {
       console.error("Error updating campaign:", error);
       toast({
-        title: "Error",
-        description: "Failed to update campaign. Please try again.",
+        title: t('errors.update'),
+        description: t('errors.update'),
         variant: "destructive",
       });
     } finally {
@@ -106,41 +110,57 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-2xl h-[95vh] md:h-auto md:max-h-[85vh] p-0">
-        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6">
-          <DialogTitle className="text-xl">Edit Campaign</DialogTitle>
+      <DialogContent className="max-w-2xl sm:max-w-[600px] p-0 gap-0 bg-black/95 border-gray-800">
+        <DialogHeader className="px-6 py-4 border-b border-gray-800">
+          <DialogTitle className="text-xl font-semibold text-white">
+            {t('buttons.edit')}
+          </DialogTitle>
         </DialogHeader>
         
-        <ScrollArea className="px-4 sm:px-6 flex-1 h-[calc(95vh-8rem)] md:h-auto">
+        <ScrollArea className="max-h-[calc(85vh-8rem)] px-6 py-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <CampaignFormFields form={form} showAllFields={true} />
+              <div className="space-y-4">
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-gray-200">
+                    {t('form.basicInfo')}
+                  </h3>
+                  <CampaignFormFields form={form} showAllFields={true} />
+                </div>
+                
+                <Separator className="my-6 bg-gray-800" />
+                
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-gray-200">
+                    {t('form.schedule.label')}
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Schedule fields are part of CampaignFormFields */}
+                  </div>
+                </div>
+              </div>
             </form>
           </Form>
         </ScrollArea>
 
-        <div className="mt-6 border-t border-gray-800/50">
-          <div className="px-4 sm:px-6 py-4 sm:py-5 bg-black/50 backdrop-blur-sm">
-            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                className="w-full sm:w-auto order-1 sm:order-none"
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={form.handleSubmit(onSubmit)}
-                disabled={isLoading}
-                className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600"
-              >
-                {isLoading && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Save Changes
-              </Button>
-            </div>
+        <div className="px-6 py-4 border-t border-gray-800 bg-black/40">
+          <div className="flex flex-row-reverse sm:justify-end gap-3">
+            <Button
+              onClick={form.handleSubmit(onSubmit)}
+              disabled={isLoading}
+              className="flex-1 sm:flex-none bg-primary-500 hover:bg-primary-600 text-white"
+            >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t('buttons.save')}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="flex-1 sm:flex-none border-gray-700 hover:bg-gray-800"
+            >
+              {t('buttons.cancel')}
+            </Button>
           </div>
         </div>
       </DialogContent>
