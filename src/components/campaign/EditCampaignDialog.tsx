@@ -76,6 +76,12 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
         scheduledFor.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
       }
 
+      // Determine campaign status
+      let status = campaign.status;
+      if (scheduledFor) {
+        status = 'scheduled';
+      }
+
       const { error } = await supabase
         .from("campaigns")
         .update({
@@ -85,6 +91,8 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
           scheduled_for: scheduledFor?.toISOString(),
           group_id: data.group_id,
           from_number: data.from_number,
+          status: status,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
         })
         .eq('id', campaign.id);
 
