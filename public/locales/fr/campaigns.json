@@ -1,3 +1,4 @@
+
 {
   "create": {
     "title": "Créer une nouvelle campagne",
@@ -70,12 +71,16 @@
       "invalidTime": "Veuillez sélectionner une heure valide",
       "failed": "Échec de la programmation de la campagne"
     },
-    "campaignDeleteFailed": "Échec de la suppression de la campagne. Veuillez réessayer."
+    "campaignDeleteFailed": "Échec de la suppression de la campagne. Veuillez réessayer.",
+    "tryAgain": "Veuillez réessayer plus tard"
   },
   "success": {
     "created": "Campagne créée avec succès",
     "deleted": "Campagne supprimée avec succès",
-    "sent": "Campagne envoyée avec succès",
+    "sent": {
+      "title": "Demande Envoyée",
+      "description": "Votre demande de campagne a été envoyée avec succès. Nous l'examinerons et vous recontacterons bientôt."
+    },
     "updated": "Campagne mise à jour avec succès",
     "scheduled": "Campagne programmée avec succès",
     "title": "Succès"
@@ -88,7 +93,8 @@
     "send": "Envoyer",
     "save": "Enregistrer",
     "analytics": "Analytiques",
-    "schedule": "Programmer"
+    "schedule": "Programmer",
+    "submit": "Envoyer la demande"
   },
   "status": {
     "draft": "Brouillon",

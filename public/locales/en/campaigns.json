@@ -1,3 +1,4 @@
+
 {
   "create": {
     "title": "Create New Campaign",
@@ -70,7 +71,8 @@
       "pastTime": "Please select a future time",
       "invalidTime": "Please select a valid time"
     },
-    "campaignDeleteFailed": "Failed to delete the campaign. Please try again."
+    "campaignDeleteFailed": "Failed to delete the campaign. Please try again.",
+    "tryAgain": "Please try again later"
   },
   "success": {
     "title": "Success",
@@ -83,8 +85,8 @@
       "description": "Campaign has been deleted successfully"
     },
     "sent": {
-      "title": "Campaign Sent",
-      "description": "Campaign has been sent successfully"
+      "title": "Request Sent",
+      "description": "Your campaign request has been sent successfully. We'll review it and get back to you soon."
     },
     "updated": {
       "title": "Campaign Updated",
@@ -102,7 +104,8 @@
     "edit": "Edit",
     "send": "Send",
     "analytics": "Analytics",
-    "schedule": "Schedule"
+    "schedule": "Schedule",
+    "submit": "Submit Request"
   },
   "status": {
     "draft": "Draft",
