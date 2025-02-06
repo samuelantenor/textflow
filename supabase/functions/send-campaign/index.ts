@@ -111,20 +111,6 @@ serve(async (req) => {
     // Send messages to all contacts
     for (const contact of contacts) {
       try {
-        // Check if message already exists for this contact and campaign
-        const { data: existingMessage } = await supabaseClient
-          .from('message_logs')
-          .select('id, status')
-          .eq('campaign_id', campaignId)
-          .eq('contact_phone_number', contact.phone_number)
-          .maybeSingle()
-
-        if (existingMessage) {
-          console.log(`Message already exists for contact ${contact.id} in campaign ${campaignId}`)
-          if (existingMessage.status === 'delivered') successCount++
-          continue
-        }
-
         console.log(`Sending message to ${contact.phone_number}`)
         
         const formData = new URLSearchParams({
@@ -160,14 +146,33 @@ serve(async (req) => {
             error_message: errorMessage
           })
           console.error(errorMessage)
+
+          // Log failed message attempt
+          const { error: logError } = await supabaseClient
+            .from('message_logs')
+            .insert({
+              campaign_id: campaignId,
+              contact_id: contact.id,
+              twilio_message_sid: result.sid || 'failed',
+              status: 'failed',
+              error_message: errorMessage,
+              user_id: campaign.user_id,
+              contact_name: contact.name,
+              contact_phone_number: contact.phone_number
+            })
+
+          if (logError) {
+            console.error('Error logging failed message:', logError)
+          }
+          
           continue
         }
 
-        // Log the message with error handling
+        // Log successful message
         try {
           const { error: logError } = await supabaseClient
             .from('message_logs')
-            .upsert({
+            .insert({
               campaign_id: campaignId,
               contact_id: contact.id,
               twilio_message_sid: result.sid,
@@ -176,13 +181,10 @@ serve(async (req) => {
               user_id: campaign.user_id,
               contact_name: contact.name,
               contact_phone_number: contact.phone_number
-            }, {
-              onConflict: 'campaign_id,contact_phone_number'
             })
 
           if (logError) {
             console.error('Error creating message log:', logError)
-            // Don't throw, just log the error
             messageResults.push({
               success: true,
               contact_id: contact.id,
@@ -201,7 +203,6 @@ serve(async (req) => {
           }
         } catch (logError) {
           console.error('Error in message logging:', logError)
-          // Continue processing other messages
           messageResults.push({
             success: true,
             contact_id: contact.id,
