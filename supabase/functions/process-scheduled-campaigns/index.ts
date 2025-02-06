@@ -25,7 +25,7 @@ serve(async (req) => {
       .from('campaigns')
       .select('id')
       .eq('status', 'scheduled')
-      .lte('scheduled_at', new Date().toISOString())
+      .lte('scheduled_for', new Date().toISOString())  // Changed from scheduled_at to scheduled_for
 
     if (fetchError) {
       console.error('Error fetching scheduled campaigns:', fetchError)
