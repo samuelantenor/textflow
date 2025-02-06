@@ -1,3 +1,4 @@
+
 import {
   Table,
   TableBody,
@@ -15,9 +16,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { EditCampaignDialog } from "./campaign/EditCampaignDialog";
 import { Campaign } from "@/types/campaign";
+import { useTranslation } from "react-i18next";
 
 const CampaignTable = () => {
   const { toast } = useToast();
+  const { t } = useTranslation("campaigns");
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
@@ -42,16 +45,16 @@ const CampaignTable = () => {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete campaign",
+        title: t("errors.delete"),
+        description: t("errors.campaignDeleteFailed"),
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "Success",
-      description: "Campaign deleted successfully",
+      title: t("success.deleted.title"),
+      description: t("success.deleted.description"),
     });
     refetch();
   };

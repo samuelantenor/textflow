@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Campaign } from "./types";
 import { EditCampaignDialog } from "./EditCampaignDialog";
+import { useTranslation } from "react-i18next";
 
 interface CampaignListItemProps {
   campaign: Campaign;
@@ -25,6 +26,7 @@ export function CampaignListItem({ campaign }: CampaignListItemProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation("campaigns");
 
   const handleDelete = async () => {
     try {
@@ -56,14 +58,14 @@ export function CampaignListItem({ campaign }: CampaignListItemProps) {
 
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
       toast({
-        title: "Success",
-        description: "Campaign deleted successfully",
+        title: t("success.deleted.title"),
+        description: t("success.deleted.description"),
       });
     } catch (error) {
       console.error('Error deleting campaign:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete campaign",
+        title: t("errors.delete"),
+        description: t("errors.campaignDeleteFailed"),
         variant: "destructive",
       });
     } finally {
