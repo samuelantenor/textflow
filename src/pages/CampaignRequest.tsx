@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -14,11 +16,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 
 interface Profile {
   full_name: string;
   email: string;
 }
+
+const MAX_MESSAGE_LENGTH = 160;
 
 const CampaignRequest = () => {
   const { userId } = useParams();
@@ -26,6 +38,9 @@ const CampaignRequest = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation(['campaigns']);
+  const [messageLength, setMessageLength] = useState(0);
+  const [date, setDate] = useState<Date>();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -43,7 +58,7 @@ const CampaignRequest = () => {
         console.error('Error fetching profile:', error);
         toast({
           title: "Error",
-          description: "Could not load business information. Please try again later.",
+          description: t('errors.create'),
           variant: "destructive",
         });
       } finally {
@@ -54,7 +69,7 @@ const CampaignRequest = () => {
     if (userId) {
       fetchProfile();
     }
-  }, [userId, toast]);
+  }, [userId, toast, t]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -64,6 +79,10 @@ const CampaignRequest = () => {
       const formData = new FormData(e.currentTarget);
       formData.append('business_name', profile?.full_name || '');
       formData.append('business_email', profile?.email || '');
+      
+      if (date) {
+        formData.set('preferred_date', format(date, 'PPP'));
+      }
       
       const response = await fetch('https://formspree.io/f/mnnqpdwn', {
         method: 'POST',
@@ -75,17 +94,19 @@ const CampaignRequest = () => {
 
       if (response.ok) {
         toast({
-          title: "Success",
-          description: "Your campaign request has been sent successfully!",
+          title: t('success.sent.title'),
+          description: t('success.sent.description'),
         });
         (e.target as HTMLFormElement).reset();
+        setDate(undefined);
+        setMessageLength(0);
       } else {
         throw new Error('Failed to send message');
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to send campaign request. Please try again.",
+        title: t('errors.create'),
+        description: t('errors.tryAgain'),
         variant: "destructive",
       });
     } finally {
@@ -106,9 +127,9 @@ const CampaignRequest = () => {
       <div className="flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Error</CardTitle>
+            <CardTitle>{t('errors.create')}</CardTitle>
             <CardDescription>
-              Could not find the business information. Please check the URL and try again.
+              {t('errors.tryAgain')}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -120,9 +141,9 @@ const CampaignRequest = () => {
     <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>Campaign Request for {profile.full_name}</CardTitle>
+          <CardTitle>{t('form.request.title', { businessName: profile.full_name })}</CardTitle>
           <CardDescription>
-            Fill out this form to request a new SMS campaign for your business
+            {t('form.request.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -131,38 +152,61 @@ const CampaignRequest = () => {
               <Input
                 type="text"
                 name="campaign_name"
-                placeholder="Campaign Name"
+                placeholder={t('form.name.placeholder')}
                 required
                 className="bg-background"
               />
             </div>
             <div>
-              <Textarea
-                name="campaign_message"
-                placeholder="Campaign Message"
-                required
-                className="bg-background min-h-[100px]"
-              />
+              <div className="relative">
+                <Textarea
+                  name="campaign_message"
+                  placeholder={t('form.message.placeholder')}
+                  required
+                  maxLength={MAX_MESSAGE_LENGTH}
+                  className="bg-background min-h-[100px]"
+                  onChange={(e) => setMessageLength(e.target.value.length)}
+                />
+                <span className="absolute bottom-2 right-2 text-sm text-gray-500">
+                  {messageLength}/{MAX_MESSAGE_LENGTH}
+                </span>
+              </div>
             </div>
             <div>
-              <Input
-                type="date"
-                name="preferred_date"
-                placeholder="Preferred Send Date"
-                className="bg-background"
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP") : t('form.schedule.placeholder')}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             <div>
               <Textarea
                 name="additional_notes"
-                placeholder="Additional Notes or Requirements"
+                placeholder={t('form.notes.placeholder')}
                 className="bg-background min-h-[100px]"
               />
             </div>
             <div className="flex justify-end">
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Submit Campaign Request
+                {t('buttons.submit')}
               </Button>
             </div>
           </form>

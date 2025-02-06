@@ -32,7 +32,27 @@
       "placeholder": "Sélectionnez une date"
     },
     "basicInfo": "Informations de base",
-    "campaignDetails": "Détails de la campagne"
+    "campaignDetails": "Détails de la campagne",
+    "request": {
+      "title": "Demande de campagne pour {{businessName}}",
+      "description": "Remplissez ce formulaire pour demander une nouvelle campagne SMS pour votre entreprise"
+    },
+    "name": {
+      "label": "Nom de la campagne",
+      "placeholder": "Entrez le nom de la campagne"
+    },
+    "message": {
+      "label": "Message",
+      "placeholder": "Entrez votre message"
+    },
+    "schedule": {
+      "label": "Date préférée",
+      "placeholder": "Sélectionnez une date"
+    },
+    "notes": {
+      "label": "Notes additionnelles",
+      "placeholder": "Notes ou exigences supplémentaires"
+    }
   },
   "errors": {
     "create": "Échec de la création de la campagne",
