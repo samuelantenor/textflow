@@ -58,8 +58,7 @@
     "sent": "Campaign sent successfully",
     "updated": "Campaign updated successfully",
     "scheduled": "Campaign scheduled successfully",
-    "title": "Success",
-    "deleted": "Campaign deleted successfully."
+    "title": "Success"
   },
   "buttons": {
     "cancel": "Cancel",

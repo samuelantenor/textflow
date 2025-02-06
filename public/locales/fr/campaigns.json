@@ -53,28 +53,12 @@
     "campaignDeleteFailed": "Échec de la suppression de la campagne. Veuillez réessayer."
   },
   "success": {
-    "created": {
-      "title": "Campagne créée avec succès",
-      "description": "Votre nouvelle campagne a été créée et enregistrée"
-    },
-    "deleted": {
-      "title": "Campagne supprimée",
-      "description": "La campagne a été supprimée avec succès"
-    },
-    "sent": {
-      "title": "Campagne envoyée",
-      "description": "Votre campagne a été envoyée avec succès à vos contacts"
-    },
-    "updated": {
-      "title": "Campagne mise à jour",
-      "description": "Les modifications de votre campagne ont été enregistrées"
-    },
-    "scheduled": {
-      "title": "Campagne programmée",
-      "description": "Votre campagne sera envoyée automatiquement à l'heure prévue"
-    },
-    "title": "Succès",
-    "deleted": "Campagne supprimée avec succès."
+    "created": "Campagne créée avec succès",
+    "deleted": "Campagne supprimée avec succès",
+    "sent": "Campagne envoyée avec succès",
+    "updated": "Campagne mise à jour avec succès",
+    "scheduled": "Campagne programmée avec succès",
+    "title": "Succès"
   },
   "buttons": {
     "cancel": "Annuler",
