@@ -86,17 +86,6 @@ serve(async (req) => {
       try {
         console.log(`Sending message to ${contact.phone_number}`)
 
-        // Increment delivered count before sending - we'll update it if it fails
-        const { error: incrementError } = await supabaseClient.rpc(
-          'increment_delivered_message_count',
-          { user_id_param: campaign.user_id }
-        )
-
-        if (incrementError) {
-          console.error('Error incrementing message count:', incrementError)
-          throw incrementError
-        }
-
         const formData = new URLSearchParams({
           To: contact.phone_number,
           From: campaign.from_number || '+15146125967',
@@ -126,16 +115,6 @@ serve(async (req) => {
           messageResults.push({ success: false, contact_id: contact.id, contact_phone_number: contact.phone_number, error_message: errorMessage })
           console.error(errorMessage)
 
-          // Update from delivered to failed since the message failed to send
-          const { error: updateCountError } = await supabaseClient.rpc(
-            'increment_failed_message_count',
-            { user_id_param: campaign.user_id }
-          )
-
-          if (updateCountError) {
-            console.error('Error updating message count after failure:', updateCountError)
-          }
-
           // Log failed message attempt
           await supabaseClient
             .from('message_logs')
@@ -153,7 +132,7 @@ serve(async (req) => {
           continue
         }
 
-        // Log successful message
+        // Log successful message attempt
         await supabaseClient
           .from('message_logs')
           .insert({
