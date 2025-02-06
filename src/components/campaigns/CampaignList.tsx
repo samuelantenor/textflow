@@ -30,29 +30,41 @@ export function CampaignList() {
 
   // Subscribe to real-time changes
   useEffect(() => {
-    const { data: { session } } = supabase.auth.getSession();
-    if (!session?.user) return;
+    let channel: ReturnType<typeof supabase.channel>;
 
-    const channel = supabase
-      .channel('campaigns-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen to all changes
-          schema: 'public',
-          table: 'campaigns',
-          filter: `user_id=eq.${session.user.id}` // Only listen to current user's campaigns
-        },
-        async (payload) => {
-          console.log('Campaign change received:', payload);
-          // Invalidate and refetch campaigns
-          await queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-        }
-      )
-      .subscribe();
+    const setupSubscription = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return;
+
+        channel = supabase
+          .channel('campaigns-changes')
+          .on(
+            'postgres_changes',
+            {
+              event: '*', // Listen to all changes
+              schema: 'public',
+              table: 'campaigns',
+              filter: `user_id=eq.${session.user.id}` // Only listen to current user's campaigns
+            },
+            async (payload) => {
+              console.log('Campaign change received:', payload);
+              // Invalidate and refetch campaigns
+              await queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+            }
+          )
+          .subscribe();
+      } catch (error) {
+        console.error('Error setting up real-time subscription:', error);
+      }
+    };
+
+    setupSubscription();
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [queryClient]);
 
