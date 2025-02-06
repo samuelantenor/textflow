@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -40,9 +39,8 @@ const CreateCampaign = () => {
         description: t('create.savedAsDraft'),
       });
 
-      // Navigate immediately after successful creation
-      navigate(`/${i18n.language}/dashboard?tab=campaigns`, { replace: true });
-
+      // Navigate and keep loading state until navigation completes
+      await navigate(`/${i18n.language}/dashboard?tab=campaigns`, { replace: true });
     } catch (error) {
       console.error("Error creating campaign:", error);
       toast({
@@ -50,8 +48,7 @@ const CreateCampaign = () => {
         description: error instanceof Error ? error.message : t('errors.create'),
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Reset loading state on error
     }
   };
 
@@ -62,6 +59,7 @@ const CreateCampaign = () => {
           variant="ghost"
           className="mb-6"
           onClick={() => navigate(`/${i18n.language}/dashboard?tab=campaigns`)}
+          disabled={isLoading}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           {t('create.backToCampaigns')}
@@ -77,21 +75,24 @@ const CreateCampaign = () => {
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <CampaignFormFields form={form} showAllFields={false} />
-              <div className="flex justify-end space-x-4 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate(`/${i18n.language}/dashboard?tab=campaigns`)}
-                >
-                  {t('buttons.cancel')}
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  {t('create.createCampaign')}
-                </Button>
+              <div className={`transition-opacity ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+                <CampaignFormFields form={form} showAllFields={false} />
+                <div className="flex justify-end space-x-4 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate(`/${i18n.language}/dashboard?tab=campaigns`)}
+                    disabled={isLoading}
+                  >
+                    {t('buttons.cancel')}
+                  </Button>
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    {t('create.createCampaign')}
+                  </Button>
+                </div>
               </div>
             </form>
           </Form>
