@@ -1,3 +1,4 @@
+
 {
   "create": {
     "title": "Create New Campaign",
@@ -53,12 +54,27 @@
     "campaignDeleteFailed": "Failed to delete the campaign. Please try again."
   },
   "success": {
-    "created": "Campaign created successfully",
-    "deleted": "Campaign deleted successfully",
-    "sent": "Campaign sent successfully",
-    "updated": "Campaign updated successfully",
-    "scheduled": "Campaign scheduled successfully",
-    "title": "Success"
+    "title": "Success",
+    "created": {
+      "title": "Campaign Created",
+      "description": "Campaign has been created successfully"
+    },
+    "deleted": {
+      "title": "Campaign Deleted",
+      "description": "Campaign has been deleted successfully"
+    },
+    "sent": {
+      "title": "Campaign Sent",
+      "description": "Campaign has been sent successfully"
+    },
+    "updated": {
+      "title": "Campaign Updated",
+      "description": "Campaign has been updated successfully"
+    },
+    "scheduled": {
+      "title": "Campaign Scheduled",
+      "description": "Campaign has been scheduled successfully"
+    }
   },
   "buttons": {
     "cancel": "Cancel",
