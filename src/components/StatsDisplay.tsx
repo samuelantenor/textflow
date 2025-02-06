@@ -1,83 +1,68 @@
-import { MessageSquare, CheckCircle, XCircle, Clock } from "lucide-react";
-import { Card } from "@/components/ui/card";
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import {
+  MessageSquare,
+  CheckCircle,
+  XCircle,
+  Clock
+} from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-
-const COLORS = {
-  delivered: "#22c55e",  // green
-  failed: "#ef4444",     // red
-  pending: "#f59e0b"     // amber
-};
 
 const StatsDisplay = () => {
   const { t } = useTranslation('dashboard');
   const { toast } = useToast();
 
   const { data: analytics, isLoading, error } = useQuery({
-    queryKey: ['campaign-analytics-summary'],
+    queryKey: ['subscription-stats'],
     queryFn: async () => {
       try {
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         if (userError) throw userError;
         if (!user) throw new Error('No authenticated user found');
 
-        console.log('Fetching message logs for user:', user.id);
-
-        // Use the database function to get message counts
-        const { data: statusCounts, error: countError } = await supabase
-          .rpc('get_message_counts_by_status', {
-            p_user_id: user.id
+        // Use get_user_plan_limits to get subscription data
+        const { data: limits, error: limitsError } = await supabase
+          .rpc('get_user_plan_limits', {
+            user_id: user.id
           });
 
-        if (countError) {
-          console.error('Error counting messages:', countError);
-          throw countError;
+        if (limitsError) {
+          console.error('Error fetching limits:', limitsError);
+          throw limitsError;
         }
 
-        console.log('Message counts by status:', statusCounts);
+        if (!limits || limits.length === 0) {
+          throw new Error('No subscription data found');
+        }
 
-        // Transform the data into the required format
-        const messageCountByStatus = statusCounts?.reduce((acc, curr) => {
-          acc[curr.status] = Number(curr.count);
-          return acc;
-        }, {} as Record<string, number>) || {};
-
-        // Calculate total messages and status counts
-        const counts = {
-          delivered: messageCountByStatus['delivered'] || 0,
-          failed: messageCountByStatus['failed'] || 0,
-          pending: messageCountByStatus['pending'] || 0
-        };
-
-        const totalMessages = Object.values(counts).reduce((sum, count) => sum + count, 0);
+        const stats = limits[0];
+        const totalMessages = stats.messages_sent_this_cycle || 0;
+        const deliveredMessages = stats.delivered_messages_this_cycle || 0;
+        const failedMessages = stats.failed_messages_this_cycle || 0;
+        const pendingMessages = totalMessages - (deliveredMessages + failedMessages);
         
         // Calculate delivery rate
         const deliveryRate = totalMessages > 0 
-          ? ((counts.delivered / totalMessages) * 100).toFixed(1)
+          ? ((deliveredMessages / totalMessages) * 100).toFixed(1)
           : '0';
 
-        // Prepare chart data
-        const chartData = [
-          { name: 'Delivered', value: counts.delivered, color: COLORS.delivered },
-          { name: 'Failed', value: counts.failed, color: COLORS.failed },
-          { name: 'Pending', value: counts.pending, color: COLORS.pending }
-        ];
-
         return {
-          delivery_rate: deliveryRate,
-          chart_data: chartData,
           total_messages: totalMessages,
-          status_counts: counts
+          delivered_messages: deliveredMessages,
+          failed_messages: failedMessages,
+          pending_messages: pendingMessages,
+          delivery_rate: deliveryRate,
+          message_limit: stats.message_limit
         };
       } catch (error) {
         console.error('Error in analytics query:', error);
         toast({
           title: t('errors.loadingFailed'),
-          description: t('errors.campaignsFailed'),
+          description: t('errors.statsFailed'),
           variant: "destructive",
         });
         throw error;
@@ -107,7 +92,7 @@ const StatsDisplay = () => {
     },
     {
       title: t('stats.failedMessages.title'),
-      value: analytics?.status_counts?.failed || 0,
+      value: analytics?.failed_messages || 0,
       icon: XCircle,
       color: "text-red-500",
       bgColor: "bg-red-500/10",
@@ -116,7 +101,7 @@ const StatsDisplay = () => {
     },
     {
       title: t('stats.pendingMessages.title'),
-      value: analytics?.status_counts?.pending || 0,
+      value: analytics?.pending_messages || 0,
       icon: Clock,
       color: "text-amber-500",
       bgColor: "bg-amber-500/10",
