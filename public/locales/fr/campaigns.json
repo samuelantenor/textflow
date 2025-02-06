@@ -26,15 +26,14 @@
       "placeholder": "Sélectionnez un groupe"
     },
     "schedule": {
-      "label": "Planification (Optionnel)",
+      "title": "Programmation",
+      "label": "Programmation (Optionnel)",
       "date": "Date",
       "time": "Heure",
       "placeholder": "Sélectionnez une date"
     },
-    "media": {
-      "label": "Média",
-      "placeholder": "Télécharger un média"
-    }
+    "basicInfo": "Informations de base",
+    "campaignDetails": "Détails de la campagne"
   },
   "errors": {
     "create": "Échec de la création de la campagne",
@@ -49,7 +48,8 @@
     "schedule": {
       "pastDate": "Impossible de planifier une campagne dans le passé",
       "pastTime": "Veuillez sélectionner une heure future",
-      "invalidTime": "Veuillez sélectionner une heure valide"
+      "invalidTime": "Veuillez sélectionner une heure valide",
+      "failed": "Échec de la programmation de la campagne"
     }
   },
   "success": {
@@ -57,7 +57,8 @@
     "deleted": "Campagne supprimée avec succès",
     "sent": "Campagne envoyée avec succès",
     "updated": "Campagne mise à jour avec succès",
-    "scheduled": "Campagne programmée avec succès"
+    "scheduled": "Campagne programmée avec succès",
+    "scheduledDescription": "Votre campagne sera envoyée automatiquement à l'heure prévue"
   },
   "buttons": {
     "cancel": "Annuler",
@@ -65,12 +66,13 @@
     "delete": "Supprimer",
     "edit": "Modifier",
     "send": "Envoyer",
+    "save": "Enregistrer",
     "analytics": "Analytiques",
-    "schedule": "Planifier"
+    "schedule": "Programmer"
   },
   "status": {
     "draft": "Brouillon",
-    "scheduled": "Programmée",
+    "scheduled": "Programmée", 
     "sent": "Envoyée"
   }
 }

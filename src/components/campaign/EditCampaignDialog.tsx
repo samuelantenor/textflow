@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -51,10 +52,9 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
       setIsLoading(true);
 
       if (!campaign.id) {
-        throw new Error('Invalid campaign ID');
+        throw new Error(t('errors.auth'));
       }
 
-      // Combine date and time if both are provided
       let scheduledFor = data.scheduled_for;
       if (scheduledFor && data.scheduled_time) {
         const [hours, minutes] = data.scheduled_time.split(':');
@@ -68,7 +68,6 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
         status = 'scheduled';
       }
 
-      // Update campaign in database
       const { error } = await supabase
         .from("campaigns")
         .update({
@@ -85,14 +84,13 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
 
       if (error) throw error;
 
-      // If campaign is scheduled, initiate the scheduling process
       if (scheduledFor) {
         const { error: scheduleError } = await supabase.functions.invoke('schedule-campaign-send', {
           body: { campaignId: campaign.id }
         });
 
         if (scheduleError) {
-          throw new Error(`Failed to schedule campaign: ${scheduleError.message}`);
+          throw new Error(`${t('errors.schedule.failed')}: ${scheduleError.message}`);
         }
 
         toast({
@@ -135,7 +133,7 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
               <div className="space-y-4">
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium text-gray-200">
-                    {t('form.basicInfo')}
+                    {t('form.campaignDetails')}
                   </h3>
                   <CampaignFormFields form={form} showAllFields={true} />
                 </div>
@@ -144,7 +142,7 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
                 
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium text-gray-200">
-                    {t('form.schedule.label')}
+                    {t('form.schedule.title')}
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Schedule fields are part of CampaignFormFields */}
