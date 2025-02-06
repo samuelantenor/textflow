@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -9,6 +10,7 @@ import { Loader2, ArrowLeft } from "lucide-react";
 import { CampaignFormFields } from "@/components/campaign/CampaignFormFields";
 import type { CampaignFormData } from "@/types/campaign";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
 
 const CreateCampaign = () => {
   const navigate = useNavigate();
@@ -16,6 +18,7 @@ const CreateCampaign = () => {
   const { toast } = useToast();
   const form = useForm<CampaignFormData>();
   const { t, i18n } = useTranslation(['campaigns']);
+  const queryClient = useQueryClient();
 
   const onSubmit = async (data: CampaignFormData) => {
     try {
@@ -34,13 +37,19 @@ const CreateCampaign = () => {
 
       if (error) throw error;
 
+      // Invalidate campaigns query to ensure fresh data
+      await queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+
       toast({
         title: t('success.created'),
         description: t('create.savedAsDraft'),
       });
 
-      // Navigate and keep loading state until navigation completes
-      await navigate(`/${i18n.language}/dashboard?tab=campaigns`, { replace: true });
+      // Add a small delay before navigation to allow real-time updates to process
+      setTimeout(() => {
+        navigate(`/${i18n.language}/dashboard?tab=campaigns`, { replace: true });
+        setIsLoading(false);
+      }, 500);
     } catch (error) {
       console.error("Error creating campaign:", error);
       toast({
@@ -48,7 +57,7 @@ const CreateCampaign = () => {
         description: error instanceof Error ? error.message : t('errors.create'),
         variant: "destructive",
       });
-      setIsLoading(false); // Reset loading state on error
+      setIsLoading(false);
     }
   };
 

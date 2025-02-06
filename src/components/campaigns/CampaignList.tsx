@@ -1,15 +1,16 @@
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { CreateCampaignButton } from "@/components/CreateCampaignButton";
 import { CampaignCard } from "./CampaignCard";
 import { Campaign } from "@/types/campaign";
 import { MessageSquare } from "lucide-react";
+import { useCampaignSubscription } from "@/hooks/useCampaignSubscription";
 
 export function CampaignList() {
-  const queryClient = useQueryClient();
+  // Set up real-time subscription
+  useCampaignSubscription();
 
   const { data: campaigns, isLoading } = useQuery({
     queryKey: ['campaigns'],
@@ -26,47 +27,9 @@ export function CampaignList() {
       if (error) throw error;
       return data as Campaign[];
     },
+    staleTime: 1000, // Consider data fresh for 1 second
+    refetchOnMount: true // Always refetch when component mounts
   });
-
-  // Subscribe to real-time changes
-  useEffect(() => {
-    let channel: ReturnType<typeof supabase.channel>;
-
-    const setupSubscription = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) return;
-
-        channel = supabase
-          .channel('campaigns-changes')
-          .on(
-            'postgres_changes',
-            {
-              event: '*', // Listen to all changes
-              schema: 'public',
-              table: 'campaigns',
-              filter: `user_id=eq.${session.user.id}` // Only listen to current user's campaigns
-            },
-            async (payload) => {
-              console.log('Campaign change received:', payload);
-              // Invalidate and refetch campaigns
-              await queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-            }
-          )
-          .subscribe();
-      } catch (error) {
-        console.error('Error setting up real-time subscription:', error);
-      }
-    };
-
-    setupSubscription();
-
-    return () => {
-      if (channel) {
-        supabase.removeChannel(channel);
-      }
-    };
-  }, [queryClient]);
 
   if (isLoading) {
     return (
