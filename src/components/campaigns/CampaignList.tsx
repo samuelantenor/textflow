@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -7,6 +6,8 @@ import { CampaignCard } from "./CampaignCard";
 import { Campaign } from "@/types/campaign";
 import { MessageSquare } from "lucide-react";
 import { useCampaignSubscription } from "@/hooks/useCampaignSubscription";
+import { toast } from "@/components/ui/use-toast";
+import { useTranslation } from "react-i18next";
 
 export function CampaignList() {
   // Set up real-time subscription
@@ -30,6 +31,26 @@ export function CampaignList() {
     staleTime: 1000, // Consider data fresh for 1 second
     refetchOnMount: true // Always refetch when component mounts
   });
+
+  const { t } = useTranslation();
+
+  const handleDeleteCampaign = async (campaignId) => {
+    const { error } = await supabase.from('campaigns').delete().eq('id', campaignId);
+
+    if (error) {
+      toast({
+        title: t("errors.title"),
+        description: t("errors.campaignDeleteFailed"),
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: t("campaigns.success.title"),
+        description: t("campaigns.success.deleted"),
+        variant: "success",
+      });
+    }
+  };
 
   if (isLoading) {
     return (

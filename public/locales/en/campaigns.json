@@ -1,4 +1,3 @@
-
 {
   "create": {
     "title": "Create New Campaign",
@@ -50,14 +49,17 @@
       "pastDate": "Cannot schedule campaign in the past",
       "pastTime": "Please select a future time",
       "invalidTime": "Please select a valid time"
-    }
+    },
+    "campaignDeleteFailed": "Failed to delete the campaign. Please try again."
   },
   "success": {
     "created": "Campaign created successfully",
     "deleted": "Campaign deleted successfully",
     "sent": "Campaign sent successfully",
     "updated": "Campaign updated successfully",
-    "scheduled": "Campaign scheduled successfully"
+    "scheduled": "Campaign scheduled successfully",
+    "title": "Success",
+    "deleted": "Campaign deleted successfully."
   },
   "buttons": {
     "cancel": "Cancel",

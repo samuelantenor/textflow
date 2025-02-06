@@ -1,4 +1,3 @@
-
 {
   "create": {
     "title": "Créer une nouvelle campagne",
@@ -50,7 +49,8 @@
       "pastTime": "Veuillez sélectionner une heure future",
       "invalidTime": "Veuillez sélectionner une heure valide",
       "failed": "Échec de la programmation de la campagne"
-    }
+    },
+    "campaignDeleteFailed": "Échec de la suppression de la campagne. Veuillez réessayer."
   },
   "success": {
     "created": {
@@ -72,7 +72,9 @@
     "scheduled": {
       "title": "Campagne programmée",
       "description": "Votre campagne sera envoyée automatiquement à l'heure prévue"
-    }
+    },
+    "title": "Succès",
+    "deleted": "Campagne supprimée avec succès."
   },
   "buttons": {
     "cancel": "Annuler",
