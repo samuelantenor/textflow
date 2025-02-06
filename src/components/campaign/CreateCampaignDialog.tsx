@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -5,12 +6,10 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Plus } from "lucide-react";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import type { CampaignFormData } from "@/types/campaign";
-import { useQuery } from "@tanstack/react-query";
+import { Plus, Loader2 } from "lucide-react";
 import { CampaignFormFields } from "./CampaignFormFields";
+import type { CampaignFormData } from "@/types/campaign";
+import { useTranslation } from "react-i18next";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function CreateCampaignDialog() {
@@ -18,71 +17,62 @@ export function CreateCampaignDialog() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const form = useForm<CampaignFormData>();
-
-  // Check monthly usage and campaign limits
-  const { data: limits } = useQuery({
-    queryKey: ['user-plan-limits'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return null;
-
-      const { data, error } = await supabase.rpc('get_user_plan_limits', {
-        user_id: session.user.id
-      });
-
-      if (error) throw error;
-      return data[0];
-    },
-  });
-
-  // Get current campaign count
-  const { data: campaignCount } = useQuery({
-    queryKey: ['campaign-count'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return null;
-
-      const { count, error } = await supabase
-        .from('campaigns')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', session.user.id);
-
-      if (error) throw error;
-      return count || 0;
-    },
-  });
-
-  const isAtCampaignLimit = (campaignCount || 0) >= (limits?.campaign_limit || 3);
+  const { t } = useTranslation(['campaigns']);
 
   const onSubmit = async (data: CampaignFormData) => {
     try {
-      if (isAtCampaignLimit) {
-        toast({
-          title: "Campaign limit reached",
-          description: "Please upgrade your plan to create more campaigns.",
-          variant: "destructive",
-        });
-        return;
-      }
-
       setIsLoading(true);
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
-        throw new Error("User not authenticated");
+        throw new Error(t('errors.auth'));
+      }
+
+      let mediaUrl = null;
+      if (data.media) {
+        const fileExt = data.media.name.split(".").pop();
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from("campaign_media")
+          .upload(fileName, data.media);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from("campaign_media")
+          .getPublicUrl(fileName);
+        
+        mediaUrl = publicUrl;
+      }
+
+      // Calculate scheduled_at by combining date and time
+      let scheduled_at = null;
+      let status = 'draft';
+      if (data.scheduled_for && data.scheduled_time) {
+        const [hours, minutes] = data.scheduled_time.split(':');
+        const scheduledDate = new Date(data.scheduled_for);
+        scheduledDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+        scheduled_at = scheduledDate.toISOString();
+        status = 'scheduled';
       }
 
       const { error } = await supabase.from("campaigns").insert({
         user_id: session.user.id,
         name: data.name,
-        status: "draft",
+        message: data.message,
+        media_url: mediaUrl,
+        scheduled_at,
+        status,
+        group_id: data.group_id,
+        from_number: data.from_number,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
       });
 
       if (error) throw error;
 
       toast({
-        title: "Campaign created",
-        description: "Your campaign has been saved as a draft.",
+        title: status === 'scheduled' ? t('success.scheduled') : t('success.created'),
+        description: status === 'scheduled' ? t('create.scheduledDescription') : t('create.savedAsDraft'),
       });
 
       setOpen(false);
@@ -90,8 +80,8 @@ export function CreateCampaignDialog() {
     } catch (error) {
       console.error("Error creating campaign:", error);
       toast({
-        title: "Error",
-        description: "Failed to create campaign. Please try again.",
+        title: t('errors.create'),
+        description: error instanceof Error ? error.message : t('errors.create'),
         variant: "destructive",
       });
     } finally {
@@ -104,13 +94,13 @@ export function CreateCampaignDialog() {
       <DialogTrigger asChild>
         <Button className="bg-primary-500 hover:bg-primary-600">
           <Plus className="w-4 h-4 mr-2" />
-          New Campaign
+          {t('create.newCampaign')}
         </Button>
       </DialogTrigger>
       
       <DialogContent className="w-[95vw] max-w-2xl h-[95vh] md:h-auto md:max-h-[85vh] p-0">
         <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6">
-          <DialogTitle className="text-xl">Create New Campaign</DialogTitle>
+          <DialogTitle className="text-xl">{t('create.title')}</DialogTitle>
         </DialogHeader>
         
         <ScrollArea className="px-4 sm:px-6 flex-1 h-[calc(95vh-8rem)] md:h-auto">
@@ -130,7 +120,7 @@ export function CreateCampaignDialog() {
                 onClick={() => setOpen(false)}
                 className="w-full sm:w-auto order-1 sm:order-none"
               >
-                Cancel
+                {t('buttons.cancel')}
               </Button>
               <Button 
                 onClick={form.handleSubmit(onSubmit)}
@@ -140,7 +130,7 @@ export function CreateCampaignDialog() {
                 {isLoading && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Create Campaign
+                {t('create.createCampaign')}
               </Button>
             </div>
           </div>

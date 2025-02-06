@@ -1,3 +1,4 @@
+
 {
   "create": {
     "title": "Create New Campaign",
@@ -7,7 +8,9 @@
     "createCampaign": "Create Campaign",
     "newCampaign": "New Campaign",
     "campaignCreated": "Campaign created",
-    "savedAsDraft": "Your campaign has been saved as a draft"
+    "savedAsDraft": "Your campaign has been saved as a draft",
+    "scheduled": "Campaign scheduled",
+    "scheduledDescription": "Your campaign has been scheduled and will be sent automatically at the specified time"
   },
   "form": {
     "name": {
@@ -23,7 +26,7 @@
       "placeholder": "Select a group"
     },
     "schedule": {
-      "label": "Schedule",
+      "label": "Schedule (Optional)",
       "date": "Date",
       "time": "Time",
       "placeholder": "Select date"
@@ -50,13 +53,18 @@
       "title": "Campaign limit reached",
       "description": "Please upgrade your plan to create more campaigns"
     },
-    "auth": "User not authenticated"
+    "auth": "User not authenticated",
+    "schedule": {
+      "pastDate": "Cannot schedule campaign in the past",
+      "invalidTime": "Please select a valid time"
+    }
   },
   "success": {
     "created": "Campaign created successfully",
     "deleted": "Campaign deleted successfully",
     "sent": "Campaign sent successfully",
-    "updated": "Campaign updated successfully"
+    "updated": "Campaign updated successfully",
+    "scheduled": "Campaign scheduled successfully"
   },
   "buttons": {
     "cancel": "Cancel",
@@ -64,6 +72,12 @@
     "delete": "Delete",
     "edit": "Edit",
     "send": "Send",
-    "analytics": "Analytics"
+    "analytics": "Analytics",
+    "schedule": "Schedule"
+  },
+  "status": {
+    "draft": "Draft",
+    "scheduled": "Scheduled",
+    "sent": "Sent"
   }
-} 
+}

@@ -116,8 +116,10 @@ export type Database = {
           media_url: string | null
           message: string | null
           name: string
+          scheduled_at: string | null
           scheduled_for: string | null
           status: string
+          timezone: string | null
           updated_at: string
           user_id: string
         }
@@ -129,8 +131,10 @@ export type Database = {
           media_url?: string | null
           message?: string | null
           name: string
+          scheduled_at?: string | null
           scheduled_for?: string | null
           status?: string
+          timezone?: string | null
           updated_at?: string
           user_id: string
         }
@@ -142,8 +146,10 @@ export type Database = {
           media_url?: string | null
           message?: string | null
           name?: string
+          scheduled_at?: string | null
           scheduled_for?: string | null
           status?: string
+          timezone?: string | null
           updated_at?: string
           user_id?: string
         }

@@ -1,3 +1,4 @@
+
 {
   "create": {
     "title": "Créer une nouvelle campagne",
@@ -7,7 +8,9 @@
     "createCampaign": "Créer la campagne",
     "newCampaign": "Nouvelle campagne",
     "campaignCreated": "Campagne créée",
-    "savedAsDraft": "Votre campagne a été enregistrée comme brouillon"
+    "savedAsDraft": "Votre campagne a été enregistrée comme brouillon",
+    "scheduled": "Campagne programmée",
+    "scheduledDescription": "Votre campagne a été programmée et sera envoyée automatiquement à l'heure spécifiée"
   },
   "form": {
     "name": {
@@ -23,7 +26,7 @@
       "placeholder": "Sélectionnez un groupe"
     },
     "schedule": {
-      "label": "Planification",
+      "label": "Planification (Optionnel)",
       "date": "Date",
       "time": "Heure",
       "placeholder": "Sélectionnez une date"
@@ -50,13 +53,18 @@
       "title": "Limite de campagnes atteinte",
       "description": "Veuillez mettre à niveau votre forfait pour créer plus de campagnes"
     },
-    "auth": "Utilisateur non authentifié"
+    "auth": "Utilisateur non authentifié",
+    "schedule": {
+      "pastDate": "Impossible de planifier une campagne dans le passé",
+      "invalidTime": "Veuillez sélectionner une heure valide"
+    }
   },
   "success": {
     "created": "Campagne créée avec succès",
     "deleted": "Campagne supprimée avec succès",
     "sent": "Campagne envoyée avec succès",
-    "updated": "Campagne mise à jour avec succès"
+    "updated": "Campagne mise à jour avec succès",
+    "scheduled": "Campagne programmée avec succès"
   },
   "buttons": {
     "cancel": "Annuler",
@@ -64,6 +72,12 @@
     "delete": "Supprimer",
     "edit": "Modifier",
     "send": "Envoyer",
-    "analytics": "Analytiques"
+    "analytics": "Analytiques",
+    "schedule": "Planifier"
+  },
+  "status": {
+    "draft": "Brouillon",
+    "scheduled": "Programmée",
+    "sent": "Envoyée"
   }
-} 
+}
