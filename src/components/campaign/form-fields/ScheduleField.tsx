@@ -87,10 +87,16 @@ export function ScheduleField({ form }: ScheduleFieldProps) {
           <FormItem>
             <FormLabel>{t('form.schedule.time')}</FormLabel>
             <FormControl>
-              <div className="relative">
+              <div className="relative" onClick={() => {
+                // Find and click the time input when the container is clicked
+                const timeInput = document.querySelector('input[type="time"]');
+                if (timeInput instanceof HTMLInputElement) {
+                  timeInput.click();
+                }
+              }}>
                 <Input
                   type="time"
-                  className="pl-10 bg-black/30 border-gray-800 focus:border-primary-500/50"
+                  className="pl-10 bg-black/30 border-gray-800 focus:border-primary-500/50 cursor-pointer"
                   {...field}
                   disabled={!scheduledFor}
                   onChange={(e) => {
@@ -119,7 +125,7 @@ export function ScheduleField({ form }: ScheduleFieldProps) {
                     }
                   }}
                 />
-                <Clock className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
+                <Clock className="absolute left-3 top-2.5 h-5 w-5 text-gray-500 pointer-events-none" />
               </div>
             </FormControl>
             <FormDescription className="text-gray-400">
