@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -16,7 +17,7 @@ interface MessageResult {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
@@ -85,6 +86,17 @@ serve(async (req) => {
       try {
         console.log(`Sending message to ${contact.phone_number}`)
 
+        // Call increment_messages_sent_count before sending the message
+        const { error: incrementError } = await supabaseClient.rpc(
+          'increment_messages_sent_count',
+          { user_id_param: campaign.user_id }
+        )
+
+        if (incrementError) {
+          console.error('Error incrementing message count:', incrementError)
+          throw incrementError
+        }
+
         const formData = new URLSearchParams({
           To: contact.phone_number,
           From: campaign.from_number || '+15146125967',
@@ -114,7 +126,7 @@ serve(async (req) => {
           messageResults.push({ success: false, contact_id: contact.id, contact_phone_number: contact.phone_number, error_message: errorMessage })
           console.error(errorMessage)
 
-          // Log failed message attempt (without ON CONFLICT)
+          // Log failed message attempt
           await supabaseClient
             .from('message_logs')
             .insert({
@@ -131,7 +143,7 @@ serve(async (req) => {
           continue
         }
 
-        // Log successful message (without ON CONFLICT)
+        // Log successful message
         await supabaseClient
           .from('message_logs')
           .insert({

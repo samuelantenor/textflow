@@ -1,7 +1,7 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
-import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { formatDate } from "@/utils/dateUtils";
 
@@ -13,6 +13,7 @@ interface MessageStats {
   monthlyLimit: number;
   billingCycleStart: string;
   billingCycleEnd: string;
+  messagesSentThisCycle: number;
 }
 
 export const UsageStats = () => {
@@ -30,7 +31,7 @@ export const UsageStats = () => {
 
       if (limitsError) throw limitsError;
 
-      // Get message counts
+      // Get message counts for delivered/failed/pending
       const { data: messages, error: messagesError } = await supabase
         .from('message_logs')
         .select('status')
@@ -54,7 +55,8 @@ export const UsageStats = () => {
         pending: statusCounts?.pending || 0,
         monthlyLimit: limits[0].message_limit,
         billingCycleStart: limits[0].billing_cycle_start,
-        billingCycleEnd: limits[0].billing_cycle_end
+        billingCycleEnd: limits[0].billing_cycle_end,
+        messagesSentThisCycle: limits[0].messages_sent_this_cycle
       };
 
       return stats;
@@ -63,7 +65,7 @@ export const UsageStats = () => {
   });
 
   const monthlyLimit = messageStats?.monthlyLimit || 20;
-  const usagePercentage = ((messageStats?.totalSent || 0) / monthlyLimit) * 100;
+  const usagePercentage = ((messageStats?.messagesSentThisCycle || 0) / monthlyLimit) * 100;
   const isLimitReached = usagePercentage >= 100;
 
   return (
@@ -74,7 +76,7 @@ export const UsageStats = () => {
           <div className="flex justify-between mb-2">
             <p className="text-sm text-muted-foreground">{t('usage.monthlyUsage')}</p>
             <p className="text-sm font-medium">
-              {messageStats?.totalSent || 0} / {monthlyLimit} {t('usage.messages')}
+              {messageStats?.messagesSentThisCycle || 0} / {monthlyLimit} {t('usage.messages')}
             </p>
           </div>
           <Progress 

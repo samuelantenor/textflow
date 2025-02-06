@@ -587,6 +587,7 @@ export type Database = {
           created_at: string
           has_been_paid: boolean | null
           id: string
+          messages_sent_this_cycle: number
           monthly_message_limit: number
           plan_type: string
           status: string
@@ -599,6 +600,7 @@ export type Database = {
           created_at?: string
           has_been_paid?: boolean | null
           id?: string
+          messages_sent_this_cycle?: number
           monthly_message_limit?: number
           plan_type?: string
           status: string
@@ -611,6 +613,7 @@ export type Database = {
           created_at?: string
           has_been_paid?: boolean | null
           id?: string
+          messages_sent_this_cycle?: number
           monthly_message_limit?: number
           plan_type?: string
           status?: string
@@ -672,7 +675,20 @@ export type Database = {
           can_buy_phone_numbers: boolean
           billing_cycle_start: string
           billing_cycle_end: string
+          messages_sent_this_cycle: number
         }[]
+      }
+      increment_messages_sent_count: {
+        Args: {
+          user_id_param: string
+        }
+        Returns: undefined
+      }
+      reset_messages_sent_count: {
+        Args: {
+          user_id_param: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
