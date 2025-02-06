@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -9,6 +10,7 @@ import { Loader2, ArrowLeft } from "lucide-react";
 import { CampaignFormFields } from "@/components/campaign/CampaignFormFields";
 import type { CampaignFormData } from "@/types/campaign";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
 
 const CreateCampaign = () => {
   const navigate = useNavigate();
@@ -16,6 +18,7 @@ const CreateCampaign = () => {
   const { toast } = useToast();
   const form = useForm<CampaignFormData>();
   const { t, i18n } = useTranslation(['campaigns']);
+  const queryClient = useQueryClient();
 
   const onSubmit = async (data: CampaignFormData) => {
     try {
@@ -25,6 +28,25 @@ const CreateCampaign = () => {
       if (!session?.user) {
         throw new Error(t('errors.auth'));
       }
+
+      // Subscribe to real-time updates before creating the campaign
+      const channel = supabase
+        .channel('campaign-updates')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'campaigns',
+            filter: `user_id=eq.${session.user.id}`
+          },
+          async (payload) => {
+            // When the new campaign is detected, invalidate the query and navigate
+            await queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+            navigate(`/${i18n.language}/dashboard?tab=campaigns`, { replace: true });
+          }
+        )
+        .subscribe();
 
       const { error } = await supabase.from("campaigns").insert({
         user_id: session.user.id,
@@ -39,8 +61,12 @@ const CreateCampaign = () => {
         description: t('create.savedAsDraft'),
       });
 
-      // Refresh the page and redirect to dashboard with campaigns tab
-      navigate(`/${i18n.language}/dashboard?tab=campaigns`);
+      // The navigation will happen in the subscription callback
+      // Cleanup the channel after a short delay to ensure the message is processed
+      setTimeout(() => {
+        supabase.removeChannel(channel);
+      }, 1000);
+
     } catch (error) {
       console.error("Error creating campaign:", error);
       toast({
@@ -48,6 +74,7 @@ const CreateCampaign = () => {
         description: error instanceof Error ? error.message : t('errors.create'),
         variant: "destructive",
       });
+      navigate(`/${i18n.language}/dashboard?tab=campaigns`, { replace: true });
     } finally {
       setIsLoading(false);
     }
