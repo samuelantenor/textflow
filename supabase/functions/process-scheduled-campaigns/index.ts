@@ -18,11 +18,11 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    console.log('Processing scheduled campaigns...')
+    console.log('Starting scheduled campaign processing...')
+    const now = new Date()
+    console.log('Current server time:', now.toISOString())
 
-    // Get all campaigns that are scheduled and due to be sent
-    // Instead of comparing with current time, we'll get all scheduled campaigns
-    // and check their timestamps in UTC
+    // Get all scheduled campaigns
     const { data: campaignsToProcess, error: fetchError } = await supabaseClient
       .from('campaigns')
       .select('*')
@@ -34,23 +34,48 @@ serve(async (req) => {
     }
 
     console.log(`Found ${campaignsToProcess?.length || 0} total scheduled campaigns`)
+    console.log('All scheduled campaigns:', campaignsToProcess)
 
     // Filter campaigns that are due to be sent
-    const now = new Date()
     const dueCampaigns = campaignsToProcess?.filter(campaign => {
-      const scheduledDate = new Date(campaign.scheduled_for)
-      return scheduledDate <= now
+      const scheduledFor = new Date(campaign.scheduled_for)
+      const isDue = scheduledFor <= now
+      console.log(`Campaign ${campaign.id}:`, {
+        scheduledFor: scheduledFor.toISOString(),
+        currentTime: now.toISOString(),
+        isDue,
+        timezone: campaign.timezone
+      })
+      return isDue
     }) || []
 
     console.log(`Found ${dueCampaigns.length} campaigns due to be sent`)
     console.log('Due campaigns:', dueCampaigns)
 
+    if (dueCampaigns.length === 0) {
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          processed: 0,
+          message: 'No campaigns due for processing' 
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        },
+      )
+    }
+
     // Process each campaign
     const processPromises = dueCampaigns.map(async (campaign) => {
       try {
         console.log(`Processing campaign ${campaign.id}...`)
-        console.log(`Campaign scheduled for: ${campaign.scheduled_for} in timezone: ${campaign.timezone}`)
-        console.log(`Current time: ${now.toISOString()}`)
+        console.log('Campaign details:', {
+          id: campaign.id,
+          name: campaign.name,
+          scheduledFor: campaign.scheduled_for,
+          timezone: campaign.timezone
+        })
         
         // Call the send-campaign function
         const response = await fetch(
