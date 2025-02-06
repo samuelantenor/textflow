@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import { SideNav } from './SideNav';
 import { useLocation } from 'react-router-dom';
 import { cn } from '../../lib/utils';
+import { Toaster } from "@/components/ui/toaster";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -25,6 +26,7 @@ export function MainLayout({ children }: MainLayoutProps) {
           </div>
         </div>
       </main>
+      <Toaster />
     </div>
   );
-} 
+}

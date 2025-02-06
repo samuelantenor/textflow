@@ -36,14 +36,6 @@
       "placeholder": "Télécharger un média"
     }
   },
-  "list": {
-    "title": "Campagnes",
-    "empty": {
-      "title": "Aucune campagne pour le moment",
-      "description": "Créez votre première campagne pour commencer à envoyer des messages à vos contacts"
-    },
-    "loading": "Chargement des campagnes..."
-  },
   "errors": {
     "create": "Échec de la création de la campagne",
     "delete": "Échec de la suppression de la campagne",
@@ -56,6 +48,7 @@
     "auth": "Utilisateur non authentifié",
     "schedule": {
       "pastDate": "Impossible de planifier une campagne dans le passé",
+      "pastTime": "Veuillez sélectionner une heure future",
       "invalidTime": "Veuillez sélectionner une heure valide"
     }
   },

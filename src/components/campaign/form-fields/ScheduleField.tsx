@@ -16,6 +16,25 @@ export function ScheduleField({ form }: ScheduleFieldProps) {
   const { t } = useTranslation(['campaigns']);
   const scheduledFor = form.watch("scheduled_for");
 
+  const isTimeValid = (time: string): boolean => {
+    if (!scheduledFor) return true;
+    
+    const now = new Date();
+    const [hours, minutes] = time.split(':').map(Number);
+    const selectedDate = new Date(scheduledFor);
+    selectedDate.setHours(hours, minutes, 0, 0);
+    
+    return selectedDate > now;
+  };
+
+  const getNextValidTime = (): string => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 5); // Add 5 minutes buffer
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = Math.ceil(now.getMinutes() / 15) * 15; // Round to next 15 minutes
+    return `${hours}:${minutes.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="space-y-4">
       <FormField
@@ -31,14 +50,11 @@ export function ScheduleField({ form }: ScheduleFieldProps) {
                 onSelect={(date) => {
                   if (date) {
                     const currentDate = new Date();
-                    // If the selected date is today, set time to next hour
+                    // If the selected date is today, set time to next valid time
                     if (date.toDateString() === currentDate.toDateString()) {
-                      const nextHour = new Date();
-                      nextHour.setHours(nextHour.getHours() + 1, 0, 0, 0);
-                      field.onChange(nextHour);
-                      form.setValue("scheduled_time", 
-                        `${nextHour.getHours().toString().padStart(2, '0')}:00`
-                      );
+                      const nextValidTime = getNextValidTime();
+                      field.onChange(date);
+                      form.setValue("scheduled_time", nextValidTime);
                     } else {
                       // For future dates, default to 9 AM
                       date.setHours(9, 0, 0, 0);
@@ -78,12 +94,28 @@ export function ScheduleField({ form }: ScheduleFieldProps) {
                   {...field}
                   disabled={!scheduledFor}
                   onChange={(e) => {
-                    field.onChange(e.target.value);
-                    if (scheduledFor && e.target.value) {
-                      const [hours, minutes] = e.target.value.split(':');
-                      const newDate = new Date(scheduledFor);
-                      newDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-                      form.setValue("scheduled_for", newDate);
+                    const newTime = e.target.value;
+                    if (!isTimeValid(newTime)) {
+                      const nextValidTime = getNextValidTime();
+                      field.onChange(nextValidTime);
+                      if (scheduledFor) {
+                        const [hours, minutes] = nextValidTime.split(':');
+                        const newDate = new Date(scheduledFor);
+                        newDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+                        form.setValue("scheduled_for", newDate);
+                      }
+                      form.setError("scheduled_time", {
+                        type: "manual",
+                        message: t('errors.schedule.pastTime')
+                      });
+                    } else {
+                      field.onChange(newTime);
+                      if (scheduledFor && newTime) {
+                        const [hours, minutes] = newTime.split(':');
+                        const newDate = new Date(scheduledFor);
+                        newDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+                        form.setValue("scheduled_for", newDate);
+                      }
                     }
                   }}
                 />

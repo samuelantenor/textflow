@@ -36,14 +36,6 @@
       "placeholder": "Upload media"
     }
   },
-  "list": {
-    "title": "Campaigns",
-    "empty": {
-      "title": "No campaigns yet",
-      "description": "Create your first campaign to start sending messages to your contacts"
-    },
-    "loading": "Loading campaigns..."
-  },
   "errors": {
     "create": "Failed to create campaign",
     "delete": "Failed to delete campaign",
@@ -56,6 +48,7 @@
     "auth": "User not authenticated",
     "schedule": {
       "pastDate": "Cannot schedule campaign in the past",
+      "pastTime": "Please select a future time",
       "invalidTime": "Please select a valid time"
     }
   },
