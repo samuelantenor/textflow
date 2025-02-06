@@ -86,9 +86,9 @@ serve(async (req) => {
       try {
         console.log(`Sending message to ${contact.phone_number}`)
 
-        // Call increment_messages_sent_count before sending the message
+        // Increment delivered count before sending - we'll update it if it fails
         const { error: incrementError } = await supabaseClient.rpc(
-          'increment_messages_sent_count',
+          'increment_delivered_message_count',
           { user_id_param: campaign.user_id }
         )
 
@@ -125,6 +125,16 @@ serve(async (req) => {
           const errorMessage = `Error sending to ${contact.phone_number}: ${result.message}`
           messageResults.push({ success: false, contact_id: contact.id, contact_phone_number: contact.phone_number, error_message: errorMessage })
           console.error(errorMessage)
+
+          // Update from delivered to failed since the message failed to send
+          const { error: updateCountError } = await supabaseClient.rpc(
+            'increment_failed_message_count',
+            { user_id_param: campaign.user_id }
+          )
+
+          if (updateCountError) {
+            console.error('Error updating message count after failure:', updateCountError)
+          }
 
           // Log failed message attempt
           await supabaseClient
