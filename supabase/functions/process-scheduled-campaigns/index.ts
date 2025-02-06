@@ -21,11 +21,15 @@ serve(async (req) => {
     console.log('Processing scheduled campaigns...')
 
     // Get all campaigns that are scheduled and due to be sent
+    // Use UTC timestamp for comparison
+    const currentUtcTime = new Date().toISOString();
+    console.log('Current UTC time:', currentUtcTime);
+
     const { data: campaignsToProcess, error: fetchError } = await supabaseClient
       .from('campaigns')
-      .select('id')
+      .select('id, scheduled_for, timezone')
       .eq('status', 'scheduled')
-      .lte('scheduled_for', new Date().toISOString())  // Changed from scheduled_at to scheduled_for
+      .lte('scheduled_for', currentUtcTime)
 
     if (fetchError) {
       console.error('Error fetching scheduled campaigns:', fetchError)
@@ -33,11 +37,13 @@ serve(async (req) => {
     }
 
     console.log(`Found ${campaignsToProcess?.length || 0} campaigns to process`)
+    console.log('Campaigns to process:', campaignsToProcess)
 
     // Process each campaign
     const processPromises = (campaignsToProcess || []).map(async (campaign) => {
       try {
         console.log(`Processing campaign ${campaign.id}...`)
+        console.log(`Campaign scheduled for: ${campaign.scheduled_for} in timezone: ${campaign.timezone}`)
         
         // Call the send-campaign function
         const response = await fetch(
@@ -53,10 +59,13 @@ serve(async (req) => {
         )
 
         if (!response.ok) {
-          throw new Error(`Failed to send campaign: ${await response.text()}`)
+          const errorText = await response.text();
+          console.error(`Error response from send-campaign:`, errorText);
+          throw new Error(`Failed to send campaign: ${errorText}`);
         }
 
-        console.log(`Successfully processed campaign ${campaign.id}`)
+        const result = await response.json();
+        console.log(`Successfully processed campaign ${campaign.id}`, result);
       } catch (error) {
         console.error(`Error processing campaign ${campaign.id}:`, error)
         throw error
