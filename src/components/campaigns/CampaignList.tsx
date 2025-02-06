@@ -1,4 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { CreateCampaignButton } from "@/components/CreateCampaignButton";
@@ -7,6 +9,8 @@ import { Campaign } from "@/types/campaign";
 import { MessageSquare } from "lucide-react";
 
 export function CampaignList() {
+  const queryClient = useQueryClient();
+
   const { data: campaigns, isLoading } = useQuery({
     queryKey: ['campaigns'],
     queryFn: async () => {
@@ -19,6 +23,30 @@ export function CampaignList() {
       return data as Campaign[];
     },
   });
+
+  // Subscribe to real-time changes
+  useEffect(() => {
+    const channel = supabase
+      .channel('campaigns-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all changes
+          schema: 'public',
+          table: 'campaigns'
+        },
+        (payload) => {
+          console.log('Campaign change received:', payload);
+          // Invalidate and refetch campaigns
+          queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   if (isLoading) {
     return (
