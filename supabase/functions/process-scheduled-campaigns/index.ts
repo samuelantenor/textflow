@@ -22,37 +22,23 @@ serve(async (req) => {
     const now = new Date()
     console.log('Current server time:', now.toISOString())
 
-    // Get all scheduled campaigns
+    // Get only scheduled campaigns that haven't been sent yet
     const { data: campaignsToProcess, error: fetchError } = await supabaseClient
       .from('campaigns')
       .select('*')
       .eq('status', 'scheduled')
+      .eq('processing_status', 'pending') // Only get campaigns that are still pending
+      .lte('scheduled_for', now.toISOString()) // Only get campaigns scheduled for now or earlier
 
     if (fetchError) {
       console.error('Error fetching scheduled campaigns:', fetchError)
       throw fetchError
     }
 
-    console.log(`Found ${campaignsToProcess?.length || 0} total scheduled campaigns`)
-    console.log('All scheduled campaigns:', campaignsToProcess)
+    console.log(`Found ${campaignsToProcess?.length || 0} campaigns to process`)
+    console.log('Campaigns to process:', campaignsToProcess)
 
-    // Filter campaigns that are due to be sent
-    const dueCampaigns = campaignsToProcess?.filter(campaign => {
-      const scheduledFor = new Date(campaign.scheduled_for)
-      const isDue = scheduledFor <= now
-      console.log(`Campaign ${campaign.id}:`, {
-        scheduledFor: scheduledFor.toISOString(),
-        currentTime: now.toISOString(),
-        isDue,
-        timezone: campaign.timezone
-      })
-      return isDue
-    }) || []
-
-    console.log(`Found ${dueCampaigns.length} campaigns due to be sent`)
-    console.log('Due campaigns:', dueCampaigns)
-
-    if (dueCampaigns.length === 0) {
+    if (!campaignsToProcess || campaignsToProcess.length === 0) {
       return new Response(
         JSON.stringify({ 
           success: true, 
@@ -67,15 +53,23 @@ serve(async (req) => {
     }
 
     // Process each campaign
-    const processPromises = dueCampaigns.map(async (campaign) => {
+    const processPromises = campaignsToProcess.map(async (campaign) => {
       try {
         console.log(`Processing campaign ${campaign.id}...`)
-        console.log('Campaign details:', {
-          id: campaign.id,
-          name: campaign.name,
-          scheduledFor: campaign.scheduled_for,
-          timezone: campaign.timezone
-        })
+        
+        // First mark the campaign as processing to prevent duplicate sends
+        const { error: updateError } = await supabaseClient
+          .from('campaigns')
+          .update({ 
+            processing_status: 'processing',
+            status: 'processing'
+          })
+          .eq('id', campaign.id)
+
+        if (updateError) {
+          console.error(`Error updating campaign ${campaign.id} status:`, updateError)
+          throw updateError
+        }
         
         // Call the send-campaign function
         const response = await fetch(
@@ -100,6 +94,14 @@ serve(async (req) => {
         console.log(`Successfully processed campaign ${campaign.id}`, result)
       } catch (error) {
         console.error(`Error processing campaign ${campaign.id}:`, error)
+        // Update campaign status to error if something went wrong
+        await supabaseClient
+          .from('campaigns')
+          .update({ 
+            processing_status: 'error',
+            status: 'error'
+          })
+          .eq('id', campaign.id)
         throw error
       }
     })
@@ -109,7 +111,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        processed: dueCampaigns.length 
+        processed: campaignsToProcess.length 
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
