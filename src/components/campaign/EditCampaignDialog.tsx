@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -47,6 +48,15 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
   });
 
   const onSubmit = async (data: CampaignFormData) => {
+    if (!campaign.id) {
+      toast({
+        title: t('errors.update'),
+        description: t('errors.invalidCampaign'),
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
 
