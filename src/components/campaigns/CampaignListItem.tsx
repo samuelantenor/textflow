@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "@/utils/dateUtils";
@@ -181,4 +182,4 @@ export function CampaignListItem({ campaign }: CampaignListItemProps) {
       )}
     </div>
   );
-}
+};
