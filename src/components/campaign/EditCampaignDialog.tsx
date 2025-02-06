@@ -122,6 +122,10 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
       }
 
       onOpenChange(false);
+      
+      // Refresh the page while maintaining the campaigns tab
+      window.location.href = "/en/dashboard?tab=campaigns";
+
     } catch (error) {
       console.error("Error updating campaign:", error);
       toast({
