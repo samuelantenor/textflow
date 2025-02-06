@@ -4,7 +4,6 @@ export interface Campaign {
   user_id: string;
   name: string;
   message: string;
-  media_url?: string;
   scheduled_for?: string;
   scheduled_at?: string;
   timezone?: string;
@@ -18,7 +17,6 @@ export interface Campaign {
 export type CampaignFormData = {
   name: string;
   message: string;
-  media?: File;
   scheduled_for?: Date;
   scheduled_time?: string;
   group_id: string;

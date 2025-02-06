@@ -71,31 +71,6 @@ export function CampaignFormFields({ form, showAllFields = false }: CampaignForm
           <GroupSelectField form={form} />
           <PhoneNumberField form={form} />
           <ScheduleField form={form} />
-
-          <FormField
-            control={form.control}
-            name="media"
-            render={({ field: { value, onChange, ...field } }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium text-gray-200">
-                  {t('form.media.label')}
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="file"
-                    accept="image/*,video/*"
-                    className="bg-black/30 border-gray-800 focus:border-primary-500/50"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) onChange(file);
-                    }}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </>
       )}
     </div>
