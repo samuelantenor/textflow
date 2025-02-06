@@ -7,6 +7,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+interface MessageResult {
+  success: boolean;
+  contact_id: string | null;
+  contact_phone_number: string;
+  twilio_message_sid?: string;
+  error_message?: string;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -96,11 +104,12 @@ serve(async (req) => {
     const webhookUrl = `${supabaseUrl}/functions/v1/twilio-webhook`
     console.log('Using webhook URL:', webhookUrl)
 
-    let errorCount = 0
-    const errorMessages: string[] = []
+    let successCount = 0
+    let failureCount = 0
+    const messageResults: MessageResult[] = []
 
     // Send messages to all contacts
-    const messagePromises = contacts.map(async (contact) => {
+    for (const contact of contacts) {
       try {
         // Check if message already exists for this contact and campaign
         const { data: existingMessage } = await supabaseClient
@@ -112,7 +121,8 @@ serve(async (req) => {
 
         if (existingMessage) {
           console.log(`Message already exists for contact ${contact.id} in campaign ${campaignId}`)
-          return null
+          if (existingMessage.status === 'delivered') successCount++
+          continue
         }
 
         console.log(`Sending message to ${contact.phone_number}`)
@@ -141,85 +151,119 @@ serve(async (req) => {
         console.log('Twilio response:', result)
 
         if (!response.ok) {
-          errorCount++
+          failureCount++
           const errorMessage = `Error sending to ${contact.phone_number}: ${result.message}`
-          errorMessages.push(errorMessage)
-          throw new Error(errorMessage)
-        }
-
-        // Log the message
-        const { error: logError } = await supabaseClient
-          .from('message_logs')
-          .insert({
-            campaign_id: campaignId,
+          messageResults.push({
+            success: false,
             contact_id: contact.id,
-            twilio_message_sid: result.sid,
-            status: result.status,
-            error_message: result.error_message,
-            user_id: campaign.user_id,
-            contact_name: contact.name,
-            contact_phone_number: contact.phone_number
+            contact_phone_number: contact.phone_number,
+            error_message: errorMessage
           })
-
-        if (logError) {
-          console.error('Error creating message log:', logError)
-          throw logError
+          console.error(errorMessage)
+          continue
         }
 
-        return result
+        // Log the message with error handling
+        try {
+          const { error: logError } = await supabaseClient
+            .from('message_logs')
+            .upsert({
+              campaign_id: campaignId,
+              contact_id: contact.id,
+              twilio_message_sid: result.sid,
+              status: result.status,
+              error_message: result.error_message,
+              user_id: campaign.user_id,
+              contact_name: contact.name,
+              contact_phone_number: contact.phone_number
+            }, {
+              onConflict: 'campaign_id,contact_phone_number'
+            })
+
+          if (logError) {
+            console.error('Error creating message log:', logError)
+            // Don't throw, just log the error
+            messageResults.push({
+              success: true,
+              contact_id: contact.id,
+              contact_phone_number: contact.phone_number,
+              twilio_message_sid: result.sid,
+              error_message: `Message sent but logging failed: ${logError.message}`
+            })
+          } else {
+            successCount++
+            messageResults.push({
+              success: true,
+              contact_id: contact.id,
+              contact_phone_number: contact.phone_number,
+              twilio_message_sid: result.sid
+            })
+          }
+        } catch (logError) {
+          console.error('Error in message logging:', logError)
+          // Continue processing other messages
+          messageResults.push({
+            success: true,
+            contact_id: contact.id,
+            contact_phone_number: contact.phone_number,
+            twilio_message_sid: result.sid,
+            error_message: `Message sent but logging failed: ${logError.message}`
+          })
+        }
       } catch (error) {
-        console.error(`Error sending message to ${contact.phone_number}:`, error)
-        errorCount++
-        errorMessages.push(error.message)
-        throw error
-      }
-    })
-
-    try {
-      await Promise.all(messagePromises)
-      
-      // Update campaign status based on success/failure
-      const finalStatus = errorCount === contacts.length ? 'failed' : 'sent'
-      const { error: finalUpdateError } = await supabaseClient
-        .from('campaigns')
-        .update({ 
-          status: finalStatus,
-          error_log: errorMessages.length > 0 ? errorMessages.join('\n') : null
+        console.error(`Error processing contact ${contact.id}:`, error)
+        failureCount++
+        messageResults.push({
+          success: false,
+          contact_id: contact.id,
+          contact_phone_number: contact.phone_number,
+          error_message: error.message
         })
-        .eq('id', campaignId)
-
-      if (finalUpdateError) {
-        console.error('Error updating campaign final status:', finalUpdateError)
-        throw finalUpdateError
       }
-
-      return new Response(
-        JSON.stringify({ 
-          success: true,
-          errorCount,
-          totalContacts: contacts.length 
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
-        },
-      )
-    } catch (error) {
-      // Update campaign status to failed if all messages failed
-      const { error: failureUpdateError } = await supabaseClient
-        .from('campaigns')
-        .update({ 
-          status: 'failed',
-          error_log: errorMessages.join('\n')
-        })
-        .eq('id', campaignId)
-
-      if (failureUpdateError) {
-        console.error('Error updating campaign failure status:', failureUpdateError)
-      }
-
-      throw error
     }
+
+    // Determine final campaign status
+    let finalStatus: string
+    let errorLog: string | null = null
+
+    if (failureCount === contacts.length) {
+      finalStatus = 'failed'
+      errorLog = 'All messages failed to send'
+    } else if (failureCount > 0) {
+      finalStatus = 'partially_sent'
+      errorLog = `${failureCount} out of ${contacts.length} messages failed to send`
+    } else {
+      finalStatus = 'sent'
+    }
+
+    // Update campaign status
+    const { error: finalUpdateError } = await supabaseClient
+      .from('campaigns')
+      .update({ 
+        status: finalStatus,
+        error_log: errorLog
+      })
+      .eq('id', campaignId)
+
+    if (finalUpdateError) {
+      console.error('Error updating campaign final status:', finalUpdateError)
+      // Don't throw, we still want to return the results
+    }
+
+    return new Response(
+      JSON.stringify({ 
+        success: true,
+        totalContacts: contacts.length,
+        successCount,
+        failureCount,
+        status: finalStatus,
+        messageResults
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      },
+    )
   } catch (error) {
     console.error('Error in send-campaign function:', error)
     return new Response(
