@@ -62,6 +62,23 @@ export function PhoneNumbersList() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
+      // First check if this number already exists for the user
+      const { data: existingNumbers } = await supabase
+        .from('phone_numbers')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .eq('phone_number', newNumber)
+        .single();
+
+      if (existingNumbers) {
+        toast({
+          variant: "destructive",
+          description: t("phoneNumbers.add.alreadyExists")
+        });
+        return;
+      }
+
+      // If no existing number found, proceed with insertion
       const { error } = await supabase.from('phone_numbers').insert({
         user_id: session.user.id,
         phone_number: newNumber,
@@ -179,7 +196,7 @@ export function PhoneNumbersList() {
                   <div className="flex">
                     <div className="flex-shrink-0">
                       <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M8.485 2.495c.873-1.562 3.157-1.562 4.03 0l6.28 11.226c.88 1.574-.201 3.279-2.015 3.279H4.22c-1.814 0-2.895-1.705-2.015-3.279l6.28-11.226zM10 5a1 1 0 011 1v4a1 1 0 11-2 0V6a1 1 0 011-1zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                        <path fillRule="evenodd" d="M8.485 2.495c.873-1.562 3.157-1.562 4.03 0l6.28 11.226c.88 1.574-.201 3.279-2.015 3.279H4.22c-1.814 0-2.895-1.705-2.015-3.279l6.28-11.226zM10 5a1 1 0 011 1v4a1 1 0 11-2 0V6a1 1 0 011-1zm0 9a1 1 0 010-2 1 1 0 000 2z" clipRule="evenodd" />
                       </svg>
                     </div>
                     <div className="ml-3">
