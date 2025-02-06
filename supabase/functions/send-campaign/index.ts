@@ -1,18 +1,9 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-interface MessageResult {
-  success: boolean;
-  contact_id: string | null;
-  contact_phone_number: string;
-  twilio_message_sid?: string;
-  error_message?: string;
 }
 
 serve(async (req) => {
@@ -29,12 +20,12 @@ serve(async (req) => {
     const { campaignId } = await req.json()
     console.log('Processing campaign:', campaignId)
 
-    // First, get the campaign details and check status
+    // First, get the campaign details
     const { data: campaign, error: campaignError } = await supabaseClient
       .from('campaigns')
-      .select('*, user_id')
+      .select('*, user_id')  // Make sure to select user_id
       .eq('id', campaignId)
-      .single()
+      .maybeSingle()
 
     if (campaignError) {
       console.error('Error fetching campaign:', campaignError)
@@ -44,38 +35,11 @@ serve(async (req) => {
       throw new Error('Campaign not found')
     }
 
-    // Verify campaign status is valid for sending
-    if (!['scheduled', 'draft'].includes(campaign.status)) {
-      console.log(`Campaign ${campaignId} is ${campaign.status}, skipping`)
-      return new Response(
-        JSON.stringify({ success: false, message: `Campaign is ${campaign.status}` }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400,
-        }
-      )
-    }
-
     if (!campaign.group_id) {
       throw new Error('Campaign has no associated contact group')
     }
 
-    // Update processing started timestamp and status atomically
-    const { error: updateStartError } = await supabaseClient
-      .from('campaigns')
-      .update({ 
-        last_processing_started: new Date().toISOString(),
-        status: 'processing'
-      })
-      .eq('id', campaignId)
-      .eq('status', campaign.status) // Ensure status hasn't changed
-
-    if (updateStartError) {
-      console.error('Error updating campaign start time:', updateStartError)
-      throw updateStartError
-    }
-
-    // Get contacts that haven't been messaged yet for this campaign
+    // Then, get the contacts for this group
     const { data: contacts, error: contactsError } = await supabaseClient
       .from('contacts')
       .select('*')
@@ -99,24 +63,20 @@ serve(async (req) => {
       throw new Error('Twilio credentials not configured')
     }
 
-    // Construct the webhook URL
+    // Construct the webhook URL using the Supabase project URL
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const webhookUrl = `${supabaseUrl}/functions/v1/twilio-webhook`
     console.log('Using webhook URL:', webhookUrl)
 
-    let successCount = 0
-    let failureCount = 0
-    const messageResults: MessageResult[] = []
-
     // Send messages to all contacts
-    for (const contact of contacts) {
+    const messagePromises = contacts.map(async (contact) => {
       try {
         console.log(`Sending message to ${contact.phone_number}`)
         
         const formData = new URLSearchParams({
           To: contact.phone_number,
-          From: campaign.from_number || '+15146125967',
-          Body: campaign.message || '',
+          From: campaign.from_number || '+15146125967', // Using default number if not specified
+          Body: campaign.message,
           StatusCallback: webhookUrl,
           ...(campaign.media_url ? { MediaUrl: campaign.media_url } : {}),
         })
@@ -136,130 +96,45 @@ serve(async (req) => {
         const result = await response.json()
         console.log('Twilio response:', result)
 
-        if (!response.ok) {
-          failureCount++
-          const errorMessage = `Error sending to ${contact.phone_number}: ${result.message}`
-          messageResults.push({
-            success: false,
+        // Log the message with user_id
+        const { error: logError } = await supabaseClient
+          .from('message_logs')
+          .insert({
+            campaign_id: campaignId,
             contact_id: contact.id,
-            contact_phone_number: contact.phone_number,
-            error_message: errorMessage
-          })
-          console.error(errorMessage)
-
-          // Log failed message attempt
-          const { error: logError } = await supabaseClient
-            .from('message_logs')
-            .insert({
-              campaign_id: campaignId,
-              contact_id: contact.id,
-              twilio_message_sid: result.sid || 'failed',
-              status: 'failed',
-              error_message: errorMessage,
-              user_id: campaign.user_id,
-              contact_name: contact.name,
-              contact_phone_number: contact.phone_number
-            })
-
-          if (logError) {
-            console.error('Error logging failed message:', logError)
-          }
-          
-          continue
-        }
-
-        // Log successful message
-        try {
-          const { error: logError } = await supabaseClient
-            .from('message_logs')
-            .insert({
-              campaign_id: campaignId,
-              contact_id: contact.id,
-              twilio_message_sid: result.sid,
-              status: result.status,
-              error_message: result.error_message,
-              user_id: campaign.user_id,
-              contact_name: contact.name,
-              contact_phone_number: contact.phone_number
-            })
-
-          if (logError) {
-            console.error('Error creating message log:', logError)
-            messageResults.push({
-              success: true,
-              contact_id: contact.id,
-              contact_phone_number: contact.phone_number,
-              twilio_message_sid: result.sid,
-              error_message: `Message sent but logging failed: ${logError.message}`
-            })
-          } else {
-            successCount++
-            messageResults.push({
-              success: true,
-              contact_id: contact.id,
-              contact_phone_number: contact.phone_number,
-              twilio_message_sid: result.sid
-            })
-          }
-        } catch (logError) {
-          console.error('Error in message logging:', logError)
-          messageResults.push({
-            success: true,
-            contact_id: contact.id,
-            contact_phone_number: contact.phone_number,
             twilio_message_sid: result.sid,
-            error_message: `Message sent but logging failed: ${logError.message}`
+            status: result.status,
+            error_message: result.error_message,
+            user_id: campaign.user_id  // Add the user_id from the campaign
           })
+
+        if (logError) {
+          console.error('Error creating message log:', logError)
+          throw logError
         }
+
+        return result
       } catch (error) {
-        console.error(`Error processing contact ${contact.id}:`, error)
-        failureCount++
-        messageResults.push({
-          success: false,
-          contact_id: contact.id,
-          contact_phone_number: contact.phone_number,
-          error_message: error.message
-        })
+        console.error(`Error sending message to ${contact.phone_number}:`, error)
+        throw error
       }
-    }
+    })
 
-    // Determine final campaign status
-    let finalStatus: string
-    let errorLog: string | null = null
+    await Promise.all(messagePromises)
 
-    if (failureCount === contacts.length) {
-      finalStatus = 'failed'
-      errorLog = 'All messages failed to send'
-    } else if (failureCount > 0) {
-      finalStatus = 'partially_sent'
-      errorLog = `${failureCount} out of ${contacts.length} messages failed to send`
-    } else {
-      finalStatus = 'sent'
-    }
-
-    // Update campaign status
-    const { error: finalUpdateError } = await supabaseClient
+    // Update campaign status to sent
+    const { error: updateError } = await supabaseClient
       .from('campaigns')
-      .update({ 
-        status: finalStatus,
-        error_log: errorLog
-      })
+      .update({ status: 'sent' })
       .eq('id', campaignId)
 
-    if (finalUpdateError) {
-      console.error('Error updating campaign final status:', finalUpdateError)
-      // Don't throw, we still want to return the results
+    if (updateError) {
+      console.error('Error updating campaign status:', updateError)
+      throw updateError
     }
 
     return new Response(
-      JSON.stringify({ 
-        success: true,
-        totalContacts: contacts.length,
-        successCount,
-        failureCount,
-        status: finalStatus,
-        messageResults
-      }),
+      JSON.stringify({ success: true }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
