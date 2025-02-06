@@ -21,6 +21,20 @@ serve(async (req) => {
     const { campaignId } = await req.json()
     console.log('Processing campaign:', campaignId)
 
+    // Update last processing started timestamp
+    const { error: updateStartError } = await supabaseClient
+      .from('campaigns')
+      .update({ 
+        last_processing_started: new Date().toISOString(),
+        status: 'processing'
+      })
+      .eq('id', campaignId)
+
+    if (updateStartError) {
+      console.error('Error updating campaign start time:', updateStartError)
+      throw updateStartError
+    }
+
     // First, get the campaign details and check status
     const { data: campaign, error: campaignError } = await supabaseClient
       .from('campaigns')
@@ -52,17 +66,6 @@ serve(async (req) => {
       throw new Error('Campaign has no associated contact group')
     }
 
-    // Update campaign status to processing
-    const { error: updateError } = await supabaseClient
-      .from('campaigns')
-      .update({ status: 'processing' })
-      .eq('id', campaignId)
-
-    if (updateError) {
-      console.error('Error updating campaign status:', updateError)
-      throw updateError
-    }
-
     // Get contacts that haven't been messaged yet for this campaign
     const { data: contacts, error: contactsError } = await supabaseClient
       .from('contacts')
@@ -92,6 +95,9 @@ serve(async (req) => {
     const webhookUrl = `${supabaseUrl}/functions/v1/twilio-webhook`
     console.log('Using webhook URL:', webhookUrl)
 
+    let errorCount = 0
+    const errorMessages: string[] = []
+
     // Send messages to all contacts
     const messagePromises = contacts.map(async (contact) => {
       try {
@@ -100,8 +106,8 @@ serve(async (req) => {
           .from('message_logs')
           .select('id, status')
           .eq('campaign_id', campaignId)
-          .eq('contact_id', contact.id)
-          .single()
+          .eq('contact_phone_number', contact.phone_number)
+          .maybeSingle()
 
         if (existingMessage) {
           console.log(`Message already exists for contact ${contact.id} in campaign ${campaignId}`)
@@ -134,6 +140,8 @@ serve(async (req) => {
         console.log('Twilio response:', result)
 
         if (!response.ok) {
+          errorCount++
+          errorMessages.push(`Error sending to ${contact.phone_number}: ${result.message}`)
           throw new Error(`Twilio error: ${result.message}`)
         }
 
@@ -159,30 +167,59 @@ serve(async (req) => {
         return result
       } catch (error) {
         console.error(`Error sending message to ${contact.phone_number}:`, error)
+        errorCount++
+        errorMessages.push(error.message)
         throw error
       }
     })
 
-    await Promise.all(messagePromises)
+    try {
+      await Promise.all(messagePromises)
+      
+      // Update campaign status based on success/failure
+      const finalStatus = errorCount === contacts.length ? 'failed' : 'sent'
+      const { error: finalUpdateError } = await supabaseClient
+        .from('campaigns')
+        .update({ 
+          status: finalStatus,
+          error_log: errorMessages.length > 0 ? errorMessages.join('\n') : null,
+          retry_count: campaign.retry_count + 1
+        })
+        .eq('id', campaignId)
 
-    // Update campaign status to sent
-    const { error: finalUpdateError } = await supabaseClient
-      .from('campaigns')
-      .update({ status: 'sent' })
-      .eq('id', campaignId)
+      if (finalUpdateError) {
+        console.error('Error updating campaign final status:', finalUpdateError)
+        throw finalUpdateError
+      }
 
-    if (finalUpdateError) {
-      console.error('Error updating campaign final status:', finalUpdateError)
-      throw finalUpdateError
+      return new Response(
+        JSON.stringify({ 
+          success: true,
+          errorCount,
+          totalContacts: contacts.length 
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        },
+      )
+    } catch (error) {
+      // Update campaign status to failed if all messages failed
+      const { error: failureUpdateError } = await supabaseClient
+        .from('campaigns')
+        .update({ 
+          status: 'failed',
+          error_log: errorMessages.join('\n'),
+          retry_count: campaign.retry_count + 1
+        })
+        .eq('id', campaignId)
+
+      if (failureUpdateError) {
+        console.error('Error updating campaign failure status:', failureUpdateError)
+      }
+
+      throw error
     }
-
-    return new Response(
-      JSON.stringify({ success: true }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      },
-    )
   } catch (error) {
     console.error('Error in send-campaign function:', error)
     return new Response(

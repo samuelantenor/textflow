@@ -22,11 +22,12 @@ serve(async (req) => {
     const now = new Date()
     console.log('Current server time:', now.toISOString())
 
-    // Get all scheduled campaigns
+    // Get all scheduled campaigns that haven't exceeded retry limit
     const { data: campaignsToProcess, error: fetchError } = await supabaseClient
       .from('campaigns')
       .select('*')
       .eq('status', 'scheduled')
+      .lt('retry_count', 3)
 
     if (fetchError) {
       console.error('Error fetching scheduled campaigns:', fetchError)
@@ -44,7 +45,8 @@ serve(async (req) => {
         scheduledFor: scheduledFor.toISOString(),
         currentTime: now.toISOString(),
         isDue,
-        timezone: campaign.timezone
+        timezone: campaign.timezone,
+        retryCount: campaign.retry_count
       })
       return isDue
     }) || []
@@ -74,7 +76,8 @@ serve(async (req) => {
           id: campaign.id,
           name: campaign.name,
           scheduledFor: campaign.scheduled_for,
-          timezone: campaign.timezone
+          timezone: campaign.timezone,
+          retryCount: campaign.retry_count
         })
         
         // Call the send-campaign function
@@ -100,6 +103,23 @@ serve(async (req) => {
         console.log(`Successfully processed campaign ${campaign.id}`, result)
       } catch (error) {
         console.error(`Error processing campaign ${campaign.id}:`, error)
+        
+        // Update campaign status to failed if retry limit reached
+        if (campaign.retry_count >= 2) {
+          const { error: updateError } = await supabaseClient
+            .from('campaigns')
+            .update({ 
+              status: 'failed',
+              error_log: `Max retries reached. Last error: ${error.message}`,
+              retry_count: campaign.retry_count + 1
+            })
+            .eq('id', campaign.id)
+
+          if (updateError) {
+            console.error(`Error updating failed campaign status:`, updateError)
+          }
+        }
+        
         throw error
       }
     })

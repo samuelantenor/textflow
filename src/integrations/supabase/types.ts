@@ -110,13 +110,16 @@ export type Database = {
       campaigns: {
         Row: {
           created_at: string
+          error_log: string | null
           from_number: string | null
           group_id: string | null
           id: string
+          last_processing_started: string | null
           media_url: string | null
           message: string | null
           name: string
           processing_status: string | null
+          retry_count: number | null
           scheduled_at: string | null
           scheduled_for: string | null
           scheduled_job_id: string | null
@@ -127,13 +130,16 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          error_log?: string | null
           from_number?: string | null
           group_id?: string | null
           id?: string
+          last_processing_started?: string | null
           media_url?: string | null
           message?: string | null
           name: string
           processing_status?: string | null
+          retry_count?: number | null
           scheduled_at?: string | null
           scheduled_for?: string | null
           scheduled_job_id?: string | null
@@ -144,13 +150,16 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          error_log?: string | null
           from_number?: string | null
           group_id?: string | null
           id?: string
+          last_processing_started?: string | null
           media_url?: string | null
           message?: string | null
           name?: string
           processing_status?: string | null
+          retry_count?: number | null
           scheduled_at?: string | null
           scheduled_for?: string | null
           scheduled_job_id?: string | null
