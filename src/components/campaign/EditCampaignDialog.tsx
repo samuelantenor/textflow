@@ -12,6 +12,7 @@ import { Campaign, CampaignFormData } from "@/types/campaign";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 interface EditCampaignDialogProps {
   campaign: Campaign;
@@ -22,7 +23,8 @@ interface EditCampaignDialogProps {
 export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaignDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { t } = useTranslation(['campaigns']);
+  const { t, i18n } = useTranslation(['campaigns']);
+  const navigate = useNavigate();
   
   // Convert scheduled_for to Date object if it exists
   const scheduledDate = campaign.scheduled_for ? new Date(campaign.scheduled_for) : undefined;
@@ -50,6 +52,11 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
   const onSubmit = async (data: CampaignFormData) => {
     try {
       setIsLoading(true);
+
+      // Validate campaign ID
+      if (!campaign.id) {
+        throw new Error('Invalid campaign ID');
+      }
 
       let mediaUrl = campaign.media_url;
       if (data.media) {
@@ -90,8 +97,8 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
           message: data.message,
           media_url: mediaUrl,
           scheduled_for: scheduledFor?.toISOString(),
-          group_id: data.group_id,
-          from_number: data.from_number,
+          group_id: data.group_id || null,
+          from_number: data.from_number || null,
           status: status,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           processing_status: scheduledFor ? 'pending' : null
@@ -122,6 +129,8 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
       }
 
       onOpenChange(false);
+      // Refresh the page to show updated data
+      navigate(`/${i18n.language}/dashboard?tab=campaigns`);
     } catch (error) {
       console.error("Error updating campaign:", error);
       toast({
