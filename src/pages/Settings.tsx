@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { Share2 } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -22,6 +24,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input as InputOTP } from "@/components/ui/input";
 
 interface AccountSettingsForm {
   email: string;
@@ -32,6 +42,8 @@ const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t, i18n } = useTranslation(['settings']);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
 
   // Fetch user profile data
   const { data: profile, isLoading } = useQuery({
@@ -114,6 +126,32 @@ const Settings = () => {
     navigate(newPath);
   };
 
+  const handleShareCampaignPage = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return;
+
+    const baseUrl = window.location.origin;
+    const url = `${baseUrl}/${i18n.language}/campaign-request/${session.user.id}`;
+    setShareUrl(url);
+    setIsShareDialogOpen(true);
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Success",
+        description: "Link copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to copy link",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return <div>{t('messages.loading')}</div>;
   }
@@ -167,6 +205,23 @@ const Settings = () => {
             </Form>
           </div>
 
+          {/* Campaign Request Page Settings */}
+          <div className="bg-card rounded-lg p-6 bg-black/20">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold">Campaign Request Page</h2>
+              <Button
+                onClick={handleShareCampaignPage}
+                variant="outline"
+              >
+                <Share2 className="mr-2 h-4 w-4" />
+                Share Campaign Request Page
+              </Button>
+            </div>
+            <p className="text-sm text-gray-400">
+              Share this page with your clients to let them request new SMS campaigns.
+            </p>
+          </div>
+
           {/* Language Settings */}
           <div className="bg-card rounded-lg p-6 bg-black/20">
             <h2 className="text-lg font-semibold mb-6">{t('language.title')}</h2>
@@ -197,6 +252,28 @@ const Settings = () => {
           </div>
         </div>
       </main>
+
+      {/* Share Dialog */}
+      <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Campaign Request Page</DialogTitle>
+            <DialogDescription>
+              Share this link with your clients to let them request new SMS campaigns
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2">
+            <InputOTP
+              value={shareUrl}
+              readOnly
+              className="flex-1"
+            />
+            <Button onClick={copyToClipboard}>
+              Copy
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

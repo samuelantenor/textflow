@@ -12,6 +12,7 @@ import ViewForm from './pages/ViewForm';
 import CreateCampaign from './pages/CreateCampaign';
 import Pricing from './pages/Pricing';
 import LandingPage from './app/page';
+import CampaignRequest from './pages/CampaignRequest';
 import { useEffect, useState } from 'react';
 import { supabase } from './integrations/supabase/client';
 import './lib/i18n';
@@ -34,6 +35,7 @@ const publicRoutes = [
   { path: 'reset-password', element: <ResetPassword /> },
   { path: 'pricing', element: <Pricing />, allowAuthenticated: true },
   { path: 'forms/:id', element: <ViewForm />, allowAuthenticated: true },
+  { path: 'campaign-request/:userId', element: <CampaignRequest />, allowAuthenticated: true },
 ];
 
 // Language redirect component
