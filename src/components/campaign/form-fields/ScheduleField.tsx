@@ -31,9 +31,9 @@ export function ScheduleField({ form }: ScheduleFieldProps) {
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button
-                    variant="outline"
+                    variant={"outline"}
                     className={cn(
-                      "w-full pl-3 text-left font-normal",
+                      "w-full pl-3 text-left font-normal bg-black/30 border-gray-800",
                       !field.value && "text-muted-foreground"
                     )}
                   >
@@ -50,7 +50,13 @@ export function ScheduleField({ form }: ScheduleFieldProps) {
                 <Calendar
                   mode="single"
                   selected={field.value}
-                  onSelect={field.onChange}
+                  onSelect={(date) => {
+                    field.onChange(date);
+                    // If no time is set, set a default time
+                    if (date && !form.getValues("scheduled_time")) {
+                      form.setValue("scheduled_time", "09:00");
+                    }
+                  }}
                   disabled={(date) =>
                     date < new Date() || date < new Date("1900-01-01")
                   }
@@ -73,7 +79,7 @@ export function ScheduleField({ form }: ScheduleFieldProps) {
               <div className="relative">
                 <Input
                   type="time"
-                  className="pl-10"
+                  className="pl-10 bg-black/30 border-gray-800"
                   {...field}
                   disabled={!scheduledFor}
                 />

@@ -11,13 +11,36 @@ import { CampaignFormFields } from "./CampaignFormFields";
 import type { CampaignFormData } from "@/types/campaign";
 import { useTranslation } from "react-i18next";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+const campaignFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  message: z.string().min(1, "Message is required"),
+  media: z.instanceof(File).optional(),
+  scheduled_for: z.date().optional(),
+  scheduled_time: z.string().optional(),
+  group_id: z.string().min(1, "Group is required"),
+  from_number: z.string().optional(),
+});
 
 export function CreateCampaignDialog() {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const form = useForm<CampaignFormData>();
   const { t } = useTranslation(['campaigns']);
+
+  const form = useForm<CampaignFormData>({
+    resolver: zodResolver(campaignFormSchema),
+    defaultValues: {
+      name: "",
+      message: "",
+      group_id: "",
+      scheduled_for: undefined,
+      scheduled_time: undefined,
+      from_number: undefined,
+    },
+  });
 
   const onSubmit = async (data: CampaignFormData) => {
     try {
