@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -10,7 +9,6 @@ import { Loader2, ArrowLeft } from "lucide-react";
 import { CampaignFormFields } from "@/components/campaign/CampaignFormFields";
 import type { CampaignFormData } from "@/types/campaign";
 import { useTranslation } from "react-i18next";
-import { useQueryClient } from "@tanstack/react-query";
 
 const CreateCampaign = () => {
   const navigate = useNavigate();
@@ -18,7 +16,6 @@ const CreateCampaign = () => {
   const { toast } = useToast();
   const form = useForm<CampaignFormData>();
   const { t, i18n } = useTranslation(['campaigns']);
-  const queryClient = useQueryClient();
 
   const onSubmit = async (data: CampaignFormData) => {
     try {
@@ -36,9 +33,6 @@ const CreateCampaign = () => {
       });
 
       if (error) throw error;
-
-      // Invalidate campaigns query to trigger a refresh
-      await queryClient.invalidateQueries({ queryKey: ['campaigns'] });
 
       toast({
         title: t('success.created'),
