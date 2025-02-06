@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { useTranslation } from "react-i18next";
 import { formatDate } from "@/utils/dateUtils";
+import { Card } from "@/components/ui/card";
 
 interface MessageStats {
   totalSent: number;
@@ -14,6 +15,8 @@ interface MessageStats {
   billingCycleStart: string;
   billingCycleEnd: string;
   messagesSentThisCycle: number;
+  deliveredMessagesThisCycle: number;
+  failedMessagesThisCycle: number;
 }
 
 export const UsageStats = () => {
@@ -24,39 +27,26 @@ export const UsageStats = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return null;
 
-      // Get user's message limits
+      // Get user's message limits and usage
       const { data: limits, error: limitsError } = await supabase.rpc('get_user_plan_limits', {
         user_id: session.user.id
       });
 
       if (limitsError) throw limitsError;
 
-      // Get message counts for delivered/failed/pending
-      const { data: messages, error: messagesError } = await supabase
-        .from('message_logs')
-        .select('status')
-        .eq('user_id', session.user.id)
-        .gte('created_at', limits[0].billing_cycle_start)
-        .lte('created_at', limits[0].billing_cycle_end);
-
-      if (messagesError) throw messagesError;
-
-      // Calculate totals
-      const totalMessages = messages?.length || 0;
-      const statusCounts = messages?.reduce((acc: Record<string, number>, msg) => {
-        acc[msg.status] = (acc[msg.status] || 0) + 1;
-        return acc;
-      }, {});
-
       const stats: MessageStats = {
-        totalSent: totalMessages,
-        delivered: statusCounts?.delivered || 0,
-        failed: statusCounts?.failed || 0,
-        pending: statusCounts?.pending || 0,
+        totalSent: limits[0].messages_sent_this_cycle || 0,
+        delivered: limits[0].delivered_messages_this_cycle || 0,
+        failed: limits[0].failed_messages_this_cycle || 0,
+        pending: (limits[0].messages_sent_this_cycle || 0) - 
+                ((limits[0].delivered_messages_this_cycle || 0) + 
+                 (limits[0].failed_messages_this_cycle || 0)),
         monthlyLimit: limits[0].message_limit,
         billingCycleStart: limits[0].billing_cycle_start,
         billingCycleEnd: limits[0].billing_cycle_end,
-        messagesSentThisCycle: limits[0].messages_sent_this_cycle
+        messagesSentThisCycle: limits[0].messages_sent_this_cycle,
+        deliveredMessagesThisCycle: limits[0].delivered_messages_this_cycle,
+        failedMessagesThisCycle: limits[0].failed_messages_this_cycle
       };
 
       return stats;
@@ -67,6 +57,9 @@ export const UsageStats = () => {
   const monthlyLimit = messageStats?.monthlyLimit || 20;
   const usagePercentage = ((messageStats?.messagesSentThisCycle || 0) / monthlyLimit) * 100;
   const isLimitReached = usagePercentage >= 100;
+  const deliveryRate = messageStats?.totalSent ? 
+    ((messageStats.delivered / messageStats.totalSent) * 100).toFixed(1) : 
+    '0';
 
   return (
     <div className="bg-card rounded-lg p-6">
@@ -98,19 +91,28 @@ export const UsageStats = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
+        <div className="grid grid-cols-3 gap-4">
+          <Card className="p-4">
             <p className="text-sm text-muted-foreground">{t('usage.delivered')}</p>
             <p className="text-2xl font-semibold text-green-500">
-              {messageStats?.delivered || 0}
+              {messageStats?.deliveredMessagesThisCycle || 0}
             </p>
-          </div>
-          <div>
+            <p className="text-sm text-muted-foreground mt-1">
+              {deliveryRate}% success rate
+            </p>
+          </Card>
+          <Card className="p-4">
             <p className="text-sm text-muted-foreground">{t('usage.failed')}</p>
             <p className="text-2xl font-semibold text-red-500">
-              {messageStats?.failed || 0}
+              {messageStats?.failedMessagesThisCycle || 0}
             </p>
-          </div>
+          </Card>
+          <Card className="p-4">
+            <p className="text-sm text-muted-foreground">{t('usage.pending')}</p>
+            <p className="text-2xl font-semibold text-yellow-500">
+              {messageStats?.pending || 0}
+            </p>
+          </Card>
         </div>
       </div>
     </div>

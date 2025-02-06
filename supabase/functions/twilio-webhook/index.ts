@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -42,7 +43,7 @@ serve(async (req) => {
     // Find the message log entry
     const { data: messageLog, error: findError } = await supabaseClient
       .from('message_logs')
-      .select('*')
+      .select('*, campaigns (user_id)')  // Include campaign's user_id
       .eq('twilio_message_sid', messageSid)
       .single()
 
@@ -57,6 +58,40 @@ serve(async (req) => {
     }
 
     console.log('Found message log:', messageLog);
+
+    // Get user_id from the campaign
+    const userId = messageLog.campaigns?.user_id;
+    if (!userId) {
+      console.error('User ID not found for message:', messageSid);
+      throw new Error('User ID not found');
+    }
+
+    // Update message status and increment appropriate counter
+    if (messageStatus === 'delivered') {
+      console.log('Message delivered, incrementing delivered count for user:', userId);
+      
+      const { error: incrementError } = await supabaseClient.rpc(
+        'increment_delivered_message_count',
+        { user_id_param: userId }
+      );
+
+      if (incrementError) {
+        console.error('Error incrementing delivered count:', incrementError);
+        throw incrementError;
+      }
+    } else if (messageStatus === 'failed' || messageStatus === 'undelivered') {
+      console.log('Message failed, incrementing failed count for user:', userId);
+      
+      const { error: incrementError } = await supabaseClient.rpc(
+        'increment_failed_message_count',
+        { user_id_param: userId }
+      );
+
+      if (incrementError) {
+        console.error('Error incrementing failed count:', incrementError);
+        throw incrementError;
+      }
+    }
 
     // Update message status
     const { error: updateError } = await supabaseClient
@@ -75,72 +110,11 @@ serve(async (req) => {
     console.log('Successfully updated message status');
 
     // Update campaign analytics
-    const { data: analytics, error: analyticsError } = await supabaseClient
-      .from('campaign_analytics')
-      .select('*')
-      .eq('campaign_id', messageLog.campaign_id)
-      .single()
+    const { error: analyticsError } = await supabaseClient.rpc('update_campaign_analytics');
 
-    if (analyticsError && analyticsError.code !== 'PGRST116') { // Not found error
-      console.error('Error fetching campaign analytics:', analyticsError);
-      throw analyticsError
-    }
-
-    // Calculate new metrics
-    const { data: allMessages, error: messagesError } = await supabaseClient
-      .from('message_logs')
-      .select('status')
-      .eq('campaign_id', messageLog.campaign_id)
-
-    if (messagesError) {
-      console.error('Error fetching all messages:', messagesError);
-      throw messagesError
-    }
-
-    console.log('All messages for campaign:', allMessages);
-
-    const totalMessages = allMessages.length
-    const deliveredMessages = allMessages.filter(msg => msg.status === 'delivered').length
-    const deliveryRate = (deliveredMessages / totalMessages) * 100
-
-    console.log('Calculated metrics:', {
-      totalMessages,
-      deliveredMessages,
-      deliveryRate
-    });
-
-    // Update or insert analytics
-    const analyticsData = {
-      campaign_id: messageLog.campaign_id,
-      delivery_rate: deliveryRate,
-      updated_at: new Date().toISOString()
-    }
-
-    if (analytics) {
-      const { error: updateAnalyticsError } = await supabaseClient
-        .from('campaign_analytics')
-        .update(analyticsData)
-        .eq('campaign_id', messageLog.campaign_id)
-
-      if (updateAnalyticsError) {
-        console.error('Error updating analytics:', updateAnalyticsError);
-        throw updateAnalyticsError
-      }
-    } else {
-      const { error: insertAnalyticsError } = await supabaseClient
-        .from('campaign_analytics')
-        .insert([{
-          ...analyticsData,
-          open_rate: 0,
-          click_rate: 0,
-          cost: 0,
-          revenue: 0
-        }])
-
-      if (insertAnalyticsError) {
-        console.error('Error inserting analytics:', insertAnalyticsError);
-        throw insertAnalyticsError
-      }
+    if (analyticsError) {
+      console.error('Error updating campaign analytics:', analyticsError);
+      throw analyticsError;
     }
 
     console.log('Successfully updated campaign analytics');
