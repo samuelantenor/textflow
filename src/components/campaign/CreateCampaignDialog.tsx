@@ -28,7 +28,7 @@ export function CreateCampaignDialog() {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { t, i18n } = useTranslation(['campaigns']);
+  const { t } = useTranslation(['campaigns']);
 
   const form = useForm<CampaignFormData>({
     resolver: zodResolver(campaignFormSchema),
@@ -100,10 +100,6 @@ export function CreateCampaignDialog() {
 
       setOpen(false);
       form.reset();
-      
-      // Refresh the page while maintaining the campaigns tab and user's language
-      window.location.href = `/${i18n.language}/dashboard?tab=campaigns`;
-
     } catch (error) {
       console.error("Error creating campaign:", error);
       toast({

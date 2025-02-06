@@ -22,7 +22,7 @@ interface EditCampaignDialogProps {
 export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaignDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { t, i18n } = useTranslation(['campaigns']);
+  const { t } = useTranslation(['campaigns']);
   
   // Convert scheduled_for to Date object if it exists
   const scheduledDate = campaign.scheduled_for ? new Date(campaign.scheduled_for) : undefined;
@@ -48,15 +48,6 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
   });
 
   const onSubmit = async (data: CampaignFormData) => {
-    if (!campaign.id) {
-      toast({
-        title: t('errors.update'),
-        description: t('errors.invalidCampaign'),
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       setIsLoading(true);
 
@@ -131,10 +122,6 @@ export function EditCampaignDialog({ campaign, open, onOpenChange }: EditCampaig
       }
 
       onOpenChange(false);
-      
-      // Refresh the page while maintaining the campaigns tab and user's language
-      window.location.href = `/${i18n.language}/dashboard?tab=campaigns`;
-
     } catch (error) {
       console.error("Error updating campaign:", error);
       toast({
