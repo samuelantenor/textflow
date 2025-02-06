@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,170 +9,179 @@ import {
   Clock,
   BarChart
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
-interface MessageStats {
-  total: number;
-  delivered: number;
-  failed: number;
-  pending: number;
-}
+const COLORS = {
+  delivered: "#22c55e",  // green
+  failed: "#ef4444",     // red
+  pending: "#f59e0b"     // amber
+};
 
-interface CampaignStats {
-  [key: string]: MessageStats;
-}
+const CampaignAnalytics = () => {
+  const { t } = useTranslation('dashboard');
+  const { toast } = useToast();
 
-interface AnalyticsData {
-  total_messages: number;
-  delivery_rate: string;
-  failed_messages: number;
-  response_rate: string;
-  delivery_status: {
-    delivered: number;
-    failed: number;
-    queued: number;
-  };
-}
-
-export const CampaignAnalytics = () => {
-  const { data: analytics } = useQuery<AnalyticsData>({
-    queryKey: ['campaign-analytics'],
+  const { data: analytics, isLoading, error } = useQuery({
+    queryKey: ['campaign-analytics-summary'],
     queryFn: async () => {
-      const { data: messageData, error: messageError } = await supabase
-        .from('message_logs')
-        .select(`
-          status,
-          campaign_id,
-          created_at,
-          campaigns (
-            id,
-            name
-          )
-        `)
-        .order('created_at', { ascending: false });
+      try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError) throw userError;
+        if (!user) throw new Error('No authenticated user found');
 
-      if (messageError) throw messageError;
+        console.log('Fetching message logs for user:', user.id);
 
-      // Group messages by campaign and calculate stats
-      const campaignStats = messageData.reduce<CampaignStats>((acc, msg) => {
-        if (!acc[msg.campaign_id]) {
-          acc[msg.campaign_id] = {
-            total: 0,
-            delivered: 0,
-            failed: 0,
-            pending: 0
-          };
+        // Use the database function to get message counts
+        const { data: statusCounts, error: countError } = await supabase
+          .rpc('get_message_counts_by_status', {
+            p_user_id: user.id
+          });
+
+        if (countError) {
+          console.error('Error counting messages:', countError);
+          throw countError;
         }
+
+        console.log('Message counts by status:', statusCounts);
+
+        // Transform the data into the required format
+        const messageCountByStatus = statusCounts?.reduce((acc, curr) => {
+          acc[curr.status] = Number(curr.count);
+          return acc;
+        }, {} as Record<string, number>) || {};
+
+        // Calculate total messages and status counts
+        const counts = {
+          delivered: messageCountByStatus['delivered'] || 0,
+          failed: messageCountByStatus['failed'] || 0,
+          pending: messageCountByStatus['pending'] || 0
+        };
+
+        const totalMessages = Object.values(counts).reduce((sum, count) => sum + count, 0);
         
-        acc[msg.campaign_id].total++;
-        switch (msg.status) {
-          case 'delivered':
-            acc[msg.campaign_id].delivered++;
-            break;
-          case 'failed':
-            acc[msg.campaign_id].failed++;
-            break;
-          default:
-            acc[msg.campaign_id].pending++;
-        }
-        
-        return acc;
-      }, {});
+        // Calculate delivery rate
+        const deliveryRate = totalMessages > 0 
+          ? ((counts.delivered / totalMessages) * 100).toFixed(1)
+          : '0';
 
-      // Calculate overall stats
-      const totalStats = Object.values(campaignStats).reduce((acc, curr) => {
-        acc.total_messages += curr.total;
-        acc.delivered += curr.delivered;
-        acc.failed += curr.failed;
-        acc.pending += curr.pending;
-        return acc;
-      }, { total_messages: 0, delivered: 0, failed: 0, pending: 0 });
+        // Prepare chart data
+        const chartData = [
+          { name: 'Delivered', value: counts.delivered, color: COLORS.delivered },
+          { name: 'Failed', value: counts.failed, color: COLORS.failed },
+          { name: 'Pending', value: counts.pending, color: COLORS.pending }
+        ];
 
-      return {
-        total_messages: totalStats.total_messages,
-        delivery_rate: totalStats.total_messages > 0 
-          ? ((totalStats.delivered / totalStats.total_messages) * 100).toFixed(1)
-          : '0',
-        failed_messages: totalStats.failed,
-        response_rate: totalStats.total_messages > 0
-          ? ((totalStats.delivered / totalStats.total_messages) * 100).toFixed(1)
-          : '0',
-        delivery_status: {
-          delivered: totalStats.delivered,
-          failed: totalStats.failed,
-          queued: totalStats.pending
-        }
-      };
+        return {
+          delivery_rate: deliveryRate,
+          chart_data: chartData,
+          total_messages: totalMessages,
+          status_counts: counts
+        };
+      } catch (error) {
+        console.error('Error in analytics query:', error);
+        toast({
+          title: t('errors.loadingFailed'),
+          description: t('errors.campaignsFailed'),
+          variant: "destructive",
+        });
+        throw error;
+      }
     },
-    refetchInterval: 5000, // Refresh every 5 seconds
+    refetchInterval: 5000, // Regular polling every 5 seconds
   });
+
+  if (error) {
+    return (
+      <div className="p-6 text-center text-red-500 bg-red-500/10 rounded-xl border border-red-500/20">
+        {t('errors.loadingFailed')}
+      </div>
+    );
+  }
 
   const stats = [
     {
-      title: "Total Messages",
+      title: t('stats.deliveryRate.title'),
+      value: analytics?.delivery_rate || 0,
+      unit: "%",
+      icon: CheckCircle,
+      color: "text-green-500",
+      bgColor: "bg-green-500/10",
+      borderColor: "border-green-500/20",
+      description: t('stats.deliveryRate.description', { total: analytics?.total_messages || 0 })
+    },
+    {
+      title: t('stats.failedMessages.title'),
+      value: analytics?.status_counts?.failed || 0,
+      icon: XCircle,
+      color: "text-red-500",
+      bgColor: "bg-red-500/10",
+      borderColor: "border-red-500/20",
+      description: t('stats.failedMessages.description')
+    },
+    {
+      title: t('stats.pendingMessages.title'),
+      value: analytics?.status_counts?.pending || 0,
+      icon: Clock,
+      color: "text-amber-500",
+      bgColor: "bg-amber-500/10",
+      borderColor: "border-amber-500/20",
+      description: t('stats.pendingMessages.description')
+    },
+    {
+      title: t('stats.totalMessages.title'),
       value: analytics?.total_messages || 0,
-      icon: MessageSquare
-    },
-    {
-      title: "Delivery Rate",
-      value: `${analytics?.delivery_rate || 0}%`,
-      icon: CheckCircle
-    },
-    {
-      title: "Failed Messages",
-      value: analytics?.failed_messages || 0,
-      icon: XCircle
-    },
-    {
-      title: "Response Rate",
-      value: `${analytics?.response_rate || 0}%`,
-      icon: BarChart
+      icon: MessageSquare,
+      color: "text-primary-500",
+      bgColor: "bg-primary-500/10",
+      borderColor: "border-primary-500/20",
+      description: t('stats.totalMessages.description')
     }
   ];
 
   return (
-    <div className="space-y-8">
-      <div className="grid md:grid-cols-4 gap-4">
-        {stats.map((stat) => (
-          <Card key={stat.title} className="p-6">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      {stats.map((stat, index) => (
+        <Card
+          key={stat.title}
+          className={cn(
+            "relative overflow-hidden transition-all duration-300",
+            "hover:shadow-lg hover:scale-[1.02]",
+            "border-gray-800/50 bg-gray-900/50 backdrop-blur-sm",
+            stat.borderColor
+          )}
+        >
+          <div className={cn(
+            "absolute top-0 right-0 w-32 h-32 transform translate-x-8 translate-y-[-50%] rounded-full blur-3xl opacity-20",
+            stat.bgColor
+          )} />
+          
+          <div className="relative p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-primary/10">
-                <stat.icon className="w-6 h-6 text-primary" />
+              <div className={cn("p-3 rounded-xl", stat.bgColor)}>
+                <stat.icon className={cn("w-6 h-6", stat.color)} />
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{stat.title}</p>
-                <h3 className="text-2xl font-bold">{stat.value}</h3>
+              <div className="flex-1">
+                <p className="text-sm text-gray-400 font-medium">{stat.title}</p>
+                <div className="flex items-baseline gap-1">
+                  <h3 className={cn("text-2xl font-bold mt-1", stat.color)}>
+                    {stat.value}
+                  </h3>
+                  {stat.unit && (
+                    <span className="text-sm text-gray-500">{stat.unit}</span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  {stat.description}
+                </p>
               </div>
             </div>
-          </Card>
-        ))}
-      </div>
-
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Message Delivery Status</h3>
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
-              <span>Delivered</span>
-            </div>
-            <span>{analytics?.delivery_status?.delivered || 0} ({analytics?.delivery_rate || 0}%)</span>
           </div>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <XCircle className="w-4 h-4 text-red-500" />
-              <span>Failed</span>
-            </div>
-            <span>{analytics?.delivery_status?.failed || 0} ({analytics?.failed_messages || 0})</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-yellow-500" />
-              <span>Queued</span>
-            </div>
-            <span>{analytics?.delivery_status?.queued || 0}</span>
-          </div>
-        </div>
-      </Card>
+        </Card>
+      ))}
     </div>
   );
 };
+
+export default CampaignAnalytics;

@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,15 +50,18 @@ const CampaignROI = () => {
           cost,
           revenue,
           campaigns (
-            name
+            name,
+            deleted_at
           )
         `)
         .order('created_at', { ascending: false })
         .limit(5);
 
       if (error) throw error;
+      
+      // Include all campaigns in ROI calculation, even deleted ones
       return data.map(item => ({
-        name: item.campaigns.name,
+        name: item.campaigns.name + (item.campaigns.deleted_at ? ' (Deleted)' : ''),
         cost: item.cost,
         revenue: item.revenue,
         roi: item.cost > 0 ? ((item.revenue - item.cost) / item.cost) * 100 : 0

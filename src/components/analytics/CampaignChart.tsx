@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -67,7 +68,8 @@ const CampaignChart = () => {
           *,
           campaigns (
             name,
-            created_at
+            created_at,
+            deleted_at
           )
         `)
         .order('created_at', { ascending: true });
@@ -79,7 +81,7 @@ const CampaignChart = () => {
   });
 
   const chartData = analytics?.map((item) => ({
-    name: item.campaigns.name,
+    name: item.campaigns.name + (item.campaigns.deleted_at ? ' (Deleted)' : ''),
     "Delivery Rate": item.delivery_rate,
     "Open Rate": item.open_rate,
     "Click Rate": item.click_rate,
