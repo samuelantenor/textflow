@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -20,12 +21,12 @@ serve(async (req) => {
     const { campaignId } = await req.json()
     console.log('Processing campaign:', campaignId)
 
-    // First, get the campaign details
+    // First, get the campaign details and check status
     const { data: campaign, error: campaignError } = await supabaseClient
       .from('campaigns')
-      .select('*, user_id')  // Make sure to select user_id
+      .select('*, user_id')
       .eq('id', campaignId)
-      .maybeSingle()
+      .single()
 
     if (campaignError) {
       console.error('Error fetching campaign:', campaignError)
@@ -35,11 +36,34 @@ serve(async (req) => {
       throw new Error('Campaign not found')
     }
 
+    // Verify campaign status is valid for sending
+    if (campaign.status !== 'scheduled' && campaign.status !== 'draft') {
+      console.log(`Campaign ${campaignId} is already ${campaign.status}, skipping`)
+      return new Response(
+        JSON.stringify({ success: false, message: `Campaign is already ${campaign.status}` }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      )
+    }
+
     if (!campaign.group_id) {
       throw new Error('Campaign has no associated contact group')
     }
 
-    // Then, get the contacts for this group
+    // Update campaign status to processing
+    const { error: updateError } = await supabaseClient
+      .from('campaigns')
+      .update({ status: 'processing' })
+      .eq('id', campaignId)
+
+    if (updateError) {
+      console.error('Error updating campaign status:', updateError)
+      throw updateError
+    }
+
+    // Get contacts that haven't been messaged yet for this campaign
     const { data: contacts, error: contactsError } = await supabaseClient
       .from('contacts')
       .select('*')
@@ -63,7 +87,7 @@ serve(async (req) => {
       throw new Error('Twilio credentials not configured')
     }
 
-    // Construct the webhook URL using the Supabase project URL
+    // Construct the webhook URL
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const webhookUrl = `${supabaseUrl}/functions/v1/twilio-webhook`
     console.log('Using webhook URL:', webhookUrl)
@@ -71,12 +95,25 @@ serve(async (req) => {
     // Send messages to all contacts
     const messagePromises = contacts.map(async (contact) => {
       try {
+        // Check if message already exists for this contact and campaign
+        const { data: existingMessage } = await supabaseClient
+          .from('message_logs')
+          .select('id, status')
+          .eq('campaign_id', campaignId)
+          .eq('contact_id', contact.id)
+          .single()
+
+        if (existingMessage) {
+          console.log(`Message already exists for contact ${contact.id} in campaign ${campaignId}`)
+          return null
+        }
+
         console.log(`Sending message to ${contact.phone_number}`)
         
         const formData = new URLSearchParams({
           To: contact.phone_number,
-          From: campaign.from_number || '+15146125967', // Using default number if not specified
-          Body: campaign.message,
+          From: campaign.from_number || '+15146125967',
+          Body: campaign.message || '',
           StatusCallback: webhookUrl,
           ...(campaign.media_url ? { MediaUrl: campaign.media_url } : {}),
         })
@@ -96,7 +133,11 @@ serve(async (req) => {
         const result = await response.json()
         console.log('Twilio response:', result)
 
-        // Log the message with user_id
+        if (!response.ok) {
+          throw new Error(`Twilio error: ${result.message}`)
+        }
+
+        // Log the message
         const { error: logError } = await supabaseClient
           .from('message_logs')
           .insert({
@@ -105,7 +146,9 @@ serve(async (req) => {
             twilio_message_sid: result.sid,
             status: result.status,
             error_message: result.error_message,
-            user_id: campaign.user_id  // Add the user_id from the campaign
+            user_id: campaign.user_id,
+            contact_name: contact.name,
+            contact_phone_number: contact.phone_number
           })
 
         if (logError) {
@@ -123,14 +166,14 @@ serve(async (req) => {
     await Promise.all(messagePromises)
 
     // Update campaign status to sent
-    const { error: updateError } = await supabaseClient
+    const { error: finalUpdateError } = await supabaseClient
       .from('campaigns')
       .update({ status: 'sent' })
       .eq('id', campaignId)
 
-    if (updateError) {
-      console.error('Error updating campaign status:', updateError)
-      throw updateError
+    if (finalUpdateError) {
+      console.error('Error updating campaign final status:', finalUpdateError)
+      throw finalUpdateError
     }
 
     return new Response(
