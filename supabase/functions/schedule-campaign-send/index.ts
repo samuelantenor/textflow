@@ -47,21 +47,6 @@ serve(async (req) => {
       throw new Error('Campaign has no scheduled time')
     }
 
-    // Calculate delay
-    const scheduledTime = new Date(campaign.scheduled_for)
-    const now = new Date()
-    const delay = scheduledTime.getTime() - now.getTime()
-
-    console.log('Calculated delay:', {
-      scheduledTime: scheduledTime.toISOString(),
-      currentTime: now.toISOString(),
-      delayMs: delay
-    })
-
-    if (delay < 0) {
-      throw new Error('Cannot schedule campaign in the past')
-    }
-
     // Update campaign status to processing
     const { error: updateError } = await supabaseClient
       .from('campaigns')
@@ -75,54 +60,11 @@ serve(async (req) => {
       throw new Error(`Error updating campaign status: ${updateError.message}`)
     }
 
-    // Start the delayed execution in a background task
-    setTimeout(async () => {
-      try {
-        console.log(`Delay complete, sending campaign ${campaignId}`)
-        
-        // Call send-campaign function
-        const response = await fetch(
-          `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-campaign`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-            },
-            body: JSON.stringify({ campaignId }),
-          }
-        )
-
-        if (!response.ok) {
-          throw new Error(`Failed to send campaign: ${await response.text()}`)
-        }
-
-        // Update campaign status to completed
-        await supabaseClient
-          .from('campaigns')
-          .update({ processing_status: 'completed' })
-          .eq('id', campaignId)
-
-        console.log(`Successfully completed scheduled send for campaign ${campaignId}`)
-      } catch (error) {
-        console.error(`Error in delayed execution for campaign ${campaignId}:`, error)
-        
-        // Update campaign status to failed
-        await supabaseClient
-          .from('campaigns')
-          .update({ 
-            processing_status: 'failed',
-            status: 'draft' // Reset to draft so user can retry
-          })
-          .eq('id', campaignId)
-      }
-    }, delay)
-
     return new Response(
       JSON.stringify({ 
         success: true,
         message: 'Campaign scheduled successfully',
-        scheduledFor: scheduledTime.toISOString()
+        scheduledFor: campaign.scheduled_for
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
