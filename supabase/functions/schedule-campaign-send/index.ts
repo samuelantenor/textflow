@@ -75,10 +75,9 @@ serve(async (req) => {
       throw new Error(`Error updating campaign status: ${updateError.message}`)
     }
 
-    // Use Edge Runtime for the delayed execution
-    Deno.env.get('DENO_DEPLOYMENT_ID') && // Only use waitUntil in production
-    req.signal.waitUntil(
-      (async () => {
+    // Use Deno.serve's background task handling
+    const ctx = Deno.env.get('DENO_DEPLOYMENT_ID') && // Only use in production
+      new Promise(async (resolve, reject) => {
         try {
           console.log(`Waiting ${delay}ms before sending campaign ${campaignId}`)
           await new Promise(resolve => setTimeout(resolve, delay))
@@ -109,6 +108,7 @@ serve(async (req) => {
             .eq('id', campaignId)
 
           console.log(`Successfully completed scheduled send for campaign ${campaignId}`)
+          resolve(true)
         } catch (error) {
           console.error(`Error in delayed execution for campaign ${campaignId}:`, error)
           
@@ -120,9 +120,14 @@ serve(async (req) => {
               status: 'draft' // Reset to draft so user can retry
             })
             .eq('id', campaignId)
+          reject(error)
         }
-      })()
-    )
+      })
+
+    if (ctx) {
+      // @ts-ignore - Deno.serve's context type is not properly defined
+      ctx.waitUntil(ctx)
+    }
 
     return new Response(
       JSON.stringify({ 
