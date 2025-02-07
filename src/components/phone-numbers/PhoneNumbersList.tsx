@@ -247,7 +247,7 @@ export function PhoneNumbersList() {
                 disabled={subscription?.has_requested_free_number}
               >
                 <Phone className="w-4 h-4 mr-2" />
-                {t("phoneNumbers.request.button")}
+                {t("phoneNumbers.request.title")}
               </Button>
             </DialogTrigger>
             <RequestFreeNumberDialog onClose={() => setRequestDialogOpen(false)} />
