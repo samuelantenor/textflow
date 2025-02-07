@@ -195,7 +195,7 @@ export function PhoneNumbersList() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">{t("title")}</h2>
+        <h2 className="text-2xl font-bold">{t("phoneNumbers.title")}</h2>
         <div className="space-x-2">
           <Dialog open={isAddingNumber} onOpenChange={setIsAddingNumber}>
             <DialogTrigger asChild>
