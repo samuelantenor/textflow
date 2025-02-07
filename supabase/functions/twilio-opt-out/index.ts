@@ -31,13 +31,14 @@ serve(async (req) => {
     
     const messageBody = formData.get('Body')?.toString().toLowerCase() || '';
     const fromNumber = formData.get('From')?.toString() || '';
+    const toNumber = formData.get('To')?.toString() || '';
     
-    if (!messageBody || !fromNumber) {
-      console.error('Missing required fields:', { messageBody, fromNumber });
-      throw new Error('Missing required fields: Body or From');
+    if (!messageBody || !fromNumber || !toNumber) {
+      console.error('Missing required fields:', { messageBody, fromNumber, toNumber });
+      throw new Error('Missing required fields: Body, From, or To');
     }
     
-    console.log(`Processing opt-out request from ${fromNumber} with message: ${messageBody}`);
+    console.log(`Processing opt-out request from ${fromNumber} to ${toNumber} with message: ${messageBody}`);
 
     // Check if the message contains opt-out keywords
     const optOutKeywords = ['exit'];
@@ -57,11 +58,38 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Normalize the incoming phone number
+    // Normalize phone numbers
     const normalizedFromNumber = normalizePhoneNumber(fromNumber);
-    console.log('Searching for normalized phone number:', normalizedFromNumber);
+    const normalizedToNumber = normalizePhoneNumber(toNumber);
+    
+    // First, identify the business by looking up the 'To' number
+    console.log('Looking up business phone number:', normalizedToNumber);
+    const { data: phoneNumberData, error: phoneNumberError } = await supabaseClient
+      .from('phone_numbers')
+      .select('user_id')
+      .eq('phone_number', normalizedToNumber)
+      .maybeSingle();
 
-    // Find all contacts with this phone number and their associated groups
+    if (phoneNumberError) {
+      console.error('Error finding business phone number:', phoneNumberError);
+      throw phoneNumberError;
+    }
+
+    if (!phoneNumberData) {
+      console.error('Business phone number not found:', normalizedToNumber);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        message: 'Business phone number not found' 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 404,
+      });
+    }
+
+    const businessUserId = phoneNumberData.user_id;
+    console.log('Found business user_id:', businessUserId);
+
+    // Find contacts belonging to this business's groups
     const { data: contactsWithGroups, error: contactsError } = await supabaseClient
       .from('contacts')
       .select(`
@@ -73,47 +101,81 @@ serve(async (req) => {
           name
         )
       `)
-      .filter('phone_number', 'ilike', `%${normalizedFromNumber}`);
+      .eq('phone_number', normalizedFromNumber)
+      .eq('campaign_groups.user_id', businessUserId);
 
     if (contactsError) {
       console.error('Error finding contacts:', contactsError);
       throw contactsError;
     }
 
-    console.log('Found contacts:', contactsWithGroups);
+    console.log('Found contacts for this business:', contactsWithGroups);
 
     if (!contactsWithGroups || contactsWithGroups.length === 0) {
-      console.log('No contacts found for this number');
+      console.log('No contacts found for this number in business groups');
       return new Response(JSON.stringify({ 
         success: true, 
-        message: 'No contacts found for this number'
+        message: 'No contacts found for this number in business groups'
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
     }
 
-    // Delete contacts and track history for each group
-    for (const contact of contactsWithGroups) {
-      // Delete the contact
-      const { error: deleteError } = await supabaseClient
-        .from('contacts')
-        .delete()
-        .eq('id', contact.id);
+    // Process opt-out for each contact using a transaction
+    const { error: transactionError } = await supabaseClient.rpc('begin');
+    if (transactionError) throw transactionError;
 
-      if (deleteError) {
-        console.error(`Error deleting contact ${contact.id}:`, deleteError);
-        throw deleteError;
+    try {
+      // First insert contact history records
+      for (const contact of contactsWithGroups) {
+        const { error: historyError } = await supabaseClient
+          .from('contact_history')
+          .insert({
+            contact_id: contact.id,
+            phone_number: normalizedFromNumber,
+            group_id: contact.group_id,
+            event_type: 'leave',
+            metadata: {
+              reason: 'opt_out',
+              message: messageBody,
+              business_phone: normalizedToNumber
+            }
+          });
+
+        if (historyError) {
+          console.error(`Error creating history for contact ${contact.id}:`, historyError);
+          throw historyError;
+        }
       }
 
-      console.log(`Successfully removed ${fromNumber} from group ${contact.group_id}`);
+      // Then delete the contacts
+      for (const contact of contactsWithGroups) {
+        const { error: deleteError } = await supabaseClient
+          .from('contacts')
+          .delete()
+          .eq('id', contact.id);
+
+        if (deleteError) {
+          console.error(`Error deleting contact ${contact.id}:`, deleteError);
+          throw deleteError;
+        }
+
+        console.log(`Successfully removed ${normalizedFromNumber} from group ${contact.group_id}`);
+      }
+
+      await supabaseClient.rpc('commit');
+    } catch (error) {
+      console.error('Error in transaction, rolling back:', error);
+      await supabaseClient.rpc('rollback');
+      throw error;
     }
 
     return new Response(JSON.stringify({ 
       success: true, 
       message: 'Contact successfully opted out',
       removedFromGroups: contactsWithGroups.length,
-      details: `Removed from ${contactsWithGroups.length} groups`
+      details: `Removed from ${contactsWithGroups.length} groups owned by this business`
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
@@ -121,6 +183,16 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error processing opt-out webhook:', error);
+    // Try to rollback if there was an error during transaction
+    try {
+      await createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      ).rpc('rollback');
+    } catch (rollbackError) {
+      console.error('Error rolling back transaction:', rollbackError);
+    }
+    
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
