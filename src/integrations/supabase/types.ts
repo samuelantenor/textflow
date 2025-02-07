@@ -221,13 +221,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "contact_history_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "contacts"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "contact_history_group_id_fkey"
             columns: ["group_id"]
             isOneToOne: false
