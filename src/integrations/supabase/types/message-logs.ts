@@ -1,8 +1,8 @@
 
 export interface MessageLog {
   id: string;
-  campaign_id: string | null;  // Now nullable
-  contact_id: string | null;  // Already nullable
+  campaign_id: string | null;
+  contact_id: string | null;  // Now explicitly marked as nullable
   twilio_message_sid: string;
   status: string;
   error_message?: string | null;
@@ -13,7 +13,7 @@ export interface MessageLog {
     name?: string | null;
     phone_number: string;
   };
-  // New fields to preserve contact info
+  // Preserved contact info fields
   contact_name?: string | null;
   contact_phone_number?: string | null;
   user_id: string;
@@ -21,8 +21,8 @@ export interface MessageLog {
 
 export interface MessageLogInsert {
   id?: string;
-  campaign_id: string | null;  // Now nullable
-  contact_id: string | null;  // Already nullable
+  campaign_id: string | null;
+  contact_id: string | null;  // Now explicitly marked as nullable
   twilio_message_sid: string;
   status?: string;
   error_message?: string | null;
@@ -31,12 +31,13 @@ export interface MessageLogInsert {
   updated_at?: string;
   contact_name?: string | null;
   contact_phone_number?: string | null;
+  user_id: string;
 }
 
 export interface MessageLogUpdate {
   id?: string;
-  campaign_id?: string | null;  // Now nullable
-  contact_id?: string | null;  // Already nullable
+  campaign_id?: string | null;
+  contact_id?: string | null;  // Now explicitly marked as nullable
   twilio_message_sid?: string;
   status?: string;
   error_message?: string | null;
@@ -45,4 +46,5 @@ export interface MessageLogUpdate {
   updated_at?: string;
   contact_name?: string | null;
   contact_phone_number?: string | null;
+  user_id?: string;
 }

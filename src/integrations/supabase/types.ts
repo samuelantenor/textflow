@@ -392,7 +392,7 @@ export type Database = {
       message_logs: {
         Row: {
           campaign_id: string | null
-          contact_id: string
+          contact_id: string | null
           contact_name: string | null
           contact_phone_number: string | null
           created_at: string
@@ -406,7 +406,7 @@ export type Database = {
         }
         Insert: {
           campaign_id?: string | null
-          contact_id: string
+          contact_id?: string | null
           contact_name?: string | null
           contact_phone_number?: string | null
           created_at?: string
@@ -420,7 +420,7 @@ export type Database = {
         }
         Update: {
           campaign_id?: string | null
-          contact_id?: string
+          contact_id?: string | null
           contact_name?: string | null
           contact_phone_number?: string | null
           created_at?: string
