@@ -192,20 +192,6 @@ export function PhoneNumbersList() {
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAddNumber} className="space-y-4">
-                <div className="rounded-md bg-yellow-50 p-4 mb-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M8.485 2.495c.873-1.562 3.157-1.562 4.03 0l6.28 11.226c.88 1.574-.201 3.279-2.015 3.279H4.22c-1.814 0-2.895-1.705-2.015-3.279l6.28-11.226zM10 5a1 1 0 011 1v4a1 1 0 11-2 0V6a1 1 0 011-1zm0 9a1 1 0 010-2 1 1 0 000 2z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-yellow-700">
-                        {t("phoneNumbers.add.defaultNumber")} <span className="font-medium">15146125967</span>
-                      </p>
-                    </div>
-                  </div>
-                </div>
                 <div>
                   <Label htmlFor="phone_number">{t("phoneNumbers.add.label")}</Label>
                   <Input
