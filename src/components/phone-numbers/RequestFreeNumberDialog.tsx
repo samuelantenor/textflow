@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -10,7 +11,7 @@ import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/c
 import { Loader2 } from "lucide-react";
 
 export const RequestFreeNumberDialog = ({ onClose }: { onClose: () => void }) => {
-  const { t } = useTranslation("phoneNumbers");
+  const { t } = useTranslation("forms");
   const [isLoading, setIsLoading] = useState(false);
   const [country, setCountry] = useState("");
   const { toast } = useToast();
@@ -21,7 +22,7 @@ export const RequestFreeNumberDialog = ({ onClose }: { onClose: () => void }) =>
     if (!country) {
       toast({
         variant: "destructive",
-        description: t("request.errors.selectCountry"),
+        description: t("phoneNumbers.request.errors.selectCountry"),
       });
       return;
     }
@@ -69,7 +70,7 @@ export const RequestFreeNumberDialog = ({ onClose }: { onClose: () => void }) =>
       });
 
       toast({
-        description: t("request.success"),
+        description: t("phoneNumbers.request.success"),
       });
       
       onClose();
@@ -77,7 +78,7 @@ export const RequestFreeNumberDialog = ({ onClose }: { onClose: () => void }) =>
       console.error('Error:', error);
       toast({
         variant: "destructive",
-        description: t("request.error"),
+        description: t("phoneNumbers.request.error"),
       });
     } finally {
       setIsLoading(false);
@@ -87,15 +88,15 @@ export const RequestFreeNumberDialog = ({ onClose }: { onClose: () => void }) =>
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>{t("request.title")}</DialogTitle>
+        <DialogTitle>{t("phoneNumbers.request.title")}</DialogTitle>
         <DialogDescription>
-          {t("request.description")}
+          {t("phoneNumbers.request.description")}
         </DialogDescription>
       </DialogHeader>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <Label>{t("request.region")}</Label>
+          <Label>{t("phoneNumbers.request.region")}</Label>
           <PhoneInput
             country={"us"}
             enableSearch
@@ -118,7 +119,7 @@ export const RequestFreeNumberDialog = ({ onClose }: { onClose: () => void }) =>
             variant="outline" 
             onClick={onClose}
           >
-            {t("common.cancel")}
+            {t("phoneNumbers.common.cancel")}
           </Button>
           <Button 
             type="submit" 
@@ -127,10 +128,10 @@ export const RequestFreeNumberDialog = ({ onClose }: { onClose: () => void }) =>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t("request.processing")}
+                {t("phoneNumbers.request.processing")}
               </>
             ) : (
-              t("request.submit")
+              t("phoneNumbers.request.submit")
             )}
           </Button>
         </div>
