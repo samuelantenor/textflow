@@ -208,17 +208,17 @@ const Settings = () => {
           {/* Campaign Request Page Settings */}
           <div className="bg-card rounded-lg p-6 bg-black/20">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold">Campaign Request Page</h2>
+              <h2 className="text-lg font-semibold">{t('campaignRequest.title')}</h2>
               <Button
                 onClick={handleShareCampaignPage}
                 variant="outline"
               >
                 <Share2 className="mr-2 h-4 w-4" />
-                Share Campaign Request Page
+                {t('campaignRequest.shareTitle')}
               </Button>
             </div>
             <p className="text-sm text-gray-400">
-              Share this page with your clients to let them request new SMS campaigns.
+              {t('campaignRequest.shareDescription')}
             </p>
           </div>
 
@@ -257,9 +257,9 @@ const Settings = () => {
       <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Share Campaign Request Page</DialogTitle>
+            <DialogTitle>{t('campaignRequest.shareTitle')}</DialogTitle>
             <DialogDescription>
-              Share this link with your clients to let them request new SMS campaigns
+              {t('campaignRequest.shareDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="flex gap-2">

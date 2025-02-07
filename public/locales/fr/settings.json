@@ -1,3 +1,4 @@
+
 {
   "title": "Paramètres",
   "account": {
@@ -15,6 +16,11 @@
       "fr": "Français"
     }
   },
+  "campaignRequest": {
+    "title": "Page de demande de campagne",
+    "shareTitle": "Partager la page de demande de campagne",
+    "shareDescription": "Partagez cette page avec vos clients pour leur permettre de demander de nouvelles campagnes SMS"
+  },
   "messages": {
     "updateSuccess": {
       "title": "Paramètres mis à jour",
@@ -26,4 +32,4 @@
     },
     "loading": "Chargement..."
   }
-} 
+}

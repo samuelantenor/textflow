@@ -1,3 +1,4 @@
+
 {
   "title": "Settings",
   "account": {
@@ -15,6 +16,11 @@
       "fr": "French"
     }
   },
+  "campaignRequest": {
+    "title": "Campaign Request Page",
+    "shareTitle": "Share Campaign Request Page",
+    "shareDescription": "Share this page with your clients to let them request new SMS campaigns"
+  },
   "messages": {
     "updateSuccess": {
       "title": "Settings updated",
@@ -26,4 +32,4 @@
     },
     "loading": "Loading..."
   }
-} 
+}
