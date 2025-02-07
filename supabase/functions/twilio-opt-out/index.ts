@@ -20,6 +20,11 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders })
   }
 
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  );
+
   try {
     // Parse the form data from Twilio webhook
     const formData = await req.formData()
@@ -51,12 +56,6 @@ serve(async (req) => {
         status: 200,
       });
     }
-
-    // Create Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
 
     // Normalize phone numbers
     const normalizedFromNumber = normalizePhoneNumber(fromNumber);
@@ -122,54 +121,42 @@ serve(async (req) => {
       });
     }
 
-    // Process opt-out for each contact using a transaction
-    const { error: transactionError } = await supabaseClient.rpc('begin');
-    if (transactionError) throw transactionError;
+    // Process opt-out for each contact
+    // First create all contact history records
+    for (const contact of contactsWithGroups) {
+      const { error: historyError } = await supabaseClient
+        .from('contact_history')
+        .insert({
+          contact_id: contact.id,
+          phone_number: normalizedFromNumber,
+          group_id: contact.group_id,
+          event_type: 'leave',
+          metadata: {
+            reason: 'opt_out',
+            message: messageBody,
+            business_phone: normalizedToNumber
+          }
+        });
 
-    try {
-      // First insert contact history records
-      for (const contact of contactsWithGroups) {
-        const { error: historyError } = await supabaseClient
-          .from('contact_history')
-          .insert({
-            contact_id: contact.id,
-            phone_number: normalizedFromNumber,
-            group_id: contact.group_id,
-            event_type: 'leave',
-            metadata: {
-              reason: 'opt_out',
-              message: messageBody,
-              business_phone: normalizedToNumber
-            }
-          });
-
-        if (historyError) {
-          console.error(`Error creating history for contact ${contact.id}:`, historyError);
-          throw historyError;
-        }
+      if (historyError) {
+        console.error(`Error creating history for contact ${contact.id}:`, historyError);
+        throw historyError;
       }
-
-      // Then delete the contacts
-      for (const contact of contactsWithGroups) {
-        const { error: deleteError } = await supabaseClient
-          .from('contacts')
-          .delete()
-          .eq('id', contact.id);
-
-        if (deleteError) {
-          console.error(`Error deleting contact ${contact.id}:`, deleteError);
-          throw deleteError;
-        }
-
-        console.log(`Successfully removed ${normalizedFromNumber} from group ${contact.group_id}`);
-      }
-
-      await supabaseClient.rpc('commit');
-    } catch (error) {
-      console.error('Error in transaction, rolling back:', error);
-      await supabaseClient.rpc('rollback');
-      throw error;
     }
+
+    // Then delete all contacts
+    const contactIds = contactsWithGroups.map(c => c.id);
+    const { error: deleteError } = await supabaseClient
+      .from('contacts')
+      .delete()
+      .in('id', contactIds);
+
+    if (deleteError) {
+      console.error('Error deleting contacts:', deleteError);
+      throw deleteError;
+    }
+
+    console.log(`Successfully removed ${normalizedFromNumber} from ${contactsWithGroups.length} groups`);
 
     return new Response(JSON.stringify({ 
       success: true, 
@@ -183,15 +170,6 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error processing opt-out webhook:', error);
-    // Try to rollback if there was an error during transaction
-    try {
-      await createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-      ).rpc('rollback');
-    } catch (rollbackError) {
-      console.error('Error rolling back transaction:', rollbackError);
-    }
     
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
