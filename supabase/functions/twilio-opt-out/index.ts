@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -37,14 +36,15 @@ serve(async (req) => {
       throw new Error('Missing required fields: Body or From');
     }
     
-    console.log(`Processing message from ${fromNumber} with content: ${messageBody}`);
+    console.log(`Processing opt-out request from ${fromNumber} with message: ${messageBody}`);
 
-    // Check if the message contains our custom exit keyword
-    const isExit = messageBody.trim() === 'exit';
+    // Check if the message contains opt-out keywords
+    const optOutKeywords = ['stop', 'unsubscribe', 'cancel', 'end', 'quit'];
+    const isOptOut = optOutKeywords.some(keyword => messageBody.includes(keyword));
 
-    if (!isExit) {
-      console.log('Not an exit message, letting Twilio handle any opt-out keywords');
-      return new Response(JSON.stringify({ success: true, message: 'Not an exit request' }), {
+    if (!isOptOut) {
+      console.log('Not an opt-out message, ignoring');
+      return new Response(JSON.stringify({ success: true, message: 'Not an opt-out request' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
@@ -121,7 +121,7 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: 'Contact successfully removed from groups',
+      message: 'Contact successfully opted out',
       removedFromGroups: contactsWithGroups.length,
       details: `Removed from ${contactsWithGroups.length} groups across ${Object.keys(userGroups).length} users`
     }), {
@@ -130,7 +130,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error processing exit request:', error);
+    console.error('Error processing opt-out webhook:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
