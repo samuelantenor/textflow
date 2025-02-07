@@ -742,6 +742,15 @@ export type Database = {
           failed_messages_this_cycle: number
         }[]
       }
+      handle_contact_opt_out: {
+        Args: {
+          p_contact_ids: string[]
+          p_phone_number: string
+          p_message: string
+          p_business_phone: string
+        }
+        Returns: undefined
+      }
       increment_delivered_message_count: {
         Args: {
           user_id_param: string

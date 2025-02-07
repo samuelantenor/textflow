@@ -121,45 +121,19 @@ serve(async (req) => {
       });
     }
 
-    // First create all contact history records
-    const historyPromises = contactsWithGroups.map(contact => 
-      supabaseClient
-        .from('contact_history')
-        .insert({
-          contact_id: contact.id,
-          phone_number: normalizedFromNumber,
-          group_id: contact.group_id,
-          event_type: 'leave',
-          metadata: {
-            reason: 'opt_out',
-            message: messageBody,
-            business_phone: normalizedToNumber
-          }
-        })
-    );
-
-    // Wait for all history records to be created
-    const historyResults = await Promise.all(historyPromises);
-    
-    // Check for any history creation errors
-    const historyErrors = historyResults.filter(result => result.error);
-    if (historyErrors.length > 0) {
-      console.error('Errors creating history records:', historyErrors);
-      throw new Error('Failed to create some history records');
-    }
-
-    console.log('Successfully created all history records');
-
-    // Then delete all contacts
+    // Use our new database function to handle opt-out in a transaction
     const contactIds = contactsWithGroups.map(c => c.id);
-    const { error: deleteError } = await supabaseClient
-      .from('contacts')
-      .delete()
-      .in('id', contactIds);
+    const { error: optOutError } = await supabaseClient
+      .rpc('handle_contact_opt_out', {
+        p_contact_ids: contactIds,
+        p_phone_number: normalizedFromNumber,
+        p_message: messageBody,
+        p_business_phone: normalizedToNumber
+      });
 
-    if (deleteError) {
-      console.error('Error deleting contacts:', deleteError);
-      throw deleteError;
+    if (optOutError) {
+      console.error('Error handling opt-out:', optOutError);
+      throw optOutError;
     }
 
     console.log(`Successfully removed ${normalizedFromNumber} from ${contactsWithGroups.length} groups`);
