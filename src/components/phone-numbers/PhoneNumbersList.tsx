@@ -15,7 +15,6 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Phone } from "lucide-react";
-import { BuyPhoneNumberForm } from "./BuyPhoneNumberForm";
 import { RequestFreeNumberDialog } from "./RequestFreeNumberDialog";
 import { usePhoneNumberPaymentSuccess } from "@/hooks/usePhoneNumberPaymentSuccess";
 import { useTranslation } from "react-i18next";
@@ -270,7 +269,6 @@ export function PhoneNumbersList() {
                   {t("phoneNumbers.buy.description")}
                 </DialogDescription>
               </DialogHeader>
-              <BuyPhoneNumberForm />
             </DialogContent>
           </Dialog>
         </div>

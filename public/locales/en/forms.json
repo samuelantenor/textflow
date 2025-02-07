@@ -212,6 +212,18 @@
       "cancel": "Cancel",
       "addedOn": "Added on {{date}}",
       "noNumbers": "No phone numbers added yet."
+    },
+    "request": {
+      "title": "Request a Free Number",
+      "description": "Fill in the details below to request a number.",
+      "region": "Select your region",
+      "errors": {
+        "selectCountry": "Please select a country"
+      },
+      "success": "Your request has been submitted successfully.",
+      "error": "Failed to submit your request. Please try again.",
+      "processing": "Processing...",
+      "submit": "Submit"
     }
   },
   "submission": {

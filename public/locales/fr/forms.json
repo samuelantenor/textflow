@@ -212,6 +212,18 @@
       "cancel": "Annuler",
       "addedOn": "Ajouté le {{date}}",
       "noNumbers": "Aucun numéro de téléphone ajouté pour le moment."
+    },
+    "request": {
+      "title": "Demander un numéro gratuit",
+      "description": "Remplissez les détails ci-dessous pour demander un numéro.",
+      "region": "Sélectionnez votre région",
+      "errors": {
+        "selectCountry": "Veuillez sélectionner un pays"
+      },
+      "success": "Votre demande a été soumise avec succès.",
+      "error": "Échec de la soumission de votre demande. Veuillez réessayer.",
+      "processing": "Traitement en cours...",
+      "submit": "Soumettre"
     }
   },
   "submission": {
