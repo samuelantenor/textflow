@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -53,7 +52,10 @@ export const RequestFreeNumberDialog = ({ onClose }: { onClose: () => void }) =>
         .eq('user_id', user.id)
         .eq('status', 'active');
 
-      if (subscriptionError) throw subscriptionError;
+      if (subscriptionError) {
+        console.error("Error updating subscription:", subscriptionError);
+        throw subscriptionError;
+      }
 
       // Send notification via Formspree
       await fetch("https://formspree.io/f/mnnnowqq", {
@@ -75,7 +77,7 @@ export const RequestFreeNumberDialog = ({ onClose }: { onClose: () => void }) =>
       
       onClose();
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error in handleSubmit:", error);
       toast({
         variant: "destructive",
         description: t("phoneNumbers.request.error"),
