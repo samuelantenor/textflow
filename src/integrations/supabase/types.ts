@@ -188,6 +188,54 @@ export type Database = {
           },
         ]
       }
+      contact_history: {
+        Row: {
+          contact_id: string | null
+          created_at: string
+          event_type: Database["public"]["Enums"]["contact_event_type"]
+          group_id: string
+          id: string
+          metadata: Json | null
+          phone_number: string
+          welcome_offer_sent: boolean | null
+        }
+        Insert: {
+          contact_id?: string | null
+          created_at?: string
+          event_type: Database["public"]["Enums"]["contact_event_type"]
+          group_id: string
+          id?: string
+          metadata?: Json | null
+          phone_number: string
+          welcome_offer_sent?: boolean | null
+        }
+        Update: {
+          contact_id?: string | null
+          created_at?: string
+          event_type?: Database["public"]["Enums"]["contact_event_type"]
+          group_id?: string
+          id?: string
+          metadata?: Json | null
+          phone_number?: string
+          welcome_offer_sent?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_history_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_history_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           created_at: string
@@ -634,6 +682,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_welcome_offer_eligibility: {
+        Args: {
+          p_phone_number: string
+          p_group_id: string
+          p_cooldown_days?: number
+        }
+        Returns: boolean
+      }
       get_campaign_message_stats: {
         Args: {
           p_user_id: string
@@ -706,7 +762,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      contact_event_type: "join" | "leave"
     }
     CompositeTypes: {
       [_ in never]: never
