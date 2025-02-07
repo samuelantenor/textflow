@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -36,7 +35,6 @@ export function PhoneNumbersList() {
   const [selectedNumber, setSelectedNumber] = useState<any>(null);
   const [newNumber, setNewNumber] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [buyDialogOpen, setBuyDialogOpen] = useState(false);
   const [requestDialogOpen, setRequestDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -253,23 +251,6 @@ export function PhoneNumbersList() {
               </Button>
             </DialogTrigger>
             <RequestFreeNumberDialog onClose={() => setRequestDialogOpen(false)} />
-          </Dialog>
-
-          <Dialog open={buyDialogOpen} onOpenChange={setBuyDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Phone className="w-4 h-4 mr-2" />
-                {t("phoneNumbers.buy.button")}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>{t("phoneNumbers.buy.title")}</DialogTitle>
-                <DialogDescription>
-                  {t("phoneNumbers.buy.description")}
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
           </Dialog>
         </div>
       </div>
