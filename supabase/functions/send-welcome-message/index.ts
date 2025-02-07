@@ -39,7 +39,7 @@ serve(async (req: Request) => {
     // Get form details including welcome message template
     const { data: form, error: formError } = await supabaseClient
       .from('custom_forms')
-      .select('title, welcome_message_template')
+      .select('title, welcome_message_template, group_id')
       .eq('id', formId)
       .single();
 
@@ -48,15 +48,41 @@ serve(async (req: Request) => {
       throw formError;
     }
 
-    // Prepare welcome message based on template and language
+    // Check welcome offer eligibility
+    const { data: isEligible, error: eligibilityError } = await supabaseClient
+      .rpc('check_welcome_offer_eligibility', {
+        p_phone_number: phoneNumber,
+        p_group_id: form.group_id,
+        p_cooldown_days: 90 // 90 days cooldown period
+      });
+
+    if (eligibilityError) {
+      console.error('Error checking eligibility:', eligibilityError);
+      throw eligibilityError;
+    }
+
+    // Prepare welcome message based on template and eligibility
     let message;
     if (form.welcome_message_template && form.welcome_message_template[language]) {
-      message = form.welcome_message_template[language].replace('{title}', form.title);
+      if (isEligible) {
+        message = form.welcome_message_template[language].replace('{title}', form.title);
+      } else {
+        // Use a different message for returning customers
+        message = language === 'fr' 
+          ? `Ravi de vous revoir ! Vous êtes maintenant réinscrit à "${form.title}".`
+          : `Welcome back! You're now subscribed again to "${form.title}".`;
+      }
     } else {
-      // Fallback to default message if no template is set
-      message = language === 'fr' 
-        ? `Merci d'avoir soumis le formulaire "${form.title}". Nous avons bien reçu votre réponse et nous vous contacterons bientôt.`
-        : `Thank you for submitting the form "${form.title}". We have received your response and will be in touch soon.`;
+      // Fallback messages
+      if (isEligible) {
+        message = language === 'fr' 
+          ? `Merci d'avoir soumis le formulaire "${form.title}". Nous avons bien reçu votre réponse et nous vous contacterons bientôt.`
+          : `Thank you for submitting the form "${form.title}". We have received your response and will be in touch soon.`;
+      } else {
+        message = language === 'fr' 
+          ? `Ravi de vous revoir ! Vous êtes maintenant réinscrit à "${form.title}".`
+          : `Welcome back! You're now subscribed again to "${form.title}".`;
+      }
     }
 
     console.log('Sending welcome SMS to:', phoneNumber);
@@ -86,8 +112,28 @@ serve(async (req: Request) => {
       throw new Error(`Twilio error: ${messageData.message}`);
     }
 
+    // If eligible, update contact_history to mark welcome offer as sent
+    if (isEligible) {
+      const { error: historyError } = await supabaseClient
+        .from('contact_history')
+        .update({ welcome_offer_sent: true })
+        .eq('group_id', form.group_id)
+        .eq('phone_number', phoneNumber)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (historyError) {
+        console.error('Error updating contact history:', historyError);
+        // Don't throw here, we still want to return success for the message send
+      }
+    }
+
     return new Response(
-      JSON.stringify({ success: true, messageId: messageData.sid }),
+      JSON.stringify({ 
+        success: true, 
+        messageId: messageData.sid,
+        welcomeOfferSent: isEligible 
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,

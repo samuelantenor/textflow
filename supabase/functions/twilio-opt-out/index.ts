@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -92,38 +93,27 @@ serve(async (req) => {
       });
     }
 
-    // Group contacts by user_id for logging purposes
-    const userGroups = contactsWithGroups.reduce((acc, contact) => {
-      const userId = contact.campaign_groups.user_id;
-      if (!acc[userId]) {
-        acc[userId] = [];
-      }
-      acc[userId].push(contact);
-      return acc;
-    }, {});
-
-    // Delete contacts and log for each user
-    for (const [userId, contacts] of Object.entries(userGroups)) {
-      // Delete all contacts for this user
-      const contactIds = contacts.map(c => c.id);
+    // Delete contacts and track history for each group
+    for (const contact of contactsWithGroups) {
+      // Delete the contact
       const { error: deleteError } = await supabaseClient
         .from('contacts')
         .delete()
-        .in('id', contactIds);
+        .eq('id', contact.id);
 
       if (deleteError) {
-        console.error(`Error deleting contacts for user ${userId}:`, deleteError);
+        console.error(`Error deleting contact ${contact.id}:`, deleteError);
         throw deleteError;
       }
 
-      console.log(`Successfully removed ${fromNumber} from ${contacts.length} groups for user ${userId}`);
+      console.log(`Successfully removed ${fromNumber} from group ${contact.group_id}`);
     }
 
     return new Response(JSON.stringify({ 
       success: true, 
       message: 'Contact successfully opted out',
       removedFromGroups: contactsWithGroups.length,
-      details: `Removed from ${contactsWithGroups.length} groups across ${Object.keys(userGroups).length} users`
+      details: `Removed from ${contactsWithGroups.length} groups`
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
