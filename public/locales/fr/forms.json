@@ -165,7 +165,7 @@
       "description": "Ajoutez un numéro de téléphone que vous avez reçu de Twilio pour envoyer des messages.",
       "defaultNumber": "Votre numéro de téléphone par défaut est :",
       "label": "Numéro de téléphone",
-      "placeholder": "+1234567890",
+      "placeholder": "1234567890",
       "success": "Votre numéro de téléphone a été ajouté avec succès.",
       "error": "Échec de l'ajout du numéro de téléphone. Veuillez réessayer."
     },
