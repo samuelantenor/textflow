@@ -18,8 +18,7 @@
   },
   "campaignRequest": {
     "title": "Page de demande de campagne",
-    "shareTitle": "Partager la page de demande de campagne",
-    "shareDescription": "Partagez cette page avec vos clients pour leur permettre de demander de nouvelles campagnes SMS"
+    "shareTitle": "Partager la page de demande de campagne"
   },
   "messages": {
     "updateSuccess": {

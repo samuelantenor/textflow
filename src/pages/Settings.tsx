@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -217,9 +216,6 @@ const Settings = () => {
                 {t('campaignRequest.shareTitle')}
               </Button>
             </div>
-            <p className="text-sm text-gray-400">
-              {t('campaignRequest.shareDescription')}
-            </p>
           </div>
 
           {/* Language Settings */}
@@ -258,9 +254,6 @@ const Settings = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('campaignRequest.shareTitle')}</DialogTitle>
-            <DialogDescription>
-              {t('campaignRequest.shareDescription')}
-            </DialogDescription>
           </DialogHeader>
           <div className="flex gap-2">
             <InputOTP
