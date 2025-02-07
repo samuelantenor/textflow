@@ -121,10 +121,9 @@ serve(async (req) => {
       });
     }
 
-    // Process opt-out for each contact
     // First create all contact history records
-    for (const contact of contactsWithGroups) {
-      const { error: historyError } = await supabaseClient
+    const historyPromises = contactsWithGroups.map(contact => 
+      supabaseClient
         .from('contact_history')
         .insert({
           contact_id: contact.id,
@@ -136,13 +135,20 @@ serve(async (req) => {
             message: messageBody,
             business_phone: normalizedToNumber
           }
-        });
+        })
+    );
 
-      if (historyError) {
-        console.error(`Error creating history for contact ${contact.id}:`, historyError);
-        throw historyError;
-      }
+    // Wait for all history records to be created
+    const historyResults = await Promise.all(historyPromises);
+    
+    // Check for any history creation errors
+    const historyErrors = historyResults.filter(result => result.error);
+    if (historyErrors.length > 0) {
+      console.error('Errors creating history records:', historyErrors);
+      throw new Error('Failed to create some history records');
     }
+
+    console.log('Successfully created all history records');
 
     // Then delete all contacts
     const contactIds = contactsWithGroups.map(c => c.id);
