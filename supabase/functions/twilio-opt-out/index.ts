@@ -39,7 +39,7 @@ serve(async (req) => {
     console.log(`Processing opt-out request from ${fromNumber} with message: ${messageBody}`);
 
     // Check if the message contains opt-out keywords
-    const optOutKeywords = ['stop', 'unsubscribe', 'cancel', 'end', 'quit'];
+    const optOutKeywords = ['exit'];
     const isOptOut = optOutKeywords.some(keyword => messageBody.includes(keyword));
 
     if (!isOptOut) {
