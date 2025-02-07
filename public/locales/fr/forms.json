@@ -162,7 +162,7 @@
     "add": {
       "button": "Ajouter un numéro",
       "title": "Ajouter un numéro de téléphone",
-      "description": "Ajoutez un numéro de téléphone que vous avez reçu de Twilio pour envoyer des messages.",
+      "description": "Ajoutez un numéro de téléphone que vous avez reçu par email de TnorMarketing tel quel.",
       "defaultNumber": "Votre numéro de téléphone par défaut est :",
       "label": "Numéro de téléphone",
       "placeholder": "1234567890",
