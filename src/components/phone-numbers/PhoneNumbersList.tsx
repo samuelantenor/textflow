@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,9 +13,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Phone } from "lucide-react";
 import { BuyPhoneNumberForm } from "./BuyPhoneNumberForm";
+import { RequestFreeNumberDialog } from "./RequestFreeNumberDialog";
 import { usePhoneNumberPaymentSuccess } from "@/hooks/usePhoneNumberPaymentSuccess";
 import { useTranslation } from "react-i18next";
 import {
@@ -36,10 +38,30 @@ export function PhoneNumbersList() {
   const [newNumber, setNewNumber] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [buyDialogOpen, setBuyDialogOpen] = useState(false);
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
 
   usePhoneNumberPaymentSuccess();
+
+  // Add subscription query to check if user has requested free number
+  const { data: subscription } = useQuery({
+    queryKey: ['user-subscription'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('status', 'active')
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const { data: phoneNumbers, isLoading, refetch } = useQuery({
     queryKey: ['phone-numbers'],
@@ -208,7 +230,7 @@ export function PhoneNumbersList() {
                     variant="outline"
                     onClick={() => setIsAddingNumber(false)}
                   >
-                    Cancel
+                    {t("phoneNumbers.common.cancel")}
                   </Button>
                   <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting && (
@@ -219,6 +241,19 @@ export function PhoneNumbersList() {
                 </div>
               </form>
             </DialogContent>
+          </Dialog>
+
+          <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="secondary"
+                disabled={subscription?.has_requested_free_number}
+              >
+                <Phone className="w-4 h-4 mr-2" />
+                {t("phoneNumbers.request.button")}
+              </Button>
+            </DialogTrigger>
+            <RequestFreeNumberDialog onClose={() => setRequestDialogOpen(false)} />
           </Dialog>
 
           <Dialog open={buyDialogOpen} onOpenChange={setBuyDialogOpen}>

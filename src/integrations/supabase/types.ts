@@ -629,6 +629,7 @@ export type Database = {
           delivered_messages_this_cycle: number
           failed_messages_this_cycle: number
           has_been_paid: boolean | null
+          has_requested_free_number: boolean
           id: string
           messages_sent_this_cycle: number
           monthly_message_limit: number
@@ -644,6 +645,7 @@ export type Database = {
           delivered_messages_this_cycle?: number
           failed_messages_this_cycle?: number
           has_been_paid?: boolean | null
+          has_requested_free_number?: boolean
           id?: string
           messages_sent_this_cycle?: number
           monthly_message_limit?: number
@@ -659,6 +661,7 @@ export type Database = {
           delivered_messages_this_cycle?: number
           failed_messages_this_cycle?: number
           has_been_paid?: boolean | null
+          has_requested_free_number?: boolean
           id?: string
           messages_sent_this_cycle?: number
           monthly_message_limit?: number
